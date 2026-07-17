@@ -1,0 +1,152 @@
+---
+name: implement-sparks
+description: 'Generate or update runtime engineering artifacts from reviewed Spark Documents for a configured implementation target. Use when implementing selected Sparks, regenerating runtime artifacts after Spark changes, or applying an implementation profile. Do not use for Spark design, test authoring, test-infrastructure changes, or diagrams.'
+argument-hint: 'Specify root Spark IDs or all, plus a target or profile'
+---
+
+# Implement Sparks
+
+## Purpose
+
+Create or update a working runtime implementation that faithfully realizes selected Sparks for one configured target.
+
+This skill is target-agnostic. It owns the shared Spark-to-artifact workflow. Target-specific behavior comes from the selected implementation profile, existing native project, project guidance, and optional bundled target guidance.
+
+This skill does not create, update, delete, or redesign test artifacts or test infrastructure. Use `test-sparks` for that work.
+
+## Preconditions
+
+Use this skill to generate engineering artifacts from existing Spark Documents.
+
+Treat the selected Sparks as reviewed design contracts containing the implementation-critical requested outcomes and clarified design for their concepts.
+
+If implementation requires changing software intent, use `design-sparks` and stop before implementation.
+
+Never modify a Spark Document merely to make implementation easier. If required intent is missing or contradictory, identify the affected Spark and return to Spark design.
+
+## Inputs and Precedence
+
+Always inspect:
+
+1. The requested Sparks, composed descendants, and related Sparks needed for context.
+2. `.sparkwell/config.yaml`.
+3. Native manifests, build files, runtime source, relevant existing tests, and profile-referenced guidance. Existing tests are regression evidence, not artifacts owned by this skill.
+4. After resolving the implementation ID, `.sparkwell/state/realizations/<implementation-id>.yaml` when that file exists.
+
+Load supporting contracts only when needed:
+
+- `.sparkwell/specification.md` and `.sparkwell/conventions.md` to resolve unclear or invalid Spark structure or relationships.
+- `.sparkwell/implementation-profiles.md` to validate or interpret profile configuration.
+- `.sparkwell/realization-state.md` before creating or repairing realization state.
+- `./references/<target>.md`, when present, for general target defaults.
+
+Apply decisions in this order:
+
+1. Reviewed Spark intent for detailed behavior, states, validation rules, responsibilities, interactions, and conceptual boundaries.
+2. Implementation-profile constraints.
+3. Compatible explicit user choices.
+4. The established native project and its configuration.
+5. Profile preferences.
+6. Optional target-guide defaults.
+
+Native files remain authoritative for artifact content, dependencies, versions, and build state. Realization state is only an index.
+
+A Spark is a required design contract for its concept, not an exhaustive implementation checklist or a ceiling on quality. Preserve compatible established architecture, security, accessibility, reliability, maintainability, performance, platform conventions, and normal engineering quality expectations even when they are not repeated in every Spark. Do not use quality improvements as a reason to invent observable product behavior or contradict reviewed intent.
+
+## Resolve Target and Scope
+
+Use a named profile when it exists and, if a target was also requested, matches it. Otherwise select the only profile matching the requested target; ask when multiple profiles match.
+
+With no matching profile, use an unambiguous existing implementation. For a new implementation, ask for unresolved consequential choices.
+
+The **effective target** is the selected profile's `target`, otherwise the explicitly requested target, otherwise the existing implementation target. A requested target must match a selected profile.
+
+Use the exact lowercase kebab-case effective target in `./references/<target>.md`; load that optional guide when present. Its defaults never override the profile or established project, and its absence does not make a target unsupported.
+
+Resolve the **implementation ID** and load `.sparkwell/state/realizations/<implementation-id>.yaml` according to `.sparkwell/realization-state.md`.
+
+Use these scope terms:
+
+- **Requested roots**: explicitly selected Spark IDs, or every project Spark for `all`.
+- **Candidate scope**: requested roots plus all transitively composed descendants.
+- **Contextual Sparks**: ancestors, used Sparks, and other Sparks read only to assess responsibilities, interactions, or impact.
+
+If scope is omitted, infer it only when unambiguous; otherwise ask for root IDs. Multiple roots produce the union of their candidate scopes. Selecting a child does not include its parent or siblings. A `uses` relationship adds context, not scope; require explicit expansion when a missing used-Spark realization blocks a working result.
+
+Scope is target-specific. Candidate inclusion requires implementation or validation, not automatic rewriting.
+
+## Build the Execution Plan
+
+Before editing:
+
+1. Verify the manifest's implementation ID, Spark IDs, and paths; compare mapped paths with the configured or inferred source root when available.
+2. Inspect mapped runtime artifacts, relevant unmapped source, nearby existing tests, native configuration, and enough established architecture to preserve project integration and quality. Missing or incomplete state does not prove that no realization exists.
+3. Verify that candidate Sparks define the product decisions needed for their behavior, states, boundaries, validation, interactions, failures, lifecycle, and applicable platform constraints.
+4. Mark unresolved product intent, target configuration, required dependencies, or artifact ownership as **Blocked** rather than guessing.
+
+Ordinary technical choices such as file layout, internal state representation, and framework APIs are implementation decisions governed by the precedence above.
+
+Assign each Spark in the candidate scope exactly one action:
+
+- **Create**: no target realization exists and the Spark must be implemented.
+- **Update**: its realization must change to satisfy current intent, configuration, or an affected responsibility, boundary, constraint, or interaction.
+- **Validate only**: the existing realization appears consistent and is not affected by the requested change.
+- **Blocked**: a safe action cannot yet be determined.
+
+For initial generation, create every missing candidate realization. For regeneration, re-evaluate the full candidate scope but update a descendant only when it is missing or inconsistent, a parent or profile change affects it, a shared artifact must change, or focused validation exposes a relevant failure. Otherwise classify it as **Validate only**.
+
+Treat regeneration as impact-aware update in place. Rewrite the full candidate scope only when explicitly requested and after surfacing replacement risk. Never discard unrelated or user-maintained behavior merely because it shares an artifact with generated behavior.
+
+Because Sparks and artifacts are many-to-many, include Sparks outside the candidate scope in regression context when shared artifacts may affect them. Require scope expansion before changing their observable behavior.
+
+Before editing, summarize the requested roots, candidate scope, action for each candidate, and reasons for **Update**, **Validate only**, and **Blocked** decisions. Ask only when blocked, when a used Spark must enter scope, or when destructive replacement needs confirmation.
+
+## Implement and Maintain State
+
+Plan the smallest coherent artifact changes for **Create** and **Update**, while preserving **Validate only** artifacts. Do not mirror Sparks mechanically into files, classes, views, or tests.
+
+Maintain `.sparkwell/state/realizations/<implementation-id>.yaml` according to `.sparkwell/realization-state.md`. For each artifact created or materially maintained by this workflow, record every Spark it is `derived-from` using stable Spark IDs. Preserve existing valid mappings, but do not add files that were only inspected or validated. The manifest does not grant ownership or permission to overwrite; always inspect an artifact before modifying it.
+
+If the configured source root does not exist, scaffold a new target project with the native framework tooling after resolving required technology choices. If it exists, extend the established project and never scaffold over it. Mark the plan **Blocked** when required tooling or consequential scaffold choices are unavailable.
+
+During implementation:
+
+1. Reuse established project patterns, architecture, quality practices, and native framework capabilities.
+2. Modify only runtime artifacts required by **Create** and **Update**; preserve compatible **Validate only** artifacts.
+3. Do not create, update, delete, or rename test files; install test-only dependencies; create test projects; or redesign test infrastructure. Record missing, stale, or desirable coverage for a later `test-sparks` task.
+4. Validate a new scaffold before adding the Spark-derived implementation.
+5. Track state changes as runtime artifacts are created, materially maintained, moved, split, merged, repurposed, or deleted; never map a planned artifact before it exists.
+6. Preserve valid mappings outside the affected scope, including mappings for test artifacts owned by `test-sparks`, and leave unrelated artifacts unchanged.
+
+After the final artifact edits, reconcile and write the realization manifest before reporting. If validation causes further edits, reconcile it again afterward. Persist factual mappings even when validation fails; report the failure rather than encoding validation status in state.
+
+Do not add realization mappings to Spark Documents.
+
+## Validate and Report
+
+Discover applicable checks from native project files, including manifests, build files, task definitions, and CI configuration. Validate runtime artifacts with the applicable restore or install, compile or build, type-check, lint, format, and bounded runtime smoke checks.
+
+Run relevant existing tests when they provide a cheap regression signal. If an existing test failure exposes a runtime implementation defect, repair the runtime artifact and rerun it. If reviewed behavior intentionally makes a test expectation stale, report it for `test-sparks`; do not edit the test in this workflow. When no compatible test infrastructure exists, do not create it here.
+
+Do not expand implementation validation into comprehensive scenario design, test generation, cross-platform test matrices, or broad visual/accessibility test campaigns. Those belong to `test-sparks`. Report the test coverage that was run, coverage needs discovered, and behavior that remains unverified.
+
+Validate every candidate Spark, including **Validate only**, plus contextual Sparks at risk through shared artifacts. Do not report a Spark as realized when material behavior is missing. Report checks that could not run and why.
+
+Summarize:
+
+- effective target, selected profile, and implementation ID;
+- requested roots and candidate scope;
+- each candidate action and reason;
+- Sparks created, updated, reused, blocked, or still unverified;
+- realization-state path and Spark-to-artifact mapping changes;
+- important decisions, validation, and results;
+- existing tests run and test-authoring needs deferred to `test-sparks`;
+- assumptions, conflicts, and remaining gaps.
+
+## Guardrails
+
+- Do not edit Sparks or invent observable behavior in this workflow.
+- Do not rewrite a descendant solely because its parent was selected, or omit a missing descendant from a complete parent realization.
+- Do not replace an established framework or perform destructive regeneration without an explicit compatible request.
+- Do not duplicate native configuration, expose secrets, or change unrelated artifacts.
+- Do not generate or modify test artifacts, test infrastructure, or diagrams.

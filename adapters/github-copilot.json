@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "github-copilot",
+  "default": true,
+  "aliases": ["copilot"],
+  "instructions": [
+    {
+      "source": "core/instructions/sparkwell.md",
+      "destination": ".github/copilot-instructions.md",
+      "strategy": "managed-section",
+      "startMarker": "<!-- sparkwell:start -->",
+      "endMarker": "<!-- sparkwell:end -->"
+    }
+  ],
+  "skills": [
+    {
+      "source": "skills",
+      "destination": ".github/skills",
+      "retainOnDisable": ["manage-sparkwell"]
+    }
+  ]
+}

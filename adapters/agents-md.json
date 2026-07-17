@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "agents-md",
+  "aliases": ["agents", "generic"],
+  "instructions": [
+    {
+      "source": "core/instructions/sparkwell.md",
+      "destination": "AGENTS.md",
+      "strategy": "managed-section",
+      "startMarker": "<!-- sparkwell:start -->",
+      "endMarker": "<!-- sparkwell:end -->"
+    }
+  ],
+  "skills": [
+    {
+      "source": "skills",
+      "destination": ".agents/skills",
+      "retainOnDisable": ["manage-sparkwell"]
+    }
+  ]
+}

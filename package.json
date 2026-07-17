@@ -1,0 +1,40 @@
+{
+  "name": "sparkwell",
+  "version": "0.1.0",
+  "description": "Initialize software projects with Sparkwell design contracts and coding-agent workflows.",
+  "type": "module",
+  "bin": {
+    "sparkwell": "scripts/sparkwell.js"
+  },
+  "files": [
+    "adapters",
+    "core",
+    "docs",
+    "scripts",
+    "skills",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "check": "node --check scripts/sparkwell.js && node --check scripts/adapter-registry.js && node --check scripts/cli.js && node --check scripts/init-project.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "sparkwell",
+    "software-design",
+    "coding-agents",
+    "cli"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/junvwang/SparkWell.git"
+  },
+  "bugs": {
+    "url": "https://github.com/junvwang/SparkWell/issues"
+  },
+  "homepage": "https://github.com/junvwang/SparkWell#readme",
+  "license": "MIT"
+}

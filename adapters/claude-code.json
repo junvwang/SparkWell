@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "claude-code",
+  "aliases": ["claude"],
+  "instructions": [
+    {
+      "source": "core/instructions/sparkwell.md",
+      "destination": "CLAUDE.md",
+      "strategy": "managed-section",
+      "startMarker": "<!-- sparkwell:start -->",
+      "endMarker": "<!-- sparkwell:end -->"
+    }
+  ],
+  "skills": [
+    {
+      "source": "skills",
+      "destination": ".claude/skills",
+      "retainOnDisable": ["manage-sparkwell"]
+    }
+  ]
+}
