@@ -1,5 +1,8 @@
 # SparkWell
 
+> [!IMPORTANT]
+> SparkWell is at a very early stage. Its methodology and tooling are under active development, and its underlying ideas have not yet been thoroughly validated through broad practical use. Expect significant changes. You are welcome to try it and share feedback, use cases, and challenges through [GitHub issues](https://github.com/junvwang/SparkWell/issues).
+
 > **Build and evolve software through shared, durable intent.**
 
 SparkWell gives humans and AI a durable, reviewable representation of software intent for building and evolving software together.
