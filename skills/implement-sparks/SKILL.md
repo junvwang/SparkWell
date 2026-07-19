@@ -61,7 +61,9 @@ With no matching profile, use an unambiguous existing implementation. For a new 
 
 The **effective target** is the selected profile's `target`, otherwise the explicitly requested target, otherwise the existing implementation target. A requested target must match a selected profile.
 
-Use the exact lowercase kebab-case effective target in `./references/<target>.md`; load that optional guide when present. Its defaults never override the profile or established project, and its absence does not make a target unsupported.
+Use the exact lowercase kebab-case effective target in `./references/<target>.md`; load that optional guide when present. Its defaults never override the profile or established project, and its absence does not make a target unsupported. A target guide supplies baseline platform considerations, not framework selection, comprehensive platform support, or permission to bypass the artifact-owning toolchain.
+
+Bundled target guidance is available for [web](./references/web.md), [windows](./references/windows.md), [android](./references/android.md), and [ios](./references/ios.md).
 
 Resolve the **implementation ID** and load `.sparkwell/state/realizations/<implementation-id>.yaml` according to `.sparkwell/realization-state.md`.
 

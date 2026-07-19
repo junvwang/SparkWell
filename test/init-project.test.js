@@ -31,7 +31,7 @@ test('initializes core contracts and GitHub Copilot workflows by default', async
   const result = await initializeProject({ destination: target })
 
   assert.equal(result.agent, 'github-copilot')
-  assert.equal(result.created, 17)
+  assert.equal(result.created, 19)
   assert.equal(result.updated, 0)
   assert.match(
     await readFile(path.join(target, '.sparkwell', 'config.yaml'), 'utf8'),
@@ -101,7 +101,7 @@ test('enables an adapter without reconciling core project files', async (context
   })
 
   assert.equal(result.agent, 'claude-code')
-  assert.equal(result.created, 12)
+  assert.equal(result.created, 14)
   assert.equal(result.updated, 0)
   assert.equal(result.unchanged, 0)
   assert.equal(
@@ -143,7 +143,7 @@ test('disables and re-enables an adapter while preserving project content', asyn
 
   const disabled = await disableProject({ destination: target })
 
-  assert.equal(disabled.removed, 10)
+  assert.equal(disabled.removed, 12)
   assert.equal(disabled.updated, 1)
   assert.equal(disabled.unchanged, 1)
   assert.equal(await readFile(instructionsPath, 'utf8'), projectInstructions)
@@ -161,7 +161,7 @@ test('disables and re-enables an adapter while preserving project content', asyn
   )
 
   const enabled = await enableProject({ destination: target })
-  assert.equal(enabled.created, 10)
+  assert.equal(enabled.created, 12)
   assert.equal(enabled.updated, 1)
   assert.equal(enabled.unchanged, 1)
   const restoredInstructions = await readFile(instructionsPath, 'utf8')
@@ -182,7 +182,7 @@ test('disable removes an instruction file containing only SparkWell content', as
     agent: 'claude',
   })
 
-  assert.equal(result.removed, 11)
+  assert.equal(result.removed, 13)
   assert.equal(result.updated, 0)
   await assert.rejects(access(path.join(target, 'CLAUDE.md')), { code: 'ENOENT' })
   await assert.rejects(
@@ -218,7 +218,7 @@ test('disable removes a legacy unmarked SparkWell-only instruction file', async 
   const result = await disableProject({ destination: target })
 
   assert.equal(result.created, 1)
-  assert.equal(result.removed, 11)
+  assert.equal(result.removed, 13)
   await assert.rejects(access(instructionsPath), { code: 'ENOENT' })
   await assertPathExists(controlSkillPath, 'file')
 })
@@ -258,7 +258,7 @@ test('disable preflights modified skill conflicts and force removes only managed
   assert.equal(await readFile(skillPath, 'utf8'), 'Customized skill.\n')
 
   const result = await disableProject({ destination: target, force: true })
-  assert.equal(result.removed, 11)
+  assert.equal(result.removed, 13)
   await assert.rejects(access(skillPath), { code: 'ENOENT' })
   assert.equal(await readFile(extraPath, 'utf8'), 'Preserve this file.\n')
   assert.equal(
@@ -282,7 +282,7 @@ test('disable dry-run reports removals without changing files', async (context) 
   const result = await disableProject({ destination: target, dryRun: true })
 
   assert.equal(result.dryRun, true)
-  assert.equal(result.removed, 11)
+  assert.equal(result.removed, 13)
   await assertPathExists(instructionsPath, 'file')
   await assertPathExists(skillPath, 'file')
 })
@@ -359,7 +359,7 @@ test('initializes Claude Code instructions and shared skills', async (context) =
 
   assert.equal(result.agent, 'claude-code')
   assert.deepEqual(result.agents, ['claude-code'])
-  assert.equal(result.created, 17)
+  assert.equal(result.created, 19)
   await assertPathExists(path.join(target, 'CLAUDE.md'), 'file')
   await assertPathExists(
     path.join(target, '.claude', 'skills', 'design-sparks', 'SKILL.md'),
@@ -377,7 +377,7 @@ test('initializes AGENTS.md-compatible instructions and skills', async (context)
   })
 
   assert.equal(result.agent, 'agents-md')
-  assert.equal(result.created, 17)
+  assert.equal(result.created, 19)
   await assertPathExists(path.join(target, 'AGENTS.md'), 'file')
   await assertPathExists(
     path.join(target, '.agents', 'skills', 'implement-sparks', 'SKILL.md'),
@@ -395,7 +395,7 @@ test('composes multiple selected agent adapters', async (context) => {
 
   assert.equal(result.agent, undefined)
   assert.deepEqual(result.agents, ['github-copilot', 'claude-code'])
-  assert.equal(result.created, 29)
+  assert.equal(result.created, 33)
   await assertPathExists(
     path.join(target, '.github', 'copilot-instructions.md'),
     'file',
@@ -435,7 +435,7 @@ test('is idempotent when managed files are unchanged', async (context) => {
 
   assert.equal(result.created, 0)
   assert.equal(result.updated, 0)
-  assert.equal(result.unchanged, 17)
+  assert.equal(result.unchanged, 19)
 })
 
 test('treats line-ending and final-newline differences as unchanged', async (context) => {
@@ -488,7 +488,7 @@ test('appends a managed section to existing Copilot instructions', async (contex
   const result = await initializeProject({ destination: target })
   const merged = await readFile(instructionsPath, 'utf8')
 
-  assert.equal(result.created, 16)
+  assert.equal(result.created, 18)
   assert.equal(result.updated, 1)
   assert.ok(merged.startsWith(projectInstructions))
   assert.match(merged, /# Sparkwell Project Instructions/)
@@ -497,7 +497,7 @@ test('appends a managed section to existing Copilot instructions', async (contex
 
   const repeated = await initializeProject({ destination: target })
   assert.equal(repeated.updated, 0)
-  assert.equal(repeated.unchanged, 17)
+  assert.equal(repeated.unchanged, 19)
 })
 
 test('updates only the valid Sparkwell managed section', async (context) => {
@@ -722,7 +722,7 @@ test('CLI disables and enables a selected adapter', async (context) => {
 
   assert.equal(enableExitCode, 0)
   assert.match(output.text, /Enabled Sparkwell/)
-  assert.match(output.text, /Files: 12 created/)
+  assert.match(output.text, /Files: 14 created/)
   await assertPathExists(path.join(target, 'CLAUDE.md'), 'file')
 
   output.text = ''
@@ -733,7 +733,7 @@ test('CLI disables and enables a selected adapter', async (context) => {
 
   assert.equal(disableExitCode, 0)
   assert.match(output.text, /Disabled Sparkwell/)
-  assert.match(output.text, /Files: 0 created, 11 removed/)
+  assert.match(output.text, /Files: 0 created, 13 removed/)
   assert.equal(errors.text, '')
   await assert.rejects(access(path.join(target, 'CLAUDE.md')), { code: 'ENOENT' })
 })
@@ -745,6 +745,8 @@ test('canonical Agent Skills have valid metadata and project unchanged', async (
   const projectedRoot = path.join(target, '.github', 'skills')
   const relativeFiles = await collectRelativeFiles(skillsRoot)
 
+  assert.ok(relativeFiles.includes('implement-sparks/references/android.md'))
+  assert.ok(relativeFiles.includes('implement-sparks/references/ios.md'))
   assert.ok(relativeFiles.includes('test-sparks/references/web.md'))
   assert.ok(relativeFiles.includes('test-sparks/references/windows.md'))
 
