@@ -2,8 +2,6 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { parseArgs } from 'node:util'
 import {
-  disableProject,
-  enableProject,
   InitConflictError,
   initializeProject,
   normalizeAgents,
@@ -12,8 +10,6 @@ import {
 
 const usage = `Usage:
   sparkwell init [directory] [options]
-  sparkwell enable [directory] [options]
-  sparkwell disable [directory] [options]
 
 Options:
   --agent <name>  Coding-agent integration; repeat for multiple agents
@@ -58,42 +54,27 @@ export async function runCli(args, environment = {}) {
     const [command, destinationArgument, ...extraPositionals] =
       parsed.positionals
 
-    if (!['init', 'enable', 'disable'].includes(command) || extraPositionals.length > 0) {
+    if (command !== 'init' || extraPositionals.length > 0) {
       stderr.write(`${usage}\n`)
       return 1
     }
 
     const agents = normalizeAgents(parsed.values.agent)
     const destination = path.resolve(cwd, destinationArgument ?? '.')
-    const operation = {
-      init: initializeProject,
-      enable: enableProject,
-      disable: disableProject,
-    }[command]
-    const result = await operation({
+    const result = await initializeProject({
       destination,
       agents,
       dryRun: parsed.values['dry-run'],
       force: parsed.values.force,
     })
 
-    const action = {
-      init: result.dryRun ? 'Would initialize' : 'Initialized',
-      enable: result.dryRun ? 'Would enable' : 'Enabled',
-      disable: result.dryRun ? 'Would disable' : 'Disabled',
-    }[command]
+    const action = result.dryRun ? 'Would initialize' : 'Initialized'
     stdout.write(`${action} Sparkwell in ${destination}\n`)
     const integrationLabel = agents.length === 1 ? 'integration' : 'integrations'
     stdout.write(`Agent ${integrationLabel}: ${agents.join(', ')}\n`)
-    if (command === 'disable') {
-      stdout.write(
-        `Files: ${result.created} created, ${result.removed} removed, ${result.updated} updated, ${result.unchanged} unchanged\n`,
-      )
-    } else {
-      stdout.write(
-        `Files: ${result.created} created, ${result.updated} updated, ${result.unchanged} unchanged\n`,
-      )
-    }
+    stdout.write(
+      `Files: ${result.created} created, ${result.updated} updated, ${result.unchanged} unchanged\n`,
+    )
     return 0
   } catch (error) {
     if (error instanceof InitConflictError) {

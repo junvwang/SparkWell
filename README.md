@@ -134,14 +134,14 @@ Then ask your coding agent to design Sparks for a change. Review and edit the pr
 
 GitHub Copilot is the default adapter. SparkWell also supports Claude Code, `AGENTS.md`-compatible agents, multi-agent projects, and an agent-neutral initialization mode.
 
-See the **[detailed usage guide](docs/usage.md)** for installation, adapters, configuration, toggling, safety behavior, and the complete CLI reference.
+See the **[detailed usage guide](docs/usage.md)** for installation, adapters, configuration, workflow usage, safety behavior, and the complete CLI reference.
 
 ## Project Structure
 
 | Path | Purpose |
 |------|---------|
 | [`core/`](core/) | Canonical SparkWell instructions and project contracts |
-| [`skills/`](skills/) | Agent-neutral design, implementation, testing, and management workflows |
+| [`skills/`](skills/) | Agent-neutral design, implementation, testing, and visualization workflows |
 | [`adapters/`](adapters/) | Declarative mappings to coding-agent instruction and skill locations |
 | [`scripts/`](scripts/) | Dependency-free CLI and initialization engine |
 | [`docs/usage.md`](docs/usage.md) | Detailed installation and usage reference |
@@ -149,7 +149,7 @@ See the **[detailed usage guide](docs/usage.md)** for installation, adapters, co
 
 ## Current Status
 
-SparkWell is in early development. The core Spark specification, design and implementation workflows, separate testing workflow, realization provenance, multi-agent adapters, and reversible agent integration are available today.
+SparkWell is in early development. The core Spark specification, design and implementation workflows, separate testing workflow, realization provenance, and multi-agent adapters are available today.
 
 The methodology and tooling will continue to evolve through practical use and feedback while keeping existing project content safe and version controlled.
 

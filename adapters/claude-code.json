@@ -14,8 +14,7 @@
   "skills": [
     {
       "source": "skills",
-      "destination": ".claude/skills",
-      "retainOnDisable": ["manage-sparkwell"]
+      "destination": ".claude/skills"
     }
   ]
 }

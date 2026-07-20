@@ -117,14 +117,6 @@ function validateAdapter(adapter, filename) {
   for (const skill of adapter.skills) {
     validateRelativePath(skill.source, filename)
     validateRelativePath(skill.destination, filename)
-    if (
-      skill.retainOnDisable !== undefined &&
-      (!Array.isArray(skill.retainOnDisable) ||
-        !skill.retainOnDisable.every(isValidId) ||
-        new Set(skill.retainOnDisable).size !== skill.retainOnDisable.length)
-    ) {
-      throw new Error(`${filename} contains invalid retained skills.`)
-    }
   }
 }
 
@@ -150,12 +142,6 @@ async function validateAdapterSources(adapter, filename) {
   for (const skill of adapter.skills) {
     const skillSource = path.join(packageRoot, skill.source)
     await assertReadableSource(skillSource, filename)
-    for (const retainedSkill of skill.retainOnDisable ?? []) {
-      await assertReadableSource(
-        path.join(skillSource, retainedSkill, 'SKILL.md'),
-        filename,
-      )
-    }
   }
 }
 

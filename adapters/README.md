@@ -23,8 +23,7 @@ Adapters are declarative JSON files. Adding an adapter must not require a new in
   "skills": [
     {
       "source": "skills",
-      "destination": ".agents/skills",
-      "retainOnDisable": ["manage-sparkwell"]
+      "destination": ".agents/skills"
     }
   ]
 }
@@ -41,8 +40,6 @@ Adapters are declarative JSON files. Adding an adapter must not require a new in
 | `instructions` | Canonical instruction source, project destination, and merge strategy |
 | `skills` | Shared skill source and project discovery destination |
 
-Each skill projection may define `retainOnDisable`, a list of skill directory names that remain installed while the adapter is disabled. SparkWell uses this for the narrowly scoped `manage-sparkwell` control skill so disabled integrations can be enabled again. Retained skills are preserved as-is during disable; missing retained skills are installed for legacy projects.
-
 All source paths are relative to the SparkWell package root. All destination paths are relative to the initialized project root. Absolute paths and parent traversal are rejected.
 
 The current instruction strategy is `managed-section`. It preserves project-authored content outside the adapter's markers and updates only the SparkWell-owned block.
@@ -52,7 +49,7 @@ The current instruction strategy is `managed-section`. It preserves project-auth
 1. Confirm the agent supports the Agent Skills `SKILL.md` standard or document any genuine compatibility gap.
 2. Confirm its project instruction and skill discovery locations from official documentation.
 3. Add `<agent-id>.json` to this directory.
-4. Reuse `core/instructions/sparkwell.md` and `skills/`; do not duplicate their content. Retain `manage-sparkwell` unless the agent provides another reliable reversible control plane.
+4. Reuse `core/instructions/sparkwell.md` and `skills/`; do not duplicate their content.
 5. Add initialization, merge, alias, idempotence, and packaged-CLI coverage.
 6. Update the supported-adapter table in the root README.
 

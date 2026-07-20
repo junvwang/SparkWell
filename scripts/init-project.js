@@ -4,8 +4,6 @@ import {
   mkdir,
   readFile,
   readdir,
-  rm,
-  rmdir,
   stat,
   writeFile,
 } from 'node:fs/promises'
@@ -38,16 +36,14 @@ export async function initializeProject({
   agents,
   dryRun = false,
   force = false,
-  includeCore = true,
 }) {
   const normalizedAgents = normalizeAgents(agents ?? (agent ? [agent] : undefined))
-  const templateSources = []
-  if (includeCore) {
-    templateSources.push({
+  const templateSources = [
+    {
       sourceRoot: path.join(packageRoot, 'core', 'project'),
       destinationRoot: '',
-    })
-  }
+    },
+  ]
 
   const agentTemplates = await collectAgentTemplates(normalizedAgents)
   templateSources.push(...agentTemplates.templateSources)
@@ -74,12 +70,10 @@ export async function initializeProject({
   const pendingFiles = []
   let unchanged = 0
 
-  if (includeCore) {
-    for (const relativeDirectory of requiredDirectories) {
-      const targetDirectory = path.join(destination, relativeDirectory)
-      if ((await getPathState(targetDirectory)) === 'file') {
-        fatalConflicts.push(toPortablePath(relativeDirectory))
-      }
+  for (const relativeDirectory of requiredDirectories) {
+    const targetDirectory = path.join(destination, relativeDirectory)
+    if ((await getPathState(targetDirectory)) === 'file') {
+      fatalConflicts.push(toPortablePath(relativeDirectory))
     }
   }
 
@@ -146,12 +140,10 @@ export async function initializeProject({
 
   if (!dryRun) {
     await mkdir(destination, { recursive: true })
-    if (includeCore) {
-      for (const relativeDirectory of requiredDirectories) {
-        await mkdir(path.join(destination, relativeDirectory), {
-          recursive: true,
-        })
-      }
+    for (const relativeDirectory of requiredDirectories) {
+      await mkdir(path.join(destination, relativeDirectory), {
+        recursive: true,
+      })
     }
 
     for (const pendingFile of pendingFiles) {
@@ -164,161 +156,6 @@ export async function initializeProject({
     agent: normalizedAgents.length === 1 ? normalizedAgents[0] : undefined,
     agents: normalizedAgents,
     created,
-    updated,
-    unchanged,
-    dryRun,
-  }
-}
-
-export async function enableProject({
-  destination,
-  agent,
-  agents,
-  dryRun = false,
-  force = false,
-}) {
-  await assertInitializedProject(destination)
-  const normalizedAgents = normalizeIntegrationAgents(
-    agents ?? (agent ? [agent] : undefined),
-  )
-  return initializeProject({
-    destination,
-    agents: normalizedAgents,
-    dryRun,
-    force,
-    includeCore: false,
-  })
-}
-
-export async function disableProject({
-  destination,
-  agent,
-  agents,
-  dryRun = false,
-  force = false,
-}) {
-  await assertInitializedProject(destination)
-  const normalizedAgents = normalizeIntegrationAgents(
-    agents ?? (agent ? [agent] : undefined),
-  )
-  const agentTemplates = await collectAgentTemplates(normalizedAgents)
-
-  for (const templateSource of agentTemplates.templateSources) {
-    await access(templateSource.sourceRoot, constants.R_OK)
-  }
-
-  const templates = [
-    ...(
-      await Promise.all(
-        agentTemplates.templateSources.map((source) =>
-          collectTemplateFiles(source),
-        ),
-      )
-    ).flat(),
-    ...agentTemplates.instructionTemplates,
-  ].sort((left, right) => left.relativePath.localeCompare(right.relativePath))
-  assertUniqueTemplatePaths(templates)
-
-  const conflicts = []
-  const fatalConflicts = []
-  const pendingFiles = []
-  let unchanged = 0
-
-  for (const template of templates) {
-    const targetPath = path.join(destination, template.relativePath)
-    const targetState = await getPathState(targetPath)
-    const portablePath = toPortablePath(template.relativePath)
-
-    if (template.retainOnDisable) {
-      if (targetState === 'missing') {
-        pendingFiles.push({
-          targetPath,
-          action: 'create',
-          content: template.content,
-        })
-      } else if (targetState === 'directory') {
-        fatalConflicts.push(portablePath)
-      } else {
-        unchanged += 1
-      }
-      continue
-    }
-
-    if (targetState === 'missing') {
-      unchanged += 1
-      continue
-    }
-    if (targetState === 'directory') {
-      fatalConflicts.push(portablePath)
-      continue
-    }
-
-    const currentContent = await readFile(targetPath)
-    if (template.managedSection) {
-      const removal = removeManagedSection(
-        currentContent,
-        template.content,
-        template.managedSection,
-        force,
-      )
-      if (removal.status === 'malformed') {
-        fatalConflicts.push(portablePath)
-      } else if (removal.status === 'unchanged') {
-        unchanged += 1
-      } else {
-        pendingFiles.push({
-          targetPath,
-          action: removal.status,
-          content: removal.content,
-        })
-      }
-      continue
-    }
-
-    if (!contentsMatch(currentContent, template.content) && !force) {
-      conflicts.push(portablePath)
-      continue
-    }
-    pendingFiles.push({ targetPath, action: 'delete' })
-  }
-
-  if (fatalConflicts.length > 0 || conflicts.length > 0) {
-    throw new InitConflictError([...fatalConflicts, ...conflicts].sort())
-  }
-
-  const created = pendingFiles.filter((file) => file.action === 'create').length
-  const removed = pendingFiles.filter((file) => file.action === 'delete').length
-  const updated = pendingFiles.filter((file) => file.action === 'update').length
-
-  if (!dryRun) {
-    for (const pendingFile of pendingFiles) {
-      if (pendingFile.action === 'create') {
-        await mkdir(path.dirname(pendingFile.targetPath), { recursive: true })
-        await writeFile(pendingFile.targetPath, pendingFile.content)
-      } else if (pendingFile.action === 'update') {
-        await writeFile(pendingFile.targetPath, pendingFile.content)
-      } else {
-        await rm(pendingFile.targetPath)
-      }
-    }
-
-    const parentDirectories = [
-      ...new Set(
-        pendingFiles
-          .filter((file) => file.action === 'delete')
-          .map((file) => path.dirname(file.targetPath)),
-      ),
-    ].sort((left, right) => right.length - left.length)
-    for (const parentDirectory of parentDirectories) {
-      await removeEmptyParents(parentDirectory, destination)
-    }
-  }
-
-  return {
-    agent: normalizedAgents.length === 1 ? normalizedAgents[0] : undefined,
-    agents: normalizedAgents,
-    created,
-    removed,
     updated,
     unchanged,
     dryRun,
@@ -339,7 +176,6 @@ async function collectAgentTemplates(normalizedAgents) {
       templateSources.push({
         sourceRoot: path.join(packageRoot, skillProjection.source),
         destinationRoot: skillProjection.destination,
-        retainOnDisable: skillProjection.retainOnDisable ?? [],
       })
     }
     for (const instruction of adapter.instructions) {
@@ -362,23 +198,6 @@ async function collectAgentTemplates(normalizedAgents) {
   return { templateSources, instructionTemplates }
 }
 
-function normalizeIntegrationAgents(agents) {
-  const normalizedAgents = normalizeAgents(agents)
-  if (normalizedAgents.includes('none')) {
-    throw new TypeError('Agent "none" cannot be enabled or disabled.')
-  }
-  return normalizedAgents
-}
-
-async function assertInitializedProject(destination) {
-  const configPath = path.join(destination, '.sparkwell', 'config.yaml')
-  if ((await getPathState(configPath)) !== 'file') {
-    throw new Error(
-      `Sparkwell is not initialized in ${destination}. Run "sparkwell init" first.`,
-    )
-  }
-}
-
 async function collectTemplateFiles(
   templateSource,
   currentDirectory = templateSource.sourceRoot,
@@ -398,10 +217,6 @@ async function collectTemplateFiles(
     }
 
     files.push({
-      retainOnDisable: isRetainedSkill(
-        templateSource,
-        path.relative(templateSource.sourceRoot, absolutePath),
-      ),
       relativePath: path.join(
         templateSource.destinationRoot,
         path.relative(templateSource.sourceRoot, absolutePath),
@@ -411,11 +226,6 @@ async function collectTemplateFiles(
   }
 
   return files
-}
-
-function isRetainedSkill(templateSource, relativePath) {
-  const skillName = relativePath.split(path.sep)[0]
-  return templateSource.retainOnDisable?.includes(skillName) ?? false
 }
 
 async function getPathState(targetPath) {
@@ -508,58 +318,6 @@ function mergeManagedSection(currentContent, templateContent, markers, force) {
     : { status: 'update', content: mergedContent }
 }
 
-function removeManagedSection(currentContent, templateContent, markers, force) {
-  const currentText = currentContent.toString('utf8')
-  const currentNormalized = currentText.replaceAll('\r\n', '\n')
-  const currentBlock = findManagedBlock(currentNormalized, markers)
-
-  if (currentBlock.status === 'absent') {
-    const templateBlock = findManagedBlock(
-      templateContent.toString('utf8').replaceAll('\r\n', '\n'),
-      markers,
-    )
-    const legacyBody = templateBlock.lines.slice(1, -1).join('\n')
-    if (normalizeText(currentContent) === normalizeText(Buffer.from(legacyBody))) {
-      return { status: 'delete' }
-    }
-    return { status: 'unchanged' }
-  }
-  if (currentBlock.status === 'malformed' && !force) {
-    return { status: 'malformed' }
-  }
-
-  let remaining
-  if (currentBlock.status === 'malformed') {
-    remaining = replaceMalformedManagedSection(
-      currentNormalized,
-      [],
-      currentBlock,
-    )
-  } else {
-    const lines = currentNormalized.split('\n')
-    const before = lines
-      .slice(0, currentBlock.startIndex)
-      .join('\n')
-      .replace(/\n+$/, '')
-    const after = lines
-      .slice(currentBlock.endIndex + 1)
-      .join('\n')
-      .replace(/^\n+|\n+$/g, '')
-    remaining = [before, after].filter(Boolean).join('\n\n')
-  }
-
-  remaining = remaining.replace(/^\n+|\n+$/g, '')
-  if (!remaining) {
-    return { status: 'delete' }
-  }
-
-  const lineEnding = currentText.includes('\r\n') ? '\r\n' : '\n'
-  return {
-    status: 'update',
-    content: Buffer.from(`${remaining.replaceAll('\n', lineEnding)}${lineEnding}`),
-  }
-}
-
 function findManagedBlock(content, markers) {
   const lines = content.replace(/\n*$/, '').split('\n')
   const startIndexes = findMarkerIndexes(lines, markers.startMarker)
@@ -632,27 +390,6 @@ function replaceMalformedManagedSection(
     ...replacementLines,
   )
   return lines.join('\n').replace(/\n*$/, '')
-}
-
-async function removeEmptyParents(currentDirectory, stopDirectory) {
-  const stop = path.resolve(stopDirectory)
-  let current = path.resolve(currentDirectory)
-
-  while (current !== stop && current.startsWith(`${stop}${path.sep}`)) {
-    try {
-      await rmdir(current)
-    } catch (error) {
-      if (error?.code === 'ENOENT') {
-        current = path.dirname(current)
-        continue
-      }
-      if (error?.code === 'ENOTEMPTY' || error?.code === 'EEXIST') {
-        return
-      }
-      throw error
-    }
-    current = path.dirname(current)
-  }
 }
 
 function assertUniqueTemplatePaths(templates) {

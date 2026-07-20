@@ -1,6 +1,6 @@
 # SparkWell Usage
 
-This guide covers installation, initialization, coding-agent adapters, implementation profiles, workflow usage, toggling, safety behavior, and CLI development.
+This guide covers installation, initialization, coding-agent adapters, implementation profiles, workflow usage, safety behavior, and CLI development.
 
 ## Requirements
 
@@ -59,7 +59,7 @@ sparkwell init ../MyProject --agent claude-code
 sparkwell init ../MyProject --agent agents-md
 ```
 
-Enable multiple adapters by repeating `--agent`:
+Initialize multiple adapters by repeating `--agent`:
 
 ```sh
 sparkwell init ../MyProject \
@@ -93,7 +93,6 @@ For GitHub Copilot, it also receives:
 └── skills/
     ├── design-sparks/
     ├── implement-sparks/
-    ├── manage-sparkwell/
     ├── test-sparks/
     └── visualize-sparks/
 ```
@@ -171,47 +170,19 @@ Create tests for todo-list using the web-react profile.
 
 Adding a new test framework, dependency, project, browser harness, emulator, or other consequential infrastructure requires confirmation unless explicitly requested.
 
-## Enable or Disable Agent Integration
+## Bypass SparkWell for a Task
 
-Disabling an adapter removes its SparkWell instruction block and methodology skills while preserving:
+To handle a specific task without the SparkWell workflow, tell the coding agent explicitly. For example:
 
-- `.sparkwell/` contracts and configuration;
-- every Spark Document;
-- realization state;
-- project-authored instruction content;
-- unrelated skills and files;
-- the narrow `manage-sparkwell` control skill.
-
-Disable or restore the default adapter:
-
-```sh
-sparkwell disable
-sparkwell enable
+```text
+For this task, do not use the SparkWell workflow and do not create or update Spark Documents. Work directly on the engineering artifacts.
 ```
 
-Toggle selected adapters:
-
-```sh
-sparkwell disable --agent github-copilot
-sparkwell enable --agent github-copilot
-
-sparkwell disable \
-  --agent github-copilot \
-  --agent claude-code
-```
-
-Preview first:
-
-```sh
-sparkwell disable --dry-run
-sparkwell enable --dry-run
-```
-
-If the control skill is missing in an older project, `disable` installs it while removing the active methodology. Existing customized control-skill content is preserved.
+This instruction applies to the requested task and does not change project files or persist an activation state.
 
 ## Safety and Reinitialization
 
-Initialization, enable, and disable operations are preflighted before writing files.
+Initialization is preflighted before writing files.
 
 - Existing unrelated project files are never changed.
 - Matching SparkWell files are left unchanged.
@@ -237,8 +208,6 @@ Always inspect a `--dry-run` before using `--force`.
 
 ```text
 sparkwell init [directory] [options]
-sparkwell enable [directory] [options]
-sparkwell disable [directory] [options]
 
 --agent <name>  Coding-agent integration; repeat for multiple agents
 --dry-run       Show planned changes without writing files

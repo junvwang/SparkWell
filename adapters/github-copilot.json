@@ -15,8 +15,7 @@
   "skills": [
     {
       "source": "skills",
-      "destination": ".github/skills",
-      "retainOnDisable": ["manage-sparkwell"]
+      "destination": ".github/skills"
     }
   ]
 }

@@ -15,8 +15,6 @@ import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { runCli } from '../scripts/cli.js'
 import {
-  disableProject,
-  enableProject,
   InitConflictError,
   initializeProject,
   normalizeAgents,
@@ -31,7 +29,7 @@ test('initializes core contracts and GitHub Copilot workflows by default', async
   const result = await initializeProject({ destination: target })
 
   assert.equal(result.agent, 'github-copilot')
-  assert.equal(result.created, 19)
+  assert.equal(result.created, 18)
   assert.equal(result.updated, 0)
   assert.match(
     await readFile(path.join(target, '.sparkwell', 'config.yaml'), 'utf8'),
@@ -60,10 +58,6 @@ test('initializes core contracts and GitHub Copilot workflows by default', async
     path.join(target, '.github', 'skills', 'implement-sparks', 'SKILL.md'),
     'file',
   )
-  await assertPathExists(
-    path.join(target, '.github', 'skills', 'manage-sparkwell', 'SKILL.md'),
-    'file',
-  )
   assert.equal(
     await readFile(
       path.join(target, '.github', 'skills', 'design-sparks', 'SKILL.md'),
@@ -89,266 +83,6 @@ test('supports an agent-neutral core-only initialization', async (context) => {
   await assert.rejects(access(path.join(target, '.github')), { code: 'ENOENT' })
 })
 
-test('enables an adapter without reconciling core project files', async (context) => {
-  const target = await createTemporaryTarget(context)
-  await initializeProject({ destination: target, agent: 'none' })
-  const specificationPath = path.join(target, '.sparkwell', 'specification.md')
-  await writeFile(specificationPath, 'Locally customized specification.\n')
-
-  const result = await enableProject({
-    destination: target,
-    agent: 'claude',
-  })
-
-  assert.equal(result.agent, 'claude-code')
-  assert.equal(result.created, 14)
-  assert.equal(result.updated, 0)
-  assert.equal(result.unchanged, 0)
-  assert.equal(
-    await readFile(specificationPath, 'utf8'),
-    'Locally customized specification.\n',
-  )
-  await assertPathExists(path.join(target, 'CLAUDE.md'), 'file')
-  await assertPathExists(
-    path.join(target, '.claude', 'skills', 'design-sparks', 'SKILL.md'),
-    'file',
-  )
-  await assertPathExists(
-    path.join(target, '.claude', 'skills', 'manage-sparkwell', 'SKILL.md'),
-    'file',
-  )
-})
-
-test('enable requires an initialized project and a concrete adapter', async (context) => {
-  const target = await createTemporaryTarget(context)
-
-  await assert.rejects(
-    enableProject({ destination: target }),
-    /not initialized/,
-  )
-  await initializeProject({ destination: target, agent: 'none' })
-  await assert.rejects(
-    enableProject({ destination: target, agent: 'none' }),
-    /cannot be enabled or disabled/,
-  )
-})
-
-test('disables and re-enables an adapter while preserving project content', async (context) => {
-  const target = await createTemporaryTarget(context)
-  const instructionsPath = path.join(target, '.github', 'copilot-instructions.md')
-  const projectInstructions = '# Project Instructions\n\nKeep this rule.\n'
-  await mkdir(path.dirname(instructionsPath), { recursive: true })
-  await writeFile(instructionsPath, projectInstructions)
-  await initializeProject({ destination: target })
-
-  const disabled = await disableProject({ destination: target })
-
-  assert.equal(disabled.removed, 12)
-  assert.equal(disabled.updated, 1)
-  assert.equal(disabled.unchanged, 1)
-  assert.equal(await readFile(instructionsPath, 'utf8'), projectInstructions)
-  await assert.rejects(
-    access(path.join(target, '.github', 'skills', 'design-sparks', 'SKILL.md')),
-    { code: 'ENOENT' },
-  )
-  await assertPathExists(
-    path.join(target, '.github', 'skills', 'manage-sparkwell', 'SKILL.md'),
-    'file',
-  )
-  await assertPathExists(
-    path.join(target, '.sparkwell', 'specification.md'),
-    'file',
-  )
-
-  const enabled = await enableProject({ destination: target })
-  assert.equal(enabled.created, 12)
-  assert.equal(enabled.updated, 1)
-  assert.equal(enabled.unchanged, 1)
-  const restoredInstructions = await readFile(instructionsPath, 'utf8')
-  assert.match(restoredInstructions, /Keep this rule\./)
-  assert.match(restoredInstructions, /<!-- sparkwell:start -->/)
-  await assertPathExists(
-    path.join(target, '.github', 'skills', 'design-sparks', 'SKILL.md'),
-    'file',
-  )
-})
-
-test('disable removes an instruction file containing only SparkWell content', async (context) => {
-  const target = await createTemporaryTarget(context)
-  await initializeProject({ destination: target, agent: 'claude' })
-
-  const result = await disableProject({
-    destination: target,
-    agent: 'claude',
-  })
-
-  assert.equal(result.removed, 13)
-  assert.equal(result.updated, 0)
-  await assert.rejects(access(path.join(target, 'CLAUDE.md')), { code: 'ENOENT' })
-  await assert.rejects(
-    access(path.join(target, '.claude', 'skills', 'design-sparks', 'SKILL.md')),
-    { code: 'ENOENT' },
-  )
-  await assertPathExists(
-    path.join(target, '.claude', 'skills', 'manage-sparkwell', 'SKILL.md'),
-    'file',
-  )
-  await assertPathExists(path.join(target, '.sparkwell', 'config.yaml'), 'file')
-})
-
-test('disable removes a legacy unmarked SparkWell-only instruction file', async (context) => {
-  const target = await createTemporaryTarget(context)
-  await initializeProject({ destination: target })
-  const instructionsPath = path.join(target, '.github', 'copilot-instructions.md')
-  const controlSkillPath = path.join(
-    target,
-    '.github',
-    'skills',
-    'manage-sparkwell',
-    'SKILL.md',
-  )
-  await rm(path.dirname(controlSkillPath), { recursive: true })
-  await writeFile(
-    instructionsPath,
-    await readFile(
-      path.join(repositoryRoot, 'core', 'instructions', 'sparkwell.md'),
-    ),
-  )
-
-  const result = await disableProject({ destination: target })
-
-  assert.equal(result.created, 1)
-  assert.equal(result.removed, 13)
-  await assert.rejects(access(instructionsPath), { code: 'ENOENT' })
-  await assertPathExists(controlSkillPath, 'file')
-})
-
-test('disable preflights modified skill conflicts and force removes only managed files', async (context) => {
-  const target = await createTemporaryTarget(context)
-  await initializeProject({ destination: target })
-  const skillDirectory = path.join(
-    target,
-    '.github',
-    'skills',
-    'design-sparks',
-  )
-  const skillPath = path.join(skillDirectory, 'SKILL.md')
-  const extraPath = path.join(skillDirectory, 'project-notes.md')
-  const controlSkillPath = path.join(
-    target,
-    '.github',
-    'skills',
-    'manage-sparkwell',
-    'SKILL.md',
-  )
-  await writeFile(skillPath, 'Customized skill.\n')
-  await writeFile(extraPath, 'Preserve this file.\n')
-  await writeFile(controlSkillPath, 'Customized control skill.\n')
-
-  await assert.rejects(
-    disableProject({ destination: target }),
-    (error) =>
-      error instanceof InitConflictError &&
-      error.conflicts.includes('.github/skills/design-sparks/SKILL.md'),
-  )
-  await assertPathExists(
-    path.join(target, '.github', 'copilot-instructions.md'),
-    'file',
-  )
-  assert.equal(await readFile(skillPath, 'utf8'), 'Customized skill.\n')
-
-  const result = await disableProject({ destination: target, force: true })
-  assert.equal(result.removed, 13)
-  await assert.rejects(access(skillPath), { code: 'ENOENT' })
-  assert.equal(await readFile(extraPath, 'utf8'), 'Preserve this file.\n')
-  assert.equal(
-    await readFile(controlSkillPath, 'utf8'),
-    'Customized control skill.\n',
-  )
-})
-
-test('disable dry-run reports removals without changing files', async (context) => {
-  const target = await createTemporaryTarget(context)
-  await initializeProject({ destination: target })
-  const instructionsPath = path.join(target, '.github', 'copilot-instructions.md')
-  const skillPath = path.join(
-    target,
-    '.github',
-    'skills',
-    'design-sparks',
-    'SKILL.md',
-  )
-
-  const result = await disableProject({ destination: target, dryRun: true })
-
-  assert.equal(result.dryRun, true)
-  assert.equal(result.removed, 13)
-  await assertPathExists(instructionsPath, 'file')
-  await assertPathExists(skillPath, 'file')
-})
-
-test('disable removes only the selected adapter', async (context) => {
-  const target = await createTemporaryTarget(context)
-  await initializeProject({
-    destination: target,
-    agents: ['github-copilot', 'claude-code'],
-  })
-
-  await disableProject({ destination: target, agent: 'github-copilot' })
-
-  await assert.rejects(
-    access(path.join(target, '.github', 'copilot-instructions.md')),
-    { code: 'ENOENT' },
-  )
-  await assert.rejects(
-    access(path.join(target, '.github', 'skills', 'design-sparks', 'SKILL.md')),
-    { code: 'ENOENT' },
-  )
-  await assertPathExists(
-    path.join(target, '.github', 'skills', 'manage-sparkwell', 'SKILL.md'),
-    'file',
-  )
-  await assertPathExists(path.join(target, 'CLAUDE.md'), 'file')
-  await assertPathExists(
-    path.join(target, '.claude', 'skills', 'design-sparks', 'SKILL.md'),
-    'file',
-  )
-})
-
-test('disable rejects malformed markers and force removes their bounded region', async (context) => {
-  const target = await createTemporaryTarget(context)
-  await initializeProject({ destination: target })
-  const instructionsPath = path.join(target, '.github', 'copilot-instructions.md')
-  const malformed = `# Before
-
-<!-- sparkwell:start -->
-Broken managed content
-<!-- sparkwell:start -->
-More broken content
-<!-- sparkwell:end -->
-
-# After
-`
-  await writeFile(instructionsPath, malformed)
-
-  await assert.rejects(
-    disableProject({ destination: target }),
-    (error) =>
-      error instanceof InitConflictError &&
-      error.conflicts.includes('.github/copilot-instructions.md'),
-  )
-  await assertPathExists(
-    path.join(target, '.github', 'skills', 'design-sparks', 'SKILL.md'),
-    'file',
-  )
-
-  await disableProject({ destination: target, force: true })
-  const repaired = await readFile(instructionsPath, 'utf8')
-  assert.match(repaired, /# Before/)
-  assert.match(repaired, /# After/)
-  assert.doesNotMatch(repaired, /sparkwell:start|sparkwell:end|Broken/)
-})
-
 test('initializes Claude Code instructions and shared skills', async (context) => {
   const target = await createTemporaryTarget(context)
 
@@ -359,7 +93,7 @@ test('initializes Claude Code instructions and shared skills', async (context) =
 
   assert.equal(result.agent, 'claude-code')
   assert.deepEqual(result.agents, ['claude-code'])
-  assert.equal(result.created, 19)
+  assert.equal(result.created, 18)
   await assertPathExists(path.join(target, 'CLAUDE.md'), 'file')
   await assertPathExists(
     path.join(target, '.claude', 'skills', 'design-sparks', 'SKILL.md'),
@@ -377,7 +111,7 @@ test('initializes AGENTS.md-compatible instructions and skills', async (context)
   })
 
   assert.equal(result.agent, 'agents-md')
-  assert.equal(result.created, 19)
+  assert.equal(result.created, 18)
   await assertPathExists(path.join(target, 'AGENTS.md'), 'file')
   await assertPathExists(
     path.join(target, '.agents', 'skills', 'implement-sparks', 'SKILL.md'),
@@ -395,7 +129,7 @@ test('composes multiple selected agent adapters', async (context) => {
 
   assert.equal(result.agent, undefined)
   assert.deepEqual(result.agents, ['github-copilot', 'claude-code'])
-  assert.equal(result.created, 33)
+  assert.equal(result.created, 31)
   await assertPathExists(
     path.join(target, '.github', 'copilot-instructions.md'),
     'file',
@@ -435,7 +169,7 @@ test('is idempotent when managed files are unchanged', async (context) => {
 
   assert.equal(result.created, 0)
   assert.equal(result.updated, 0)
-  assert.equal(result.unchanged, 19)
+  assert.equal(result.unchanged, 18)
 })
 
 test('treats line-ending and final-newline differences as unchanged', async (context) => {
@@ -488,7 +222,7 @@ test('appends a managed section to existing Copilot instructions', async (contex
   const result = await initializeProject({ destination: target })
   const merged = await readFile(instructionsPath, 'utf8')
 
-  assert.equal(result.created, 18)
+  assert.equal(result.created, 17)
   assert.equal(result.updated, 1)
   assert.ok(merged.startsWith(projectInstructions))
   assert.match(merged, /# Sparkwell Project Instructions/)
@@ -497,7 +231,7 @@ test('appends a managed section to existing Copilot instructions', async (contex
 
   const repeated = await initializeProject({ destination: target })
   assert.equal(repeated.updated, 0)
-  assert.equal(repeated.unchanged, 19)
+  assert.equal(repeated.unchanged, 18)
 })
 
 test('updates only the valid Sparkwell managed section', async (context) => {
@@ -709,33 +443,19 @@ test('CLI accepts repeated agent selections', async (context) => {
   )
 })
 
-test('CLI disables and enables a selected adapter', async (context) => {
-  const target = await createTemporaryTarget(context)
-  await initializeProject({ destination: target, agent: 'none' })
+test('CLI exposes initialization only', async () => {
   const output = createOutputCapture()
   const errors = createOutputCapture()
 
-  const enableExitCode = await runCli(
-    ['enable', target, '--agent', 'claude'],
+  const exitCode = await runCli(
+    ['enable'],
     { cwd: repositoryRoot, stdout: output, stderr: errors },
   )
 
-  assert.equal(enableExitCode, 0)
-  assert.match(output.text, /Enabled Sparkwell/)
-  assert.match(output.text, /Files: 14 created/)
-  await assertPathExists(path.join(target, 'CLAUDE.md'), 'file')
-
-  output.text = ''
-  const disableExitCode = await runCli(
-    ['disable', target, '--agent', 'claude'],
-    { cwd: repositoryRoot, stdout: output, stderr: errors },
-  )
-
-  assert.equal(disableExitCode, 0)
-  assert.match(output.text, /Disabled Sparkwell/)
-  assert.match(output.text, /Files: 0 created, 13 removed/)
-  assert.equal(errors.text, '')
-  await assert.rejects(access(path.join(target, 'CLAUDE.md')), { code: 'ENOENT' })
+  assert.equal(exitCode, 1)
+  assert.equal(output.text, '')
+  assert.match(errors.text, /sparkwell init/)
+  assert.doesNotMatch(errors.text, /sparkwell enable|sparkwell disable/)
 })
 
 test('canonical Agent Skills have valid metadata and project unchanged', async (context) => {

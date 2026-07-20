@@ -14,8 +14,7 @@
   "skills": [
     {
       "source": "skills",
-      "destination": ".agents/skills",
-      "retainOnDisable": ["manage-sparkwell"]
+      "destination": ".agents/skills"
     }
   ]
 }
