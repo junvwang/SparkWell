@@ -15,7 +15,8 @@ Classify candidate Sparks as follows:
 - A `domain-model` Spark with a present, non-empty `service-exposure.standard-operations` list is applicable. Generate one model-derived Service Contract containing exactly those standard operations.
 - A `domain-model` Spark without `service-exposure` is **Not applicable** and produces no model-derived Service Contract.
 - A `service` Spark is applicable whenever it is in candidate scope. Generate one Service Contract containing every capability in its `## Capabilities` table.
-- Other Spark kinds are **Not applicable** as Contract-target artifacts. Inspect any that materially constrain an applicable contract as contextual Sparks.
+- A `ui-component` Spark is **Not applicable** as a Contract-target artifact. Inspect it only when its declared service interactions materially constrain an applicable contract.
+- A project-defined kind follows the target applicability defined by its project guidance; without that guidance, mark it **Blocked** rather than inferring a contract projection.
 
 An explicit Service Spark always owns its own Service Contract. Its presence does not suppress a separate model-derived contract enabled by Domain Model `service-exposure`.
 

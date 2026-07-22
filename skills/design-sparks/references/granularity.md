@@ -71,7 +71,7 @@ A data-bearing candidate is a useful `domain-model` Spark when it represents an 
 
 Keep data within another Spark when it has no independent domain meaning, rules, or review value. Do not create Domain Model Sparks by mining nouns, database tables, API schemas, request or response DTOs, ORM entities, or target-language classes. Those shapes may realize a Domain Model without defining its conceptual boundary.
 
-A broader domain, aggregate, or application Spark should compose Domain Models only when the parent owns real purpose, boundaries, or cross-model rules. Do not create an otherwise empty parent solely to group models or draw a relationship diagram.
+Compose Domain Models only when a supported parent Spark genuinely owns their relationship or coordination. Do not create an unsupported or otherwise empty parent solely to group models or draw a relationship diagram.
 
 ### Service Concepts
 
@@ -81,11 +81,13 @@ Do not create a Service Spark solely because an implementation has a service cla
 
 Service boundaries should follow owned behavior, not deployment or framework layers. One Service Spark may have several engineering artifacts, while one service application may realize several Service Sparks.
 
-### UI Concepts
+### UI Component Concepts
 
-A user-facing candidate may deserve a separate Spark when it owns a meaningful experience, workflow, interaction boundary, state model, or enduring user-visible constraint. Identify that boundary from user purpose and behavior, not from screens, component trees, or framework structure.
+Represent the overall interface as a root `ui-component`, then decompose it when modularity is intended. A child UI Component is justified when it has an independently understandable user-facing role and a reviewable boundary expressed through conceptual inputs, interactions, state, behavior, constraints, or independent evolution.
 
-Buttons, inputs, cards, list rows, dialogs, hooks, view models, and framework components normally remain engineering artifacts. A larger experience should compose smaller UI concepts only when each child has an independent purpose and reason to evolve or be reused. UI concepts use Domain Model and Service Sparks rather than repeating their data semantics or capabilities.
+Composition is part of the software design, not a copy of the eventual component tree. The parent owns information supplied to children, handling of child-reported user intent, cross-child coordination, and child presence. The child owns its internal presentation, component-local state, and reporting of user intent. If those responsibilities cannot be stated separately, keep the behavior in the parent.
+
+Native buttons, text inputs, layout containers, styling fragments, hooks, view models, and framework-only components remain engineering artifacts. A form, list, row, or dialog may be a UI Component Spark when it satisfies the modular boundary above; its visual shape alone is insufficient. UI Components use Domain Model and Service Sparks rather than repeating their data semantics or capabilities.
 
 ### Cohesion and Coupling
 
@@ -97,13 +99,13 @@ A concept may deserve its own boundary when it owns meaningful rules, constraint
 
 ### Use Cases and Workflows
 
-Actors, outcomes, states, transitions, and failure behavior can reveal meaningful workflow concepts. Steps that have no independent responsibility should usually remain part of the enclosing workflow.
+Actors, outcomes, states, transitions, and failure behavior can reveal responsibilities for Domain Model, Service, and UI Component concepts. Steps without an independent responsibility remain behavior of their owning concept.
 
 ### Abstraction Levels
 
-Compare candidate Sparks at similar levels of abstraction. A larger Spark may compose smaller Sparks, but do not treat an application, feature, UI control, and helper function as peers merely because each can technically be described as a concept.
+Compare candidate Sparks at similar levels of abstraction. A root UI Component may compose smaller UI Components, but native controls and helper functions remain artifacts rather than peer Sparks.
 
-Artifacts from these methods are evidence, not automatic Spark boundaries. Not every domain entity, aggregate, use case, service, architecture component, or workflow step deserves a Spark.
+Artifacts from these methods are evidence, not automatic Spark boundaries. Not every domain entity, aggregate, use case, architecture component, UI node, or workflow step deserves a Spark.
 
 ## Project Calibration
 
@@ -136,7 +138,7 @@ Do not create one Service Spark per controller, endpoint, service class, reposit
 
 ### Component-Tree Mining
 
-Do not create one Spark per screen, form, button, row, card, dialog, hook, or framework component. Start from the user-facing purpose, owned behavior, states, and interaction boundaries; split only independently meaningful UI concepts.
+Do not create one Spark per rendered node or framework component. Start with the root UI purpose, then split a form, list, row, card, dialog, or other child only when it is an intended modular UI boundary with meaningful inputs, interactions, state, behavior, or constraints. Keep native controls and layout-only nodes as engineering artifacts.
 
 ### Noun Mining
 
@@ -148,7 +150,7 @@ Do not split hypothetical future variation into separate Sparks without current 
 
 ### Overloaded Spark
 
-Do not place unrelated capabilities into a single application or feature Spark merely because they ship together.
+Do not place unrelated domain, service, and UI responsibilities into one Spark merely because they ship together. Decompose a root UI Component when its children have clear modular contracts; otherwise keep cohesive interaction behavior together.
 
 ### Relationship-Only Spark
 

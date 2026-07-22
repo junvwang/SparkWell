@@ -7,7 +7,8 @@ Use this reference when the effective target is `api-service`. The selected prof
 - A `domain-model` Spark with a matching model-derived Service Contract is applicable.
 - A `service` Spark with a matching explicit Service Contract is applicable.
 - A Domain Model without its own model-derived contract is **Not applicable** unless an applicable Service operation requires it as context or as an internal domain artifact.
-- UI and presentation Sparks are **Not applicable** as API Service artifacts.
+- A `ui-component` Spark is **Not applicable** as an API Service artifact. Inspect it only as context when its interactions consume an applicable contract.
+- A project-defined kind follows the target applicability defined by its project guidance; without that guidance, mark it **Blocked** rather than inferring an API Service projection.
 - Mark the task **Blocked** when an applicable Spark has no unambiguous matching contract. Do not reconstruct the public interface from Sparks.
 
 ## Contract Boundary

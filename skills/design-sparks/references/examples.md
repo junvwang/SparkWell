@@ -8,9 +8,9 @@ Requirement: Users can sign in with credentials and remain signed in across brow
 
 Possible result:
 
-- Evolve or create a Credential Sign-In Spark that owns credential submission, success, rejection, and user-visible failure behavior.
-- Evolve or create a User Session Spark that owns session establishment, persistence, expiration, and termination.
-- Model sign-in as using session management when the concepts are independently owned.
+- Evolve or create a Credential Sign-In UI Component that owns credential submission, pending, success, rejection, and user-visible failure behavior.
+- Evolve or create a User Session Service that owns session establishment, persistence, expiration, and termination when those capabilities cross an independently meaningful boundary.
+- Model Credential Sign-In as using User Session rather than duplicating session behavior in the UI Component.
 
 This is one requirement mapped to multiple Sparks because it changes two independently meaningful responsibilities.
 
@@ -22,35 +22,42 @@ Requirements:
 - Prevent repeated submission while authentication is in progress.
 - Show a recoverable error when authentication is unavailable.
 
-Possible result: Represent all three behaviors in one Credential Sign-In Spark when that Spark owns the complete sign-in interaction. Do not create separate Sparks for each acceptance criterion.
+Possible result: Represent all three behaviors in one Credential Sign-In UI Component when that component owns the complete sign-in interaction. Do not create separate Sparks for each acceptance criterion.
 
 ## Evolve Instead of Create
 
 Requirement: Add an optional "remember this device" choice to an existing sign-in experience.
 
-Possible result: Evolve the existing Credential Sign-In and User Session Sparks if the choice changes their behavior. Do not create a Remember Device Checkbox Spark merely because the implementation will add a UI control.
+Possible result: Evolve the existing Credential Sign-In UI Component and User Session Service if the choice changes their behavior. Do not create a Remember Device Checkbox UI Component merely because the implementation will add a native control.
 
 A separate trusted-device concept may be justified only when it owns independent security rules, lifecycle, or reuse beyond the sign-in form.
 
-## Appropriate Decomposition
+## Modular UI Composition
 
 Requirement: Customers can complete checkout by reviewing an order, paying, and receiving confirmation.
 
 Possible result:
 
-- A Checkout Workflow Spark owns the end-to-end customer flow and composes independently meaningful steps.
-- A Payment Spark owns payment authorization and failure behavior.
-- An Order Placement Spark owns creation of the committed order and its invariants.
+- A Checkout UI Component owns the end-to-end interface state and composes Order Review and Payment Entry UI Components.
+- Order Review reports confirmation or requested changes through stable interactions.
+- Payment Entry reports submitted payment details and presents validation owned by that component.
+- A Payment Service owns authorization and failure behavior across the service boundary.
 
-The parent remains meaningful because it owns the overall flow and transitions. The children are meaningful because they own behavior and constraints that can evolve independently.
+The parent remains meaningful because it supplies child inputs, handles child interactions, and owns transitions between review, payment, and confirmation. The children remain meaningful because each has its own inputs, interactions, states, behavior, and constraints. Framework pages, routes, controls, and callbacks remain engineering artifacts.
 
-## UI Concept Versus Component Tree
+## UI Component Composition Versus Rendered Tree
 
 Requirement: People can review Todo Items, add new work, rename or complete items, and recover from failed operations. The experience has loading, empty, populated, and error states.
 
-Possible result: Evolve or create a Todo List Experience Spark when it owns that user-facing workflow, its interaction behavior, and its observable states. It uses the `todo-item` Domain Model and any applicable Service Sparks instead of repeating their fields, invariants, or capabilities.
+Possible result:
 
-Do not create separate Sparks for Todo Row, Add Form, Empty State, Error Banner, Delete Dialog, or framework components merely because the implementation contains them. Introduce a smaller UI Spark only when it owns an independently meaningful user purpose, behavior, constraints, and reason to evolve or be reused.
+- A Todo App UI Component owns restoration, the ordered Todo Item collection, persistence coordination, and cross-child states.
+- It composes a Todo Entry UI Component that owns text entry, validation presentation, and an `add-requested` interaction.
+- It composes a Todo List UI Component that receives the ordered Todo Items and reports completion intent.
+- Todo List composes a Todo Item Row UI Component when the row is an intentional modular boundary with item input, completion state presentation, and a `complete-requested` interaction.
+- These UI Components use the `todo-item` Domain Model and applicable Services instead of repeating their fields, invariants, or capabilities.
+
+Do not create UI Component Sparks for the text box, add button, checkbox, stack panel, empty-state message, error banner, hook, view model, or framework component merely because the rendered tree contains them. Keep a proposed child inside its parent when its conceptual inputs, interactions, state ownership, and behavior cannot be reviewed independently.
 
 ## Domain Model and Standard Service Behavior
 
@@ -105,7 +112,7 @@ Represent one piece of work from creation through completion.
 This Spark does not define visual presentation, transport schemas, persistence layout, or framework types.
 ```
 
-A Todo List UI Spark can `use` `todo-item` and state which standard operations its interactions require. Do not create an automatic Todo Item Service Spark merely to repeat standard CRUD. Create an explicit Service Spark only when independently meaningful service behavior exists, such as bulk completion, authorization, specialized queries, or cross-model operations.
+A Todo List UI Component can `use` `todo-item` and state which standard operations its interactions require. Do not create an automatic Todo Item Service Spark merely to repeat standard CRUD. Create an explicit Service Spark only when independently meaningful service behavior exists, such as bulk completion, authorization, specialized queries, or cross-model operations.
 
 Do not create separate Sparks for `CreateTodoInput`, `TodoItemDto`, an ORM `TodoEntity`, or a `todos` table. Those are possible engineering realizations of `todo-item`.
 
@@ -150,15 +157,15 @@ Coordinate Todo Item operations that are broader than one model-level change.
 This Spark does not define transport routes, persistence, or Todo Item fields and invariants.
 ```
 
-A UI Spark uses `todo-management` when it needs `complete-all`. Contract and target implementations may realize that capability through an API operation, but the Service Spark does not prescribe an HTTP route, verb, DTO, or generated client method.
+A UI Component uses `todo-management` when it needs `complete-all`. Contract and target implementations may realize that capability through an API operation, but the Service Spark does not prescribe an HTTP route, verb, DTO, or generated client method.
 
 ## Under-Decomposition
 
-Candidate: One Application Spark describes authentication, product discovery, purchasing, billing, and account administration in detail.
+Candidate: One root UI Component describes authentication, product discovery, purchasing, billing, and account administration in detail without child boundaries.
 
-Problem: The Spark combines independently meaningful capabilities with different responsibilities and evolution paths.
+Problem: The Spark combines independently meaningful UI responsibilities with different inputs, interactions, states, and evolution paths.
 
-Better direction: Keep an Application Spark only if it owns meaningful system-level purpose and composition, then represent major independent capabilities as composed or used Sparks.
+Better direction: Keep the root UI Component as the coordination owner, then compose child UI Components whose modular contracts can be stated and reviewed independently. Represent domain and service responsibilities with their standardized kinds rather than embedding them in the UI.
 
 ## Implementation-Shaped Over-Decomposition
 

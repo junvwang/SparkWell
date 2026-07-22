@@ -8,6 +8,14 @@ Use this optional reference when the effective target is `web`. The selected pro
 - Preserve the established framework and package manager unless a compatible migration is explicitly requested.
 - Use native package and workspace configuration rather than duplicating it in Sparkwell files.
 
+## UI Component Projection
+
+- Realize a root `ui-component` through the established application root, route, page, or top-level framework component.
+- Realize each composed child through an identifiable framework-native component boundary, such as a React, Vue, Svelte, Web Component, or established equivalent boundary. A boundary does not require one file when the project convention keeps several component declarations together.
+- Map conceptual inputs to idiomatic properties, context, stores, or equivalent read boundaries, and map interactions to callbacks, emitted events, actions, or equivalent owner-facing mechanisms.
+- Keep cross-child state and coordination in the owning parent. Keep child-local presentation and interaction state in the child.
+- Preserve semantic HTML and native controls inside component boundaries; do not turn every element, hook, or styling unit into a Spark-derived component.
+
 ## Runtime Quality
 
 - Use semantic HTML and native controls where they express the intended interaction.

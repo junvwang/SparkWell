@@ -59,23 +59,17 @@ The Spark directory and filename must remain aligned with the stable identifier 
 
 ---
 
-# Kind Names
+# Supported Kinds
 
-Serialize kind names in lowercase kebab-case. Prefer an existing project kind when it accurately describes the concept.
+Serialize kind names in lowercase kebab-case.
 
-Common kinds include:
+Bundled SparkWell workflows support exactly these kinds:
 
-- `application`
-- `feature`
-- `workflow`
-- `service`
 - `domain-model`
-- `screen`
+- `service`
 - `ui-component`
-- `function`
-- `reusable-element`
 
-Use lowercase kebab-case for additional kinds and explain a new kind during human review.
+A project may use another kind only when it defines that kind's concept semantics, document rules, design rules, and target applicability. Without all four, treat the kind as unsupported and stop for clarification instead of inferring behavior from its name.
 
 ---
 
@@ -85,7 +79,7 @@ Do not create a `shared` storage category solely because multiple Sparks use a c
 
 Sharedness is derived from relationships rather than encoded in a path. Store a shared Spark under its actual `kind`, and let each consumer reference its stable ID through `uses`.
 
-A Spark does not become a `reusable-element` merely because it has multiple consumers. Use that kind only when reuse is part of the concept's purpose.
+A Spark does not change kind merely because it has multiple consumers. Reuse is represented by relationships and the concept's own intent.
 
 ---
 
@@ -282,63 +276,70 @@ This Spark does not define transport routes, persistence, or Todo Item fields an
 
 ---
 
+# UI Component Documents
+
+Use `kind: ui-component` only for a modular user-interface concept that satisfies the UI Component semantics in the Spark Specification. Do not use it merely for a native control, framework component, source file, style fragment, or incidental node in a rendered tree.
+
+Describe enough applicable intent to understand and implement the component's user-facing purpose, owned behavior and state, interactions, composition responsibilities, constraints, accessibility requirements, and boundaries. Organize the body with whatever prose, lists, tables, or sections communicate that intent most clearly. Omit topics that do not apply.
+
+When `composes` is non-empty, explain any parent-child responsibilities that are not already clear from the child Sparks, such as supplied information, reported user intent, state ownership, cross-child coordination, ordering, or conditional presence. Do not repeat the complete child definitions in the parent.
+
+Keep Domain Model invariants in Domain Model Sparks and Service capabilities in Service Sparks. Reference independently owned concepts through `uses` rather than duplicating their semantics.
+
+Keep framework properties, callbacks, events, commands, bindings, files, classes, controls, styling mechanics, and layout implementation in engineering artifacts.
+
+---
+
 # Example
 
-This composition:
+This UI Component composition:
 
 ```text
-checkout
-├── order-review
-└── payment
-    └── fraud-screening
+todo-app-ui
+├── todo-entry
+└── todo-list
 ```
 
 is stored as:
 
 ```text
 sparks/
-├── screen/
-│   └── order-review/
-│       └── order-review.spark.md
-├── service/
-│   ├── fraud-screening/
-│   │   └── fraud-screening.spark.md
-│   └── payment/
-│       └── payment.spark.md
-└── workflow/
-    └── checkout/
-        └── checkout.spark.md
+└── ui-component/
+    ├── todo-app-ui/
+    │   └── todo-app-ui.spark.md
+    ├── todo-entry/
+    │   └── todo-entry.spark.md
+    └── todo-list/
+        └── todo-list.spark.md
 ```
 
-The `sparks/workflow/checkout/checkout.spark.md` document begins:
+The `sparks/ui-component/todo-app-ui/todo-app-ui.spark.md` document begins:
 
 ```markdown
 ---
-id: checkout
-name: Checkout
-kind: workflow
-summary: Guides a customer from order review through payment and order placement.
+id: todo-app-ui
+name: Todo App UI
+kind: ui-component
+summary: Coordinates entry and list components for a Todo application.
 composes:
-  - order-review
-  - payment
-uses: []
+  - todo-entry
+  - todo-list
+uses:
+  - todo-item
 ---
 
-# Checkout
+# Todo App UI
 
-## Purpose
+The Todo App UI provides the root user interface and owns the ordered Todo Item collection. It coordinates collection changes reported by its child components.
 
-Allow a customer to review and complete a purchase.
+It composes:
 
-## Behavior
+- `todo-entry`, which collects a new Todo Item title and reports add intent;
+- `todo-list`, which receives the ordered collection and reports completion intent.
 
-- Present the order for review before payment.
-- Continue to payment after the customer confirms the order.
-- Complete the workflow only after its required steps succeed.
+When the collection is empty, the list presents its empty state. Otherwise, it presents items in their established order. Focus moves logically between entry and list content, and collection changes are communicated without relying on color alone.
 
-## Boundaries
-
-This Spark owns the checkout flow. Order review and payment behavior belong to their composed Sparks.
+The children own their internal presentation and interactions. `todo-item` owns Todo Item data and invariants. Exact layout and target-framework mechanisms remain implementation choices.
 ```
 
 ---

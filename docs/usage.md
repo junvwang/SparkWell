@@ -117,6 +117,33 @@ Review the proposal for behavioral completeness, states, failure behavior, valid
 
 The workflow stops at this checkpoint. Implementation-critical information must be durable in the reviewed Sparks rather than existing only in chat.
 
+Bundled SparkWell workflows support exactly these standardized kinds:
+
+- `domain-model`
+- `service`
+- `ui-component`
+
+A project-defined kind requires guidance for its concept semantics, document rules, design rules, and target applicability. When that guidance is incomplete, the agent stops for clarification.
+
+#### UI Component Sparks
+
+Use `kind: ui-component` for a modular user-interface concept with an identifiable purpose and boundary. Describe its information flow, user interactions, state, behavior, constraints, composition, and accessibility intent when those topics are material. A root UI Component owns the overall interface and may be realized by an application shell, window, page, route, or equivalent target entry surface.
+
+A parent UI Component uses `composes` for child UI Components it owns. Information flows from parent to child, while children report user intent or outcomes to the parent. The parent owns child presence, supplied information, handling of reported intent, and cross-child coordination. The child owns its internal presentation and local state.
+
+Do not create UI Component Sparks for every button, input, layout container, framework component, hook, view model, or rendered node. Create a child Spark when modularity is intended and its purpose, behavior, state, interactions, or constraints form an independently reviewable boundary.
+
+For example:
+
+```text
+todo-app-ui
+├── todo-entry
+└── todo-list
+  └── todo-item-row
+```
+
+Web may realize these as framework components; Windows may use a root window plus user controls, views, or templates. Android and iOS use their established native component boundaries. The exact files, classes, props, events, commands, and bindings remain engineering choices. Every composed child must nevertheless retain an identifiable runtime component boundary, and one Spark does not imply exactly one source file.
+
 #### Domain Model Sparks
 
 Use `kind: domain-model` for an independently meaningful domain concept that owns durable field semantics, invariants, relationships, lifecycle, or model-level behavior. Do not create Domain Model Sparks mechanically for DTOs, API payloads, ORM entities, database rows, or target-language classes.
@@ -229,7 +256,6 @@ The initial bundled Contract target generates OpenAPI 3.1 Service Contracts:
 
 - A Domain Model Spark generates a model-derived contract only when it contains a non-empty `service-exposure.standard-operations` list.
 - A Service Spark in the requested candidate scope always generates a contract containing its capability rows.
-- Other Spark kinds do not generate Contract-target artifacts by default.
 
 Default paths beneath `contracts.root` are:
 

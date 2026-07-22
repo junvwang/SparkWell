@@ -87,9 +87,9 @@ A Spark is not a compressed request or a file-generation template. It narrows co
 - lifecycle, persistence, and concurrency expectations;
 - enduring platform-specific intent.
 
-Sparks can exist at different levels of abstraction. A Spark might represent an application, feature, workflow, service, domain model, UI component, function, or another concept that is meaningful to understand and evolve independently. Larger concepts can compose smaller ones without forcing the implementation into the same structure.
+Sparks can exist at different levels of abstraction. Bundled SparkWell workflows currently support three standardized kinds: Domain Models, Services, and modular UI Components. Projects may define another kind only by supplying its semantics, document rules, design rules, and target applicability.
 
-`domain-model` is a standardized Spark kind for independently meaningful domain concepts with durable field semantics, invariants, lifecycle, and relationships. `service` is a lightweight standardized kind for independently meaningful capabilities, concept-level inputs and outputs, and failure behavior across a boundary. Both remain technology-independent; DTOs, API schemas, controllers, framework services, ORM entities, and database records are engineering artifacts by default.
+`domain-model` represents independently meaningful domain concepts with durable field semantics, invariants, lifecycle, and relationships. `service` represents independently meaningful capabilities, concept-level inputs and outputs, and failure behavior across a boundary. `ui-component` represents a modular interface boundary with user-facing behavior, state, interactions, accessibility intent, and optional child composition. A root UI Component may realize the application shell, window, page, route, or another platform entry surface.
 
 Each Spark is stored as a **Spark Document** with two complementary parts:
 
@@ -151,7 +151,7 @@ See the **[detailed usage guide](docs/usage.md)** for installation, adapters, co
 
 ## Current Status
 
-SparkWell is in early development. The core Spark specification, standardized Domain Model and Service kinds, OpenAPI Service Contract and API Service target guidance, design and implementation workflows, separate testing workflow, realization provenance, and multi-agent adapters are available today.
+SparkWell is in early development. The core Spark specification, standardized Domain Model, Service, and UI Component kinds, OpenAPI Service Contract and API Service target guidance, design and implementation workflows, separate testing workflow, realization provenance, and multi-agent adapters are available today.
 
 The methodology and tooling will continue to evolve through practical use and feedback while keeping existing project content safe and version controlled.
 

@@ -111,6 +111,24 @@ Because Sparks and artifacts are many-to-many, include Sparks outside the candid
 
 Before editing, summarize the requested roots, candidate scope, action for each candidate, and reasons for **Update**, **Validate only**, **Not applicable**, and **Blocked** decisions. Ask only when blocked, when a used Spark must enter scope, or when destructive replacement needs confirmation.
 
+## Project UI Component Composition
+
+For a UI target, classify every candidate `ui-component` as applicable unless its reviewed boundaries explicitly exclude that target. The selected root and every transitively composed UI Component in candidate scope must have an identifiable runtime component boundary. A component boundary may span several artifacts, and several boundaries may share one artifact when the established framework supports that structure; do not require one Spark per file or one file per Spark.
+
+Project composed UI Components as follows:
+
+1. Realize the selected root through the established application shell, window, page, route, view, or equivalent root UI boundary.
+2. Realize each composed child through a framework-native component boundary that preserves its applicable intent.
+3. Have the parent render, host, or instantiate its children and provide the information they need through idiomatic target mechanisms.
+4. Have children report user intent or other outcomes to their owner through idiomatic callbacks, events, commands, delegates, bindings, or equivalent mechanisms. Do not let a child directly mutate parent or sibling state.
+5. Keep child presence, information supplied to children, handling of child-reported intent, and cross-child coordination with the parent. Keep internal presentation and component-local state with the child unless reviewed intent assigns them elsewhere.
+6. Use referenced Domain Models and Services as their own concepts rather than duplicating their fields, invariants, or capabilities inside UI components.
+7. Preserve an existing valid component boundary even when its artifact layout differs from the Spark decomposition. Refactor only when the boundary cannot realize the reviewed component contract.
+
+Do not inline a composed child's behavior into its parent in a way that erases the child's identifiable boundary. Do not create native controls or source modules mechanically for every body section, input, interaction, or state. Framework props, callbacks, events, commands, bindings, state containers, files, and class names remain engineering decisions.
+
+When regenerating, update a parent only when its own behavior, composition, information flow, child presence, or coordination changes. A child-internal change does not by itself require rewriting a compatible parent.
+
 ## Implement and Maintain State
 
 Plan the smallest coherent artifact changes for **Create** and **Update**, while preserving **Validate only** artifacts. **Not applicable** Sparks produce no target artifact. Do not mirror Sparks mechanically into files, classes, views, or tests.

@@ -71,11 +71,13 @@ Use [the granularity guide](./references/granularity.md) to decide whether each 
 
 Use existing Sparks of similar kinds as the primary calibration for vocabulary and granularity.
 
+Use the standardized `domain-model`, `service`, and `ui-component` kinds. A project-defined kind requires guidance for its concept semantics, document representation, design rules, and target applicability. Classify each candidate with a supported kind or stop for clarification.
+
 When a candidate primarily owns domain data semantics, consider `domain-model` only when the concept is independently meaningful and owns fields, invariants, relationships, lifecycle, or model-level behavior worth reviewing and evolving separately. Do not classify an implementation data shape as a Domain Model merely because it has fields.
 
 When a candidate owns independently meaningful capabilities across a conceptual boundary, consider `service`. Create a Service Spark for behavior such as cross-model coordination, specialized queries, authorization, batching, orchestration, or distinct failure semantics. Do not create one merely because an implementation will contain a service class, endpoint, or automatic standard CRUD surface.
 
-For user-facing software, identify concepts by user purpose, behavior, state, and interaction boundaries rather than by the component tree. Create or separate a UI concept only when it owns independently meaningful behavior, constraints, lifecycle, or a reason to evolve or be reused; buttons, inputs, cards, rows, dialogs, and framework components normally remain engineering artifacts. A UI concept should use Domain Model and Service Sparks rather than duplicate their fields, invariants, or capabilities.
+For user-facing software, identify a root `ui-component` that owns the overall interface purpose and cross-component coordination. Decompose it into composed child UI Components when modularity is intended and each child has a meaningful user-facing role, conceptual inputs, interactions, state, behavior, constraints, or reason to evolve independently. Define the parent-child interface and state ownership rather than copying a rendered component tree. Native controls, layout containers, styling fragments, and framework-only components remain engineering artifacts. UI Components use Domain Model and Service Sparks rather than duplicating their fields, invariants, or capabilities.
 
 ### 4. Model Relationships
 
@@ -101,6 +103,8 @@ For `domain-model`, follow the standardized kind semantics in the Spark Specific
 
 For `service`, follow the standardized kind semantics and `## Capabilities` table in project conventions. Give each capability a stable logical identifier, describe concept-level inputs and outputs, capture observable failure behavior, and include every independently owned referenced concept in `uses`. Do not duplicate Domain Model fields or prescribe transport routes, DTOs, controllers, or framework service types.
 
+For `ui-component`, follow the standardized kind semantics and body conventions in project guidance. Organize the body for clarity rather than filling a fixed template. Describe information received from owners, reported user intent, observable states, transitions, behavior, constraints, boundaries, and accessibility intent when material. When the component composes children, capture material child roles, information flow, interaction handling, parent coordination, and layout relationships without repeating child definitions. Do not prescribe framework props, callbacks, events, commands, bindings, classes, files, or native controls.
+
 When no storage or document convention exists and existing Sparks do not establish one, do not invent a format. Present the proposed Spark map and document content in chat, identify the missing convention, and stop for clarification.
 
 Spark Documents should optimize for human review and conceptual understanding rather than implementation completeness.
@@ -119,6 +123,7 @@ Before presenting the changes, verify that:
 - bodies describe intent without unnecessary implementation detail;
 - every Domain Model has a valid `## Data` table, stable field identities, technology-independent types, applicable invariants and relationships, and valid `service-exposure` frontmatter when automatic standard service operations are intended;
 - every Service has a valid `## Capabilities` table, stable capability identities, concept-level inputs and outputs, applicable failure behavior, and consistent `uses` relationships;
+- every UI Component clearly communicates its purpose and boundary, applicable information and interaction flow, material states and ownership, child composition responsibilities, and consistent `uses` relationships;
 - proposed design remains compatible with relevant established architecture, or any intentional architectural conflict is surfaced;
 - assumptions and unresolved questions are explicit;
 - every implementation-critical decision learned during the design conversation is captured in durable artifacts;
@@ -160,6 +165,8 @@ A successful Spark design should:
 - Do not model files, classes, endpoints, tables, framework components, or implementation layers as Sparks unless they represent independently meaningful software concepts.
 - Do not create Domain Model Sparks for DTOs, API payloads, ORM entities, database rows, or target-language types unless they independently satisfy the Domain Model semantics.
 - Do not create Service Sparks for controllers, endpoints, framework service classes, generated clients, or automatic standard CRUD unless they independently satisfy the Service semantics.
+- Do not create unsupported Spark kinds unless project guidance defines their semantics, document representation, design rules, and target applicability.
+- Do not create a UI Component Spark for a native control, layout container, style fragment, or framework-only component.
 - Do not generate engineering artifacts as part of this skill.
 - Do not invent missing Spark semantics, storage conventions, or workflow metadata.
 - Do not silently resolve unclear ownership or contradictions between Sparks and engineering artifacts.

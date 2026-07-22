@@ -4,6 +4,7 @@ Use this optional reference when the effective target is `api-service`. Reviewed
 
 ## Contract and Scope
 
+- Treat `ui-component` Sparks as **Not applicable** to API Service test artifacts and inspect them only as consumer context for selected operations.
 - Require `contracts.service-format: openapi-3.1` and resolve applicable contracts beneath `contracts.root` through realization state and conventional paths.
 - Match tested operations by `operationId`. Mark missing or ambiguous contract correspondence **Blocked** rather than reconstructing an interface from Sparks.
 - Detect incompatible duplicate path and HTTP method pairs across contracts implemented by the service.

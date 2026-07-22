@@ -5,6 +5,7 @@ Use this optional reference when the effective target is `contract`. Reviewed Sp
 ## Scope
 
 - Resolve applicable Domain Model and Service Sparks using the Contract target applicability rules.
+- Treat `ui-component` Sparks as **Not applicable** to Contract test artifacts and inspect them only as context when they constrain an applicable service interaction.
 - Validate only contract artifacts in the requested scope. Treat other Sparks as context when they constrain operations or boundary schemas.
 - Require `contracts.service-format: openapi-3.1` and locate contracts beneath `contracts.root` through conventional paths and realization state.
 - Mark missing or ambiguous Spark-to-contract correspondence **Blocked** rather than inventing provenance.

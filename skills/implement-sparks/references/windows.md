@@ -8,6 +8,14 @@ Use this optional reference when the effective target is `windows`. The selected
 - Preserve the established Windows framework and project type unless a compatible migration is explicitly requested.
 - Use native SDK, dependency, packaging, and build configuration rather than duplicating it in Sparkwell files.
 
+## UI Component Projection
+
+- Realize a root `ui-component` through the established window, page, application shell, or equivalent root view.
+- Realize each composed child through an identifiable framework-native view boundary, such as a `UserControl`, `Page`, custom control, data template with an established owner, or equivalent component. A boundary may use code-behind, a view model, or both according to project architecture.
+- Map conceptual inputs to idiomatic properties, bindings, or view-model state, and map interactions to events, commands, delegates, or equivalent owner-facing mechanisms.
+- Keep cross-child state and coordination in the owning parent or its established controller or view model. Keep child-local presentation and interaction state with the child boundary.
+- Do not create a custom control for a standard Windows control or split XAML solely to mirror Spark body sections.
+
 ## Runtime Quality
 
 - Prefer standard Windows controls and platform behaviors when they satisfy the Spark intent.

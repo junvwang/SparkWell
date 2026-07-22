@@ -26,15 +26,11 @@ A **Spark** represents a meaningful software concept.
 
 A Spark captures the software intent of that concept independently of any particular engineering artifact.
 
-A Spark may represent software concepts at different levels of abstraction, including (but not limited to):
+A Spark may represent software concepts at different levels of abstraction. Bundled SparkWell workflows currently support:
 
-- an application
-- a feature
-- a workflow
-- a service
 - a domain model
-- a UI component
-- a reusable software element
+- a service
+- a modular UI component
 
 Spark intentionally does not prescribe a fixed granularity.
 
@@ -104,9 +100,15 @@ Relationships reference Sparks by their stable identifiers.
 
 The `kind` identifies the category of software concept represented by a Spark.
 
-Kinds are extensible. Projects should reuse established kinds when they accurately describe a concept and may introduce additional kinds when needed.
+Bundled SparkWell workflows support exactly these standardized kinds:
 
-Some established kinds define additional semantics for the concepts they represent. Those semantics do not close the kind system or impose one universal body template. Project conventions define how kind-specific information is serialized.
+- `domain-model`
+- `service`
+- `ui-component`
+
+The kind system remains extensible, but a project-defined kind is supported only when project guidance defines its concept semantics, document representation, design rules, and target applicability. Without that guidance, design and realization workflows must treat the kind as unsupported rather than infer behavior from its name.
+
+The standardized kinds define additional semantics for the concepts they represent. Those semantics do not impose one universal body template. Project conventions define how kind-specific information is serialized.
 
 ### Domain Model
 
@@ -155,6 +157,28 @@ A Service Spark references independently owned Domain Models and other concepts 
 A Service Spark does not prescribe HTTP routes, verbs, transport schemas, controllers, framework services, or generated operation names. Those are engineering artifacts unless they are themselves essential software intent.
 
 Do not create a Service Spark solely to restate standard model operations derived from Domain Model service exposure. Create one when service behavior has an independently meaningful boundary, such as cross-model operations, specialized queries, authorization, batching, orchestration, or distinct failure semantics.
+
+### UI Component
+
+A Spark with `kind: ui-component` represents a modular user-interface concept with an identifiable interaction and composition boundary across applicable UI implementations.
+
+A UI Component Spark communicates:
+
+- the component's user-facing purpose;
+- information received from an owning UI Component or other established boundary;
+- interactions through which it reports user intent or other observable output;
+- observable states and state transitions owned by the component;
+- user-visible behavior, validation, and failure handling;
+- child UI Components it owns and the roles they play;
+- applicable layout relationships, accessibility behavior, and interaction constraints;
+- state and coordination responsibilities that remain with its owner;
+- boundaries separating its intent from Domain Models, Services, and implementation details.
+
+A UI Component may be the root of a target's user interface or a child composed by another UI Component. A root component may be realized by an application shell, window, page, route, or other platform entry surface. A composed child remains independently meaningful and must retain an identifiable component boundary in applicable UI realizations.
+
+A UI Component uses Domain Models and Services rather than duplicating their fields, invariants, or capabilities. It may describe how domain data is presented and how service outcomes affect its states, but it does not redefine the underlying domain or service semantics.
+
+Native controls, layout containers, framework components, source files, and styling fragments are engineering artifacts. Do not create a UI Component Spark for one merely because it appears in a component tree. Create one when modularity is part of the intended design and the concept owns meaningful behavior, state, interaction, composition, constraints, or a reason to evolve independently.
 
 ---
 
@@ -252,11 +276,8 @@ Typical examples include:
 | Spark Kind | Typical Topics |
 |------------|----------------|
 | UI Component | Behavior, States, Layout, Interaction, Boundaries |
-| Screen | User Flow, Layout, Navigation |
 | Service | Purpose, Capabilities, Inputs, Outputs, Rules, Failure Behavior |
 | Domain Model | Domain Meaning, Data, Validation, Invariants, Lifecycle, Relationships |
-| Workflow | Participants, Steps, Transitions |
-| Function | Purpose, Inputs, Outputs, Rules |
 
 These examples are recommendations rather than requirements.
 

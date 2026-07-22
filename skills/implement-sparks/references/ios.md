@@ -9,6 +9,14 @@ Use this optional reference when the effective target is `ios`. The selected pro
 - For cross-platform or hybrid applications, inspect the owning framework's root manifests, source, and build configuration first. Treat the iOS host as an integration layer and do not edit generated project files unless the project clearly owns them or regeneration is part of the established workflow.
 - Preserve the established language, UI framework, target structure, dependency management, application architecture, deployment target, and supported device families unless constrained by the profile or explicitly changed.
 
+## UI Component Projection
+
+- Realize a root `ui-component` through the established scene content, navigation destination, root SwiftUI view, view controller, or equivalent root boundary.
+- Realize each composed child through an identifiable framework-native boundary, such as a SwiftUI `View`, UIKit view or view controller, or established cross-platform component.
+- Map conceptual inputs to properties, bindings, observable state, or equivalent read boundaries, and map interactions to closures, actions, delegates, notifications, or equivalent owner-facing mechanisms.
+- Keep cross-child state and coordination in the owning parent or established state holder. Keep child-local presentation and interaction state with the child boundary.
+- Do not create a Spark-derived component for each UIKit control, SwiftUI modifier, view-builder fragment, or layout node.
+
 ## Platform Responsibilities
 
 - Prefer standard iOS controls and platform behaviors when they satisfy the Spark intent.

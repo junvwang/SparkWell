@@ -10,6 +10,7 @@ Use this optional reference when the effective target is `windows`. The selected
 
 ## Behavioral Coverage
 
+- For composed UI Components, exercise the child through its native user-visible surface and verify the parent's observable coordination outcome. Do not assert XAML file boundaries, view-model types, binding paths, command names, or control-tree structure unless one is itself a required compatibility surface.
 - Cover keyboard navigation, access keys, accessible names, focus order, high contrast, scaling, resizing, windowing, and supported input methods only when relevant to reviewed intent or material regression risk.
 - Verify the launched application consumes the current build before diagnosing UI behavior.
 - Test packaging, installation, signing, or elevation only when the profile or request includes those concerns.

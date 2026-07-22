@@ -69,6 +69,8 @@ Inspect existing tests and map each scenario to one action:
 
 Before editing, summarize candidate scope, scenario coverage, existing coverage, proposed actions, consequential test-infrastructure changes, and blockers.
 
+For candidate `ui-component` Sparks, derive scenarios from conceptual inputs, interactions, observable states, behavior, composition, accessibility, and boundaries. Verify child behavior through its stable user-facing surface and verify parent handling through observable coordination outcomes. Do not assert source-file layout, framework component instances, prop or event names, control classes, or one-to-one Spark-to-test structure. Use an integrated parent-child scenario only when composition behavior cannot be distinguished through narrower component scenarios.
+
 ## Test Infrastructure
 
 Reuse the established test framework, helpers, fixtures, project structure, and CI conventions.

@@ -561,6 +561,26 @@ test('core project templates preserve the methodology quality contract', async (
     ),
     'utf8',
   )
+  const webReference = await readFile(
+    path.join(
+      repositoryRoot,
+      'skills',
+      'implement-sparks',
+      'references',
+      'web.md',
+    ),
+    'utf8',
+  )
+  const windowsReference = await readFile(
+    path.join(
+      repositoryRoot,
+      'skills',
+      'implement-sparks',
+      'references',
+      'windows.md',
+    ),
+    'utf8',
+  )
   const apiServiceTestReference = await readFile(
     path.join(
       repositoryRoot,
@@ -604,7 +624,10 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(specification, /kind: domain-model/)
   assert.match(specification, /DTOs, API schemas, ORM entities, database records/)
   assert.match(specification, /A Spark with `kind: service`/)
+  assert.match(specification, /A Spark with `kind: ui-component`/)
+  assert.match(specification, /support exactly these standardized kinds/)
   assert.doesNotMatch(specification, /project default/)
+  assert.doesNotMatch(specification, /`(?:application|feature|workflow|screen|function|reusable-element)`/)
   assert.match(contractReference, /A `service` Spark is applicable whenever it is in candidate scope/)
   assert.match(contractReference, /construct a transient Effective Service Definition/)
   assert.match(contractReference, /Do not persist it or add it to realization state/)
@@ -612,6 +635,11 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(conventions, /Review must evaluate substance/)
   assert.match(conventions, /\| Field \| Meaning \| Type \| Required \| Default \| Constraints \| Mutability \|/)
   assert.match(conventions, /\| Capability \| Purpose \| Inputs \| Output \| Failure Behavior \|/)
+  assert.match(conventions, /whatever prose, lists, tables, or sections communicate that intent most clearly/)
+  assert.match(conventions, /When `composes` is non-empty, explain any parent-child responsibilities/)
+  assert.doesNotMatch(conventions, /Every UI Component Spark body contains these sections in this order/)
+  assert.doesNotMatch(conventions, /This component (receives no conceptual inputs|reports no interactions|owns no distinct observable states)/)
+  assert.match(conventions, /Bundled SparkWell workflows support exactly these kinds/)
   assert.match(conventions, /Omit `service-exposure` when no model-derived public service/)
   assert.match(conventions, /non-empty, duplicate-free list containing only `create`, `get`, `list`, `update`, and `delete`/)
   assert.match(conventions, /must not cross any public service boundary/)
@@ -619,8 +647,11 @@ test('core project templates preserve the methodology quality contract', async (
   assert.doesNotMatch(conventions, /`data-model`\s*$/m)
   assert.match(designSkill, /For `domain-model`, follow the standardized kind semantics/)
   assert.match(designSkill, /For `service`, follow the standardized kind semantics/)
-  assert.match(designSkill, /identify concepts by user purpose, behavior, state, and interaction boundaries/)
-  assert.match(designExamples, /## UI Concept Versus Component Tree/)
+  assert.match(designSkill, /Use the standardized `domain-model`, `service`, and `ui-component` kinds/)
+  assert.match(designSkill, /identify a root `ui-component`/)
+  assert.doesNotMatch(designSkill, /`(?:application|feature|workflow|screen|function|reusable-element)`/)
+  assert.match(designExamples, /## UI Component Composition Versus Rendered Tree/)
+  assert.match(designExamples, /`add-requested` interaction/)
   assert.match(designExamples, /## Domain Model and Standard Service Behavior/)
   assert.match(designExamples, /## Explicit Service Spark/)
   assert.match(implementationProfiles, /`contracts\.root` is the project-relative folder where the Contract target writes contracts and other targets read them/)
@@ -631,7 +662,11 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(implementationSkill, /do not infer a competing wire format/)
   assert.match(implementationSkill, /\[api-service\]\(\.\/references\/api-service\.md\)/)
   assert.match(implementationSkill, /\.\/references\/openapi-client\.md/)
-  assert.match(apiServiceReference, /UI and presentation Sparks are \*\*Not applicable\*\*/)
+  assert.match(implementationSkill, /must have an identifiable runtime component boundary/)
+  assert.match(implementationSkill, /Have children report user intent or other outcomes to their owner/)
+  assert.match(webReference, /framework-native component boundary/)
+  assert.match(windowsReference, /framework-native view boundary/)
+  assert.match(apiServiceReference, /A `ui-component` Spark is \*\*Not applicable\*\*/)
   assert.match(apiServiceReference, /Implement every selected contract operation by its `operationId`/)
   assert.match(apiServiceReference, /duplicate path and HTTP method pairs/)
   assert.match(apiServiceReference, /Do not reconstruct the public interface from Sparks/)
