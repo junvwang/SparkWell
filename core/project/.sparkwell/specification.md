@@ -32,7 +32,7 @@ A Spark may represent software concepts at different levels of abstraction, incl
 - a feature
 - a workflow
 - a service
-- a data model
+- a domain model
 - a UI component
 - a reusable software element
 
@@ -84,6 +84,8 @@ Every Spark Document defines the following core fields:
 
 Projects may define additional metadata when appropriate.
 
+Established kinds may define standardized kind-specific frontmatter fields. Those fields are part of the represented software intent and must follow the semantics defined for their kind.
+
 The frontmatter should remain concise and relatively stable.
 
 ---
@@ -103,6 +105,56 @@ Relationships reference Sparks by their stable identifiers.
 The `kind` identifies the category of software concept represented by a Spark.
 
 Kinds are extensible. Projects should reuse established kinds when they accurately describe a concept and may introduce additional kinds when needed.
+
+Some established kinds define additional semantics for the concepts they represent. Those semantics do not close the kind system or impose one universal body template. Project conventions define how kind-specific information is serialized.
+
+### Domain Model
+
+A Spark with `kind: domain-model` represents a meaningful domain concept whose data semantics and rules must remain recognizable across implementations.
+
+A Domain Model Spark communicates:
+
+- the concept's domain meaning and purpose;
+- stable logical fields and their meanings;
+- domain-level types and required or optional values;
+- defaults, validation rules, ranges, and invariants;
+- field mutability and applicable lifecycle behavior;
+- relationships with other domain concepts;
+- model-level behavior that belongs to the concept;
+- any restriction on standard public service operations, when the project default should not apply unchanged.
+
+A Domain Model may include the optional `service-exposure` frontmatter field. Its non-empty `standard-operations` list explicitly enables the standard operations that may be derived automatically from the model. Omitting `service-exposure` means that no default public service is derived from the Domain Model.
+
+`service-exposure` governs only standard public service behavior derived from the Domain Model. It does not prevent an explicit Service Spark from using the model. When the model must not cross any public service boundary, the Domain Model must state that stronger prohibition in its body. Implementation configuration must not add or remove operations declared by the Spark.
+
+Field identifiers are stable logical identities within the model. Renaming a display label does not by itself rename a field. A field-identity change is software-intent evolution and may affect every realization of the model.
+
+Domain types describe software intent rather than language, transport, ORM, or database types. A Domain Model Spark does not prescribe classes, DTOs, wire schemas, tables, columns, or framework annotations unless one of those constructs is itself essential software intent.
+
+DTOs, API schemas, ORM entities, database records, and target-language types are engineering artifacts. They may realize a Domain Model Spark but do not become Domain Model Sparks merely because they contain data.
+
+Not every noun or data structure deserves a Domain Model Spark. The concept must have independently meaningful semantics, rules, relationships, or a reason to evolve and be reviewed separately.
+
+### Service
+
+A Spark with `kind: service` represents an independently meaningful set of capabilities offered across a conceptual boundary.
+
+A Service Spark communicates:
+
+- the service's purpose and boundary;
+- stable logical capabilities;
+- the domain concepts each capability uses;
+- concept-level inputs and outputs;
+- observable success and failure behavior;
+- applicable permissions, concurrency, idempotency, and interaction rules.
+
+Capability identifiers are stable logical identities within the service. Changing descriptive wording does not by itself rename a capability. A capability-identity change is software-intent evolution and may affect every contract and implementation that realizes the service.
+
+A Service Spark references independently owned Domain Models and other concepts through `uses`. It does not duplicate their fields, validation, or invariants. It describes only the behavior and rules owned by the service boundary.
+
+A Service Spark does not prescribe HTTP routes, verbs, transport schemas, controllers, framework services, or generated operation names. Those are engineering artifacts unless they are themselves essential software intent.
+
+Do not create a Service Spark solely to restate standard model operations derived from Domain Model service exposure. Create one when service behavior has an independently meaningful boundary, such as cross-model operations, specialized queries, authorization, batching, orchestration, or distinct failure semantics.
 
 ---
 
@@ -201,8 +253,8 @@ Typical examples include:
 |------------|----------------|
 | UI Component | Behavior, States, Layout, Interaction, Boundaries |
 | Screen | User Flow, Layout, Navigation |
-| Service | Capabilities, Inputs, Outputs, Failure Behavior |
-| Data Model | Data, Validation, Invariants |
+| Service | Purpose, Capabilities, Inputs, Outputs, Rules, Failure Behavior |
+| Domain Model | Domain Meaning, Data, Validation, Invariants, Lifecycle, Relationships |
 | Workflow | Participants, Steps, Transitions |
 | Function | Purpose, Inputs, Outputs, Rules |
 

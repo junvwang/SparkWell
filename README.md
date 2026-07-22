@@ -87,7 +87,9 @@ A Spark is not a compressed request or a file-generation template. It narrows co
 - lifecycle, persistence, and concurrency expectations;
 - enduring platform-specific intent.
 
-Sparks can exist at different levels of abstraction. A Spark might represent an application, feature, workflow, service, data model, UI component, function, or another concept that is meaningful to understand and evolve independently. Larger concepts can compose smaller ones without forcing the implementation into the same structure.
+Sparks can exist at different levels of abstraction. A Spark might represent an application, feature, workflow, service, domain model, UI component, function, or another concept that is meaningful to understand and evolve independently. Larger concepts can compose smaller ones without forcing the implementation into the same structure.
+
+`domain-model` is a standardized Spark kind for independently meaningful domain concepts with durable field semantics, invariants, lifecycle, and relationships. `service` is a lightweight standardized kind for independently meaningful capabilities, concept-level inputs and outputs, and failure behavior across a boundary. Both remain technology-independent; DTOs, API schemas, controllers, framework services, ORM entities, and database records are engineering artifacts by default.
 
 Each Spark is stored as a **Spark Document** with two complementary parts:
 
@@ -110,7 +112,7 @@ After review, specialized workflows realize the same Sparks independently:
 
 | Workflow | Responsibility | Does not own |
 |----------|----------------|--------------|
-| `implement-sparks` | Creates or updates runtime artifacts while preserving established architecture and normal engineering quality | Spark design or test authoring |
+| `implement-sparks` | Creates or updates target engineering artifacts, including runtime and Service Contract realizations | Spark design or test authoring |
 | `test-sparks` | Derives behavioral scenarios, creates or updates test artifacts, and reports verified and unverified intent | Spark design or production runtime changes |
 
 Implementation and testing are separate realization paths rather than one automatic pipeline. A team can implement a Spark for multiple targets, add tests at a different time, or evolve either artifact set without forcing the Spark Documents to mirror the code or test structure.
@@ -149,7 +151,7 @@ See the **[detailed usage guide](docs/usage.md)** for installation, adapters, co
 
 ## Current Status
 
-SparkWell is in early development. The core Spark specification, design and implementation workflows, separate testing workflow, realization provenance, and multi-agent adapters are available today.
+SparkWell is in early development. The core Spark specification, standardized Domain Model and Service kinds, OpenAPI Service Contract and API Service target guidance, design and implementation workflows, separate testing workflow, realization provenance, and multi-agent adapters are available today.
 
 The methodology and tooling will continue to evolve through practical use and feedback while keeping existing project content safe and version controlled.
 

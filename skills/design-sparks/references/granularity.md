@@ -65,6 +65,22 @@ Ask what responsibility a concept owns, what information it needs, and which oth
 
 Use domain language, business capabilities, invariants, and bounded contexts to identify stable conceptual boundaries. Do not automatically translate every entity, aggregate, service, or bounded context into a Spark.
 
+### Domain Model Concepts
+
+A data-bearing candidate is a useful `domain-model` Spark when it represents an independently meaningful domain concept and owns material field semantics, invariants, relationships, lifecycle, or model-level behavior. Independent reuse or evolution strengthens the case but does not replace a clear domain purpose.
+
+Keep data within another Spark when it has no independent domain meaning, rules, or review value. Do not create Domain Model Sparks by mining nouns, database tables, API schemas, request or response DTOs, ORM entities, or target-language classes. Those shapes may realize a Domain Model without defining its conceptual boundary.
+
+A broader domain, aggregate, or application Spark should compose Domain Models only when the parent owns real purpose, boundaries, or cross-model rules. Do not create an otherwise empty parent solely to group models or draw a relationship diagram.
+
+### Service Concepts
+
+A candidate is a useful `service` Spark when it owns an independently meaningful set of capabilities across a conceptual boundary. Strong signals include cross-model coordination, specialized queries, authorization, batching, orchestration, idempotency, concurrency, or distinctive failure behavior.
+
+Do not create a Service Spark solely because an implementation has a service class, controller, endpoint group, repository, or generated client. Do not create one merely to repeat standard CRUD already derived from Domain Model service exposure. Keep a capability in another Spark when it has no independent service purpose or review value.
+
+Service boundaries should follow owned behavior, not deployment or framework layers. One Service Spark may have several engineering artifacts, while one service application may realize several Service Sparks.
+
 ### Cohesion and Coupling
 
 Keep behavior, rules, and constraints together when they serve one purpose. Consider separate Sparks when concepts have distinct purposes and can evolve with limited impact on each other.
@@ -103,6 +119,14 @@ Requirements describe outcomes; Sparks represent responsible concepts. Their rel
 ### Implementation-Shaped Sparks
 
 Do not create Sparks merely for controllers, hooks, DTOs, database tables, API endpoints, source files, or packages.
+
+### Data-Structure Mining
+
+Do not create one Domain Model Spark per payload, table, entity class, or field group. Start from domain meaning and owned rules. Multiple implementation shapes may realize one Domain Model, while an incidental data structure may realize no independent Spark at all.
+
+### Service-Layer Mining
+
+Do not create one Service Spark per controller, endpoint, service class, repository, or transport group. Start from independently meaningful capabilities and boundary rules. A default CRUD surface does not justify a Service Spark by itself.
 
 ### Noun Mining
 

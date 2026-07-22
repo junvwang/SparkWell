@@ -9,11 +9,17 @@ Define profiles in `.sparkwell/config.yaml`:
 ```yaml
 schema-version: 1
 
+contracts:
+  root: src/contracts
+  service-format: openapi-3.1
+
 implementations:
   profiles: {}
 ```
 
-`implementations.profiles` maps a unique profile ID to each profile. Profile and target IDs use lowercase kebab-case. Targets are extensible, and multiple profiles may share a target.
+`contracts` defines project-wide contract settings shared by every target. `contracts.root` is the project-relative folder where the Contract target writes contracts and other targets read them. `contracts.service-format` selects the service-contract format. The bundled Contract target supports `openapi-3.1`.
+
+`implementations.profiles` maps a unique profile ID to each runtime implementation profile. Profile and target IDs use lowercase kebab-case. Targets are extensible, and multiple profiles may share a target.
 
 ## Profile Fields
 
@@ -36,6 +42,10 @@ Profiles do not inherit and must not contain secrets. `.sparkwell/config.yaml` i
 ```yaml
 schema-version: 1
 
+contracts:
+  root: src/contracts
+  service-format: openapi-3.1
+
 implementations:
   profiles:
     web-react:
@@ -46,16 +56,15 @@ implementations:
       preferences:
         language: typescript
 
-    web-vue:
-      target: web
-      source-root: src/web-vue
+    todo-api:
+      target: api-service
+      source-root: src/todo-api
       constraints:
-        framework: vue
-      preferences:
-        language: typescript
+        runtime: dotnet
+        framework: aspnet-core
 ```
 
-Both profiles target `web`, so a request for `web` alone is ambiguous.
+The Contract target uses `contracts.root` directly and does not require a profile. Runtime profiles, including API Service profiles, keep their own artifact roots in `source-root` and share contracts through the root-level `contracts` configuration. A human runs contract generation before any workflow that needs those files.
 
 ## Selection
 

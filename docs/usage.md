@@ -117,21 +117,81 @@ Review the proposal for behavioral completeness, states, failure behavior, valid
 
 The workflow stops at this checkpoint. Implementation-critical information must be durable in the reviewed Sparks rather than existing only in chat.
 
+#### Domain Model Sparks
+
+Use `kind: domain-model` for an independently meaningful domain concept that owns durable field semantics, invariants, relationships, lifecycle, or model-level behavior. Do not create Domain Model Sparks mechanically for DTOs, API payloads, ORM entities, database rows, or target-language classes.
+
+Each Domain Model uses a technology-independent `## Data` table:
+
+```markdown
+## Data
+
+| Field | Meaning | Type | Required | Default | Constraints | Mutability |
+|---|---|---|---|---|---|---|
+| `id` | Stable identity of the Todo Item | identifier | Yes | Generated | Unique and non-empty | Immutable |
+| `title` | Work the person wants to remember | string | Yes | None | Trimmed; 1-200 characters | Mutable |
+| `completed` | Whether the work is complete | boolean | Yes | `false` | None | Mutable |
+```
+
+Use stable logical field identifiers and domain types rather than language, transport, ORM, or database types. Put cross-field rules under `## Invariants`, describe material model relationships through `composes` or `uses`, and use optional `service-exposure` frontmatter only when automatic standard service operations are explicitly intended.
+
+To enable a model-derived standard service, add the allowed operations after `uses`:
+
+```yaml
+service-exposure:
+  standard-operations:
+    - create
+    - get
+    - list
+    - update
+    - delete
+```
+
+Omit `service-exposure` to generate no default service from the model. The list must be non-empty and limits automatic service derivation to the listed operations. Omission does not prevent an explicit Service Spark from using the model unless the Domain Model body states that it must not cross any public service boundary.
+
+The projected `.sparkwell/specification.md` defines Domain Model semantics. `.sparkwell/conventions.md` defines the exact field-table, type, relationship, and service-exposure representation.
+
+#### Service Sparks
+
+Use `kind: service` for independently meaningful capabilities across a conceptual boundary, such as cross-model coordination, specialized queries, authorization, batching, orchestration, or distinct failure behavior. Do not create Service Sparks mechanically for controllers, endpoints, framework service classes, generated clients, or default model CRUD.
+
+Each Service Spark uses a lightweight capabilities table:
+
+```markdown
+## Capabilities
+
+| Capability | Purpose | Inputs | Output | Failure Behavior |
+|---|---|---|---|---|
+| `complete-all` | Mark every active Todo Item complete | None | Number of `todo-item` models changed | Fails without partial completion if the operation cannot complete |
+```
+
+Capability IDs are stable lowercase kebab-case identities. Reference independently owned models and concepts through `uses`, keep inputs and outputs at the concept level, and describe only observable service failure behavior. Transport routes, HTTP verbs, status codes, DTOs, and framework types remain engineering-artifact choices unless they are enduring compatibility requirements.
+
+The projected `.sparkwell/specification.md` defines Service semantics. `.sparkwell/conventions.md` defines the exact capabilities-table representation.
+
 ### 2. Configure an implementation
 
-Initialization creates an empty profile map in `.sparkwell/config.yaml`:
+Initialization creates shared contract settings and an empty profile map in `.sparkwell/config.yaml`:
 
 ```yaml
 schema-version: 1
+
+contracts:
+  root: src/contracts
+  service-format: openapi-3.1
 
 implementations:
   profiles: {}
 ```
 
-Add one profile per concrete implementation:
+Add one profile per concrete runtime implementation:
 
 ```yaml
 schema-version: 1
+
+contracts:
+  root: src/contracts
+  service-format: openapi-3.1
 
 implementations:
   profiles:
@@ -142,11 +202,47 @@ implementations:
         framework: react
       preferences:
         language: typescript
+
+    todo-api:
+      target: api-service
+      source-root: src/todo-api
+      constraints:
+        runtime: dotnet
+        framework: aspnet-core
 ```
 
 Native project files remain authoritative for dependencies, versions, commands, formatting, linting, and build configuration.
 
-### 3. Implement
+The Contract target writes to `contracts.root`, and runtime targets read contracts from that same project-wide folder. Each runtime profile's `source-root` remains the output root for its own artifacts.
+
+### 3. Generate Service Contracts
+
+After reviewing the relevant Sparks, invoke `implement-sparks` for the Contract target:
+
+```text
+Implement todo-item and todo-management for the contract target.
+```
+
+The initial bundled Contract target generates OpenAPI 3.1 Service Contracts:
+
+- A Domain Model Spark generates a model-derived contract only when it contains a non-empty `service-exposure.standard-operations` list.
+- A Service Spark in the requested candidate scope always generates a contract containing its capability rows.
+- Other Spark kinds do not generate Contract-target artifacts by default.
+
+Default paths beneath `contracts.root` are:
+
+```text
+src/contracts/
+└── service/
+    ├── <domain-model-spark-id>.openapi.yaml
+    └── <service-spark-id>.openapi.yaml
+```
+
+The Contract target records each file in `.sparkwell/state/realizations/contract.yaml`. Runtime targets inspect `contracts.root`, conventional paths, and realization manifests whose artifact paths are under that folder. Contract generation does not create server, client, UI, storage, or test code.
+
+Run the Contract target before profiles that consume or implement its contracts. SparkWell does not automate this ordering.
+
+### 4. Implement
 
 After review, ask the agent to implement selected Sparks for a profile:
 
@@ -154,11 +250,19 @@ After review, ask the agent to implement selected Sparks for a profile:
 Implement todo-list for the web-react profile.
 ```
 
-`implement-sparks` creates or updates runtime artifacts, maintains realization provenance, runs build and static checks, performs a bounded runtime smoke check when available, and may run relevant existing tests as regression evidence.
+To implement the server side of generated Service Contracts:
+
+```text
+Implement todo-item and todo-management for the todo-api profile.
+```
+
+The API Service target implements matching OpenAPI operations and maps their boundary schemas to internal domain representations. It does not generate a competing interface or modify public contract files.
+
+`implement-sparks` creates or updates artifacts for the selected target, maintains realization provenance, runs applicable checks, and may run relevant existing tests as regression evidence.
 
 It does not create or modify tests, test-only dependencies, test projects, or test infrastructure.
 
-### 4. Test
+### 5. Test
 
 Invoke the separate testing workflow when test authoring or broader behavioral verification is desired:
 

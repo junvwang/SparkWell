@@ -44,6 +44,106 @@ Possible result:
 
 The parent remains meaningful because it owns the overall flow and transitions. The children are meaningful because they own behavior and constraints that can evolve independently.
 
+## Domain Model and Standard Service Behavior
+
+Requirement: People can create Todo Items, give each one a non-empty title, mark it complete or active, rename it, and delete it.
+
+Possible result: Create one `todo-item` Domain Model Spark because a Todo Item has stable identity, independently meaningful fields and invariants, model-level state changes, and a reason to be used by several realizations.
+
+```markdown
+---
+id: todo-item
+name: Todo Item
+kind: domain-model
+summary: Represents one piece of work a person wants to track.
+composes: []
+uses: []
+service-exposure:
+  standard-operations:
+    - create
+    - get
+    - list
+    - update
+    - delete
+---
+
+# Todo Item
+
+## Purpose
+
+Represent one piece of work from creation through completion.
+
+## Data
+
+| Field | Meaning | Type | Required | Default | Constraints | Mutability |
+|---|---|---|---|---|---|---|
+| `id` | Stable identity of the Todo Item | identifier | Yes | Generated | Unique and non-empty | Immutable |
+| `title` | Work the person wants to remember | string | Yes | None | Trimmed; 1-200 characters | Mutable |
+| `completed` | Whether the work is complete | boolean | Yes | `false` | None | Mutable |
+
+## Behavior
+
+- Change the title while preserving identity.
+- Mark an active Todo Item complete.
+- Return a completed Todo Item to active.
+
+## Invariants
+
+- The title remains non-empty after trimming.
+- Changing title or completion does not change identity.
+
+## Boundaries
+
+This Spark does not define visual presentation, transport schemas, persistence layout, or framework types.
+```
+
+A Todo List UI Spark can `use` `todo-item` and state which standard operations its interactions require. Do not create an automatic Todo Item Service Spark merely to repeat default CRUD. Create an explicit Service Spark only when independently meaningful service behavior exists, such as bulk archival, authorization, specialized queries, or cross-model operations.
+
+Do not create separate Sparks for `CreateTodoInput`, `TodoItemDto`, an ORM `TodoEntity`, or a `todos` table. Those are possible engineering realizations of `todo-item`.
+
+If Todo Items must not receive an automatically derived public service, omit `service-exposure`. This still permits a reviewed explicit Service Spark to use Todo Items. If Todo Items must never cross a public service boundary, state that stronger rule explicitly in the Domain Model Spark.
+
+## Explicit Service Spark
+
+Requirement: People can mark every active Todo Item complete in one operation. The operation must not leave only part of the selected set completed if it fails.
+
+Possible result: Create a `todo-management` Service Spark because bulk completion coordinates behavior across multiple Todo Items and owns distinct all-or-nothing failure semantics. It uses `todo-item` rather than duplicating Todo Item fields and invariants.
+
+```markdown
+---
+id: todo-management
+name: Todo Management
+kind: service
+summary: Coordinates operations across Todo Items.
+composes: []
+uses:
+  - todo-item
+---
+
+# Todo Management
+
+## Purpose
+
+Coordinate Todo Item operations that are broader than one model-level change.
+
+## Capabilities
+
+| Capability | Purpose | Inputs | Output | Failure Behavior |
+|---|---|---|---|---|
+| `complete-all` | Mark every active Todo Item complete | None | Number of `todo-item` models changed | Fails without partial completion if the operation cannot complete |
+
+## Rules
+
+- Already completed Todo Items remain unchanged.
+- The result counts only Todo Items changed by this operation.
+
+## Boundaries
+
+This Spark does not define transport routes, persistence, or Todo Item fields and invariants.
+```
+
+A UI Spark uses `todo-management` when it needs `complete-all`. Contract and target implementations may realize that capability through an API operation, but the Service Spark does not prescribe an HTTP route, verb, DTO, or generated client method.
+
 ## Under-Decomposition
 
 Candidate: One Application Spark describes authentication, product discovery, purchasing, billing, and account administration in detail.
