@@ -121,9 +121,9 @@ A Domain Model Spark communicates:
 - field mutability and applicable lifecycle behavior;
 - relationships with other domain concepts;
 - model-level behavior that belongs to the concept;
-- any restriction on standard public service operations, when the project default should not apply unchanged.
+- any standard public service operations explicitly enabled for automatic derivation.
 
-A Domain Model may include the optional `service-exposure` frontmatter field. Its non-empty `standard-operations` list explicitly enables the standard operations that may be derived automatically from the model. Omitting `service-exposure` means that no default public service is derived from the Domain Model.
+A Domain Model may include the optional `service-exposure` frontmatter field. Its non-empty `standard-operations` list explicitly enables the standard operations that may be derived automatically from the model. Omitting `service-exposure` means that no model-derived public service is generated.
 
 `service-exposure` governs only standard public service behavior derived from the Domain Model. It does not prevent an explicit Service Spark from using the model. When the model must not cross any public service boundary, the Domain Model must state that stronger prohibition in its body. Implementation configuration must not add or remove operations declared by the Spark.
 

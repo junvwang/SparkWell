@@ -29,7 +29,7 @@ test('initializes core contracts and GitHub Copilot workflows by default', async
   const result = await initializeProject({ destination: target })
 
   assert.equal(result.agent, 'github-copilot')
-  assert.equal(result.created, 22)
+  assert.equal(result.created, 23)
   assert.equal(result.updated, 0)
   assert.match(
     await readFile(path.join(target, '.sparkwell', 'config.yaml'), 'utf8'),
@@ -93,7 +93,7 @@ test('initializes Claude Code instructions and shared skills', async (context) =
 
   assert.equal(result.agent, 'claude-code')
   assert.deepEqual(result.agents, ['claude-code'])
-  assert.equal(result.created, 22)
+  assert.equal(result.created, 23)
   await assertPathExists(path.join(target, 'CLAUDE.md'), 'file')
   await assertPathExists(
     path.join(target, '.claude', 'skills', 'design-sparks', 'SKILL.md'),
@@ -111,7 +111,7 @@ test('initializes AGENTS.md-compatible instructions and skills', async (context)
   })
 
   assert.equal(result.agent, 'agents-md')
-  assert.equal(result.created, 22)
+  assert.equal(result.created, 23)
   await assertPathExists(path.join(target, 'AGENTS.md'), 'file')
   await assertPathExists(
     path.join(target, '.agents', 'skills', 'implement-sparks', 'SKILL.md'),
@@ -129,7 +129,7 @@ test('composes multiple selected agent adapters', async (context) => {
 
   assert.equal(result.agent, undefined)
   assert.deepEqual(result.agents, ['github-copilot', 'claude-code'])
-  assert.equal(result.created, 39)
+  assert.equal(result.created, 41)
   await assertPathExists(
     path.join(target, '.github', 'copilot-instructions.md'),
     'file',
@@ -169,7 +169,7 @@ test('is idempotent when managed files are unchanged', async (context) => {
 
   assert.equal(result.created, 0)
   assert.equal(result.updated, 0)
-  assert.equal(result.unchanged, 22)
+  assert.equal(result.unchanged, 23)
 })
 
 test('treats line-ending and final-newline differences as unchanged', async (context) => {
@@ -222,7 +222,7 @@ test('appends a managed section to existing Copilot instructions', async (contex
   const result = await initializeProject({ destination: target })
   const merged = await readFile(instructionsPath, 'utf8')
 
-  assert.equal(result.created, 21)
+  assert.equal(result.created, 22)
   assert.equal(result.updated, 1)
   assert.ok(merged.startsWith(projectInstructions))
   assert.match(merged, /# Sparkwell Project Instructions/)
@@ -231,7 +231,7 @@ test('appends a managed section to existing Copilot instructions', async (contex
 
   const repeated = await initializeProject({ destination: target })
   assert.equal(repeated.updated, 0)
-  assert.equal(repeated.unchanged, 22)
+  assert.equal(repeated.unchanged, 23)
 })
 
 test('updates only the valid Sparkwell managed section', async (context) => {
@@ -472,6 +472,7 @@ test('canonical Agent Skills have valid metadata and project unchanged', async (
   assert.ok(relativeFiles.includes('implement-sparks/references/ios.md'))
   assert.ok(relativeFiles.includes('test-sparks/references/web.md'))
   assert.ok(relativeFiles.includes('test-sparks/references/windows.md'))
+  assert.ok(relativeFiles.includes('test-sparks/references/contract.md'))
   assert.ok(relativeFiles.includes('test-sparks/references/api-service.md'))
 
   for (const relativeFile of relativeFiles) {
@@ -570,6 +571,16 @@ test('core project templates preserve the methodology quality contract', async (
     ),
     'utf8',
   )
+  const contractTestReference = await readFile(
+    path.join(
+      repositoryRoot,
+      'skills',
+      'test-sparks',
+      'references',
+      'contract.md',
+    ),
+    'utf8',
+  )
   const testSkill = await readFile(
     path.join(repositoryRoot, 'skills', 'test-sparks', 'SKILL.md'),
     'utf8',
@@ -593,21 +604,25 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(specification, /kind: domain-model/)
   assert.match(specification, /DTOs, API schemas, ORM entities, database records/)
   assert.match(specification, /A Spark with `kind: service`/)
+  assert.doesNotMatch(specification, /project default/)
   assert.match(contractReference, /A `service` Spark is applicable whenever it is in candidate scope/)
+  assert.match(contractReference, /construct a transient Effective Service Definition/)
+  assert.match(contractReference, /Do not persist it or add it to realization state/)
   assert.match(config, /contracts:\r?\n  root: src\/contracts\r?\n  service-format: openapi-3\.1/)
   assert.match(conventions, /Review must evaluate substance/)
   assert.match(conventions, /\| Field \| Meaning \| Type \| Required \| Default \| Constraints \| Mutability \|/)
   assert.match(conventions, /\| Capability \| Purpose \| Inputs \| Output \| Failure Behavior \|/)
-  assert.match(conventions, /Omit `service-exposure` when no default public service/)
+  assert.match(conventions, /Omit `service-exposure` when no model-derived public service/)
   assert.match(conventions, /non-empty, duplicate-free list containing only `create`, `get`, `list`, `update`, and `delete`/)
   assert.match(conventions, /must not cross any public service boundary/)
+  assert.doesNotMatch(conventions, /project defaults/)
   assert.doesNotMatch(conventions, /`data-model`\s*$/m)
   assert.match(designSkill, /For `domain-model`, follow the standardized kind semantics/)
   assert.match(designSkill, /For `service`, follow the standardized kind semantics/)
   assert.match(designExamples, /## Domain Model and Standard Service Behavior/)
   assert.match(designExamples, /## Explicit Service Spark/)
   assert.match(implementationProfiles, /`contracts\.root` is the project-relative folder where the Contract target writes contracts and other targets read them/)
-  assert.match(implementationProfiles, /The Contract target uses `contracts\.root` directly and does not require a profile/)
+  assert.match(implementationProfiles, /Profiles do not inherit and must not contain secrets/)
   assert.doesNotMatch(implementationProfiles, /`contract-root`/)
   assert.doesNotMatch(implementationProfiles, /`contract-source`/)
   assert.doesNotMatch(implementationSkill, /`contract-root`/)
@@ -616,10 +631,16 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(implementationSkill, /\.\/references\/openapi-client\.md/)
   assert.match(apiServiceReference, /UI and presentation Sparks are \*\*Not applicable\*\*/)
   assert.match(apiServiceReference, /Implement every selected contract operation by its `operationId`/)
+  assert.match(apiServiceReference, /duplicate path and HTTP method pairs/)
   assert.match(apiServiceReference, /Do not reconstruct the public interface from Sparks/)
+  assert.match(apiServiceReference, /The API Service owns the data-access code and provider-specific artifacts it needs/)
+  assert.match(implementationSkill, /Keep persistence access and provider-specific artifacts in the current target/)
+  assert.match(implementationSkill, /Mark an independently managed persistence boundary \*\*Blocked\*\*/)
   assert.match(openApiClientReference, /Select one contract operation by `operationId`/)
   assert.match(openApiClientReference, /Prefer established client-generation tooling/)
   assert.match(apiServiceTestReference, /Verify HTTP method, path, parameter location/)
+  assert.match(contractTestReference, /operations exactly match `service-exposure\.standard-operations`/)
+  assert.match(contractTestReference, /Compare an updated contract with the existing interface/)
   assert.match(contractReference, /Record every generated or materially updated contract file in `\.sparkwell\/state\/realizations\/contract\.yaml`/)
   assert.doesNotMatch(contractReference, /profile's `source-root`|constraints\.service-format/)
   assert.match(realizationState, /Map each contract file to its source Sparks/)

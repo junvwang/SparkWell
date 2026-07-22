@@ -147,13 +147,13 @@ service-exposure:
     - delete
 ```
 
-Omit `service-exposure` to generate no default service from the model. The list must be non-empty and limits automatic service derivation to the listed operations. Omission does not prevent an explicit Service Spark from using the model unless the Domain Model body states that it must not cross any public service boundary.
+Omit `service-exposure` to generate no model-derived service. The list must be non-empty and is the exact set of automatically derived operations. Omission does not prevent an explicit Service Spark from using the model unless the Domain Model body states that it must not cross any public service boundary.
 
 The projected `.sparkwell/specification.md` defines Domain Model semantics. `.sparkwell/conventions.md` defines the exact field-table, type, relationship, and service-exposure representation.
 
 #### Service Sparks
 
-Use `kind: service` for independently meaningful capabilities across a conceptual boundary, such as cross-model coordination, specialized queries, authorization, batching, orchestration, or distinct failure behavior. Do not create Service Sparks mechanically for controllers, endpoints, framework service classes, generated clients, or default model CRUD.
+Use `kind: service` for independently meaningful capabilities across a conceptual boundary, such as cross-model coordination, specialized queries, authorization, batching, orchestration, or distinct failure behavior. Do not create Service Sparks mechanically for controllers, endpoints, framework service classes, generated clients, or automatic standard CRUD.
 
 Each Service Spark uses a lightweight capabilities table:
 
@@ -209,6 +209,8 @@ implementations:
       constraints:
         runtime: dotnet
         framework: aspnet-core
+        persistence:
+          provider: sqlite
 ```
 
 Native project files remain authoritative for dependencies, versions, commands, formatting, linting, and build configuration.
@@ -256,7 +258,7 @@ To implement the server side of generated Service Contracts:
 Implement todo-item and todo-management for the todo-api profile.
 ```
 
-The API Service target implements matching OpenAPI operations and maps their boundary schemas to internal domain representations. It does not generate a competing interface or modify public contract files.
+The API Service target implements matching OpenAPI operations, maps their boundary schemas to internal domain representations, and owns its configured persistence access and provider-specific artifacts. It does not generate a competing interface or modify public contract files.
 
 `implement-sparks` creates or updates artifacts for the selected target, maintains realization provenance, runs applicable checks, and may run relevant existing tests as regression evidence.
 

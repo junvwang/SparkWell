@@ -62,9 +62,9 @@ implementations:
       constraints:
         runtime: dotnet
         framework: aspnet-core
+        persistence:
+          provider: sqlite
 ```
-
-The Contract target uses `contracts.root` directly and does not require a profile. Runtime profiles, including API Service profiles, keep their own artifact roots in `source-root` and share contracts through the root-level `contracts` configuration. A human runs contract generation before any workflow that needs those files.
 
 ## Selection
 

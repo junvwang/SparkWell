@@ -6,6 +6,7 @@ Use this optional reference when the effective target is `api-service`. Reviewed
 
 - Require `contracts.service-format: openapi-3.1` and resolve applicable contracts beneath `contracts.root` through realization state and conventional paths.
 - Match tested operations by `operationId`. Mark missing or ambiguous contract correspondence **Blocked** rather than reconstructing an interface from Sparks.
+- Detect incompatible duplicate path and HTTP method pairs across contracts implemented by the service.
 - Test only operations and behavior within the requested Spark scope, including shared behavior at risk through the same handlers or domain artifacts.
 
 ## Coverage

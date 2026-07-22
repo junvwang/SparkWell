@@ -97,7 +97,7 @@ Represent one piece of work from creation through completion.
 This Spark does not define visual presentation, transport schemas, persistence layout, or framework types.
 ```
 
-A Todo List UI Spark can `use` `todo-item` and state which standard operations its interactions require. Do not create an automatic Todo Item Service Spark merely to repeat default CRUD. Create an explicit Service Spark only when independently meaningful service behavior exists, such as bulk archival, authorization, specialized queries, or cross-model operations.
+A Todo List UI Spark can `use` `todo-item` and state which standard operations its interactions require. Do not create an automatic Todo Item Service Spark merely to repeat standard CRUD. Create an explicit Service Spark only when independently meaningful service behavior exists, such as bulk completion, authorization, specialized queries, or cross-model operations.
 
 Do not create separate Sparks for `CreateTodoInput`, `TodoItemDto`, an ORM `TodoEntity`, or a `todos` table. Those are possible engineering realizations of `todo-item`.
 

@@ -6,20 +6,28 @@ Use this reference when the effective target is `contract`. The root-level `cont
 
 The bundled target generates OpenAPI 3.1 Service Contracts. Persistence and event contracts are out of scope.
 
-Within SparkWell, only the Contract target creates or updates public contract files. Runtime targets may consume or implement them. The Contract target does not create runtime server, client, UI, storage, or test artifacts.
+Within SparkWell, only the Contract target creates or updates public contract files. Runtime targets may consume or implement them. The Contract target does not create runtime server, client, UI, persistence, or test artifacts.
 
 ## Applicability
 
 Classify candidate Sparks as follows:
 
 - A `domain-model` Spark with a present, non-empty `service-exposure.standard-operations` list is applicable. Generate one model-derived Service Contract containing exactly those standard operations.
-- A `domain-model` Spark without `service-exposure` is **Not applicable** and produces no default Service Contract.
+- A `domain-model` Spark without `service-exposure` is **Not applicable** and produces no model-derived Service Contract.
 - A `service` Spark is applicable whenever it is in candidate scope. Generate one Service Contract containing every capability in its `## Capabilities` table.
 - Other Spark kinds are **Not applicable** as Contract-target artifacts. Inspect any that materially constrain an applicable contract as contextual Sparks.
 
 An explicit Service Spark always owns its own Service Contract. Its presence does not suppress a separate model-derived contract enabled by Domain Model `service-exposure`.
 
 Treat Domain Models referenced by an applicable Service Spark as contextual inputs. Inspect their fields, invariants, relationships, and public-boundary restrictions. Include them in the contract artifact's realization provenance when their semantics materially define request or response schemas.
+
+## Effective Service Definition
+
+Before writing each contract, construct a transient Effective Service Definition from the applicable Domain Model or Service Spark and any Domain Models that define its boundary schemas. Resolve operations, inputs, outputs, validation, failures, permissions, concurrency, and other declared boundary behavior.
+
+For a model-derived service, the operation set must exactly match `service-exposure.standard-operations`. For an explicit Service, include every capability in its `## Capabilities` table. Mark missing or conflicting intent **Blocked**.
+
+Summarize the Effective Service Definition in the execution plan. Do not persist it or add it to realization state.
 
 ## Configuration and Layout
 
@@ -99,5 +107,6 @@ Record every generated or materially updated contract file in `.sparkwell/state/
 
 - Parse and validate every generated OpenAPI document with an established project tool when available.
 - Verify OpenAPI version, unique operation IDs, resolvable `$ref` values, referenced request and response schemas, and realization-state paths.
+- Verify that model-derived operations exactly match `service-exposure.standard-operations` and explicit-service operations cover every capability.
 - Compare an updated contract with the existing file and report additive, compatible, and potentially breaking interface changes.
 - If no OpenAPI validator is available, perform the strongest available structural check and report the remaining validation gap.

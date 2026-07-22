@@ -164,7 +164,7 @@ service-exposure:
 
 Apply these rules:
 
-- Omit `service-exposure` when no default public service should be derived from the Domain Model.
+- Omit `service-exposure` when no model-derived public service should be generated.
 - When `service-exposure` is present, `standard-operations` is required.
 - `standard-operations` is a non-empty, duplicate-free list containing only `create`, `get`, `list`, `update`, and `delete`, serialized in that order when present.
 - The list is the exact standard operation set for a model-derived Service Contract. An implementation profile must not add or remove operations.
@@ -243,7 +243,7 @@ Describe permissions, ordering, idempotency, concurrency, transactional behavior
 
 Do not put HTTP routes, verbs, status codes, DTO names, framework types, controller names, or generated client method names in the capabilities table unless they are enduring compatibility requirements of the software concept.
 
-Do not create a Service Spark solely to repeat standard operations already represented by a Domain Model's service exposure and project defaults.
+Do not create a Service Spark solely to repeat standard operations already represented by a Domain Model's service exposure.
 
 Example:
 

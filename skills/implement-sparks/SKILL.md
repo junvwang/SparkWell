@@ -37,6 +37,8 @@ For a task that creates, implements, or consumes contracts, resolve `contracts.r
 
 Use realization state to associate contract files with stable Spark IDs and the contract files themselves for operations and schemas; do not infer a competing wire format. When provenance is missing, inspect the contract directly and mark the task **Blocked** only if its Spark correspondence remains ambiguous.
 
+For runtime persistence, resolve provider and access choices from the selected profile and established native project. Keep persistence access and provider-specific artifacts in the current target. Mark an independently managed persistence boundary **Blocked** unless an explicit established contract defines it.
+
 Load supporting contracts only when needed:
 
 - `.sparkwell/specification.md` and `.sparkwell/conventions.md` to resolve unclear or invalid Spark structure or relationships.

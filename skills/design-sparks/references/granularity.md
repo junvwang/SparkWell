@@ -126,7 +126,7 @@ Do not create one Domain Model Spark per payload, table, entity class, or field 
 
 ### Service-Layer Mining
 
-Do not create one Service Spark per controller, endpoint, service class, repository, or transport group. Start from independently meaningful capabilities and boundary rules. A default CRUD surface does not justify a Service Spark by itself.
+Do not create one Service Spark per controller, endpoint, service class, repository, or transport group. Start from independently meaningful capabilities and boundary rules. An automatic standard CRUD surface does not justify a Service Spark by itself.
 
 ### Noun Mining
 

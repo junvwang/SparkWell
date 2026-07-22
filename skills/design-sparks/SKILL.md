@@ -73,7 +73,7 @@ Use existing Sparks of similar kinds as the primary calibration for vocabulary a
 
 When a candidate primarily owns domain data semantics, consider `domain-model` only when the concept is independently meaningful and owns fields, invariants, relationships, lifecycle, or model-level behavior worth reviewing and evolving separately. Do not classify an implementation data shape as a Domain Model merely because it has fields.
 
-When a candidate owns independently meaningful capabilities across a conceptual boundary, consider `service`. Create a Service Spark for behavior such as cross-model coordination, specialized queries, authorization, batching, orchestration, or distinct failure semantics. Do not create one merely because an implementation will contain a service class, endpoint, or default model CRUD surface.
+When a candidate owns independently meaningful capabilities across a conceptual boundary, consider `service`. Create a Service Spark for behavior such as cross-model coordination, specialized queries, authorization, batching, orchestration, or distinct failure semantics. Do not create one merely because an implementation will contain a service class, endpoint, or automatic standard CRUD surface.
 
 ### 4. Model Relationships
 
@@ -115,7 +115,7 @@ Before presenting the changes, verify that:
 - composition and usage relationships are consistent with conceptual ownership;
 - bodies contain enough applicable behavioral, state, failure, validation, lifecycle, and interaction detail for implementation to proceed without inventing product behavior;
 - bodies describe intent without unnecessary implementation detail;
-- every Domain Model has a valid `## Data` table, stable field identities, technology-independent types, applicable invariants and relationships, and valid `service-exposure` frontmatter when project defaults should not apply;
+- every Domain Model has a valid `## Data` table, stable field identities, technology-independent types, applicable invariants and relationships, and valid `service-exposure` frontmatter when automatic standard service operations are intended;
 - every Service has a valid `## Capabilities` table, stable capability identities, concept-level inputs and outputs, applicable failure behavior, and consistent `uses` relationships;
 - proposed design remains compatible with relevant established architecture, or any intentional architectural conflict is surfaced;
 - assumptions and unresolved questions are explicit;
@@ -157,7 +157,7 @@ A successful Spark design should:
 - Do not create one Spark per requirement by default.
 - Do not model files, classes, endpoints, tables, framework components, or implementation layers as Sparks unless they represent independently meaningful software concepts.
 - Do not create Domain Model Sparks for DTOs, API payloads, ORM entities, database rows, or target-language types unless they independently satisfy the Domain Model semantics.
-- Do not create Service Sparks for controllers, endpoints, framework service classes, generated clients, or default model CRUD unless they independently satisfy the Service semantics.
+- Do not create Service Sparks for controllers, endpoints, framework service classes, generated clients, or automatic standard CRUD unless they independently satisfy the Service semantics.
 - Do not generate engineering artifacts as part of this skill.
 - Do not invent missing Spark semantics, storage conventions, or workflow metadata.
 - Do not silently resolve unclear ownership or contradictions between Sparks and engineering artifacts.
