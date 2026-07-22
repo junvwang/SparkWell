@@ -81,6 +81,12 @@ Do not create a Service Spark solely because an implementation has a service cla
 
 Service boundaries should follow owned behavior, not deployment or framework layers. One Service Spark may have several engineering artifacts, while one service application may realize several Service Sparks.
 
+### UI Concepts
+
+A user-facing candidate may deserve a separate Spark when it owns a meaningful experience, workflow, interaction boundary, state model, or enduring user-visible constraint. Identify that boundary from user purpose and behavior, not from screens, component trees, or framework structure.
+
+Buttons, inputs, cards, list rows, dialogs, hooks, view models, and framework components normally remain engineering artifacts. A larger experience should compose smaller UI concepts only when each child has an independent purpose and reason to evolve or be reused. UI concepts use Domain Model and Service Sparks rather than repeating their data semantics or capabilities.
+
 ### Cohesion and Coupling
 
 Keep behavior, rules, and constraints together when they serve one purpose. Consider separate Sparks when concepts have distinct purposes and can evolve with limited impact on each other.
@@ -127,6 +133,10 @@ Do not create one Domain Model Spark per payload, table, entity class, or field 
 ### Service-Layer Mining
 
 Do not create one Service Spark per controller, endpoint, service class, repository, or transport group. Start from independently meaningful capabilities and boundary rules. An automatic standard CRUD surface does not justify a Service Spark by itself.
+
+### Component-Tree Mining
+
+Do not create one Spark per screen, form, button, row, card, dialog, hook, or framework component. Start from the user-facing purpose, owned behavior, states, and interaction boundaries; split only independently meaningful UI concepts.
 
 ### Noun Mining
 

@@ -619,6 +619,8 @@ test('core project templates preserve the methodology quality contract', async (
   assert.doesNotMatch(conventions, /`data-model`\s*$/m)
   assert.match(designSkill, /For `domain-model`, follow the standardized kind semantics/)
   assert.match(designSkill, /For `service`, follow the standardized kind semantics/)
+  assert.match(designSkill, /identify concepts by user purpose, behavior, state, and interaction boundaries/)
+  assert.match(designExamples, /## UI Concept Versus Component Tree/)
   assert.match(designExamples, /## Domain Model and Standard Service Behavior/)
   assert.match(designExamples, /## Explicit Service Spark/)
   assert.match(implementationProfiles, /`contracts\.root` is the project-relative folder where the Contract target writes contracts and other targets read them/)

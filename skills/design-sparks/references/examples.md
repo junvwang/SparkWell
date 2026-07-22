@@ -44,6 +44,14 @@ Possible result:
 
 The parent remains meaningful because it owns the overall flow and transitions. The children are meaningful because they own behavior and constraints that can evolve independently.
 
+## UI Concept Versus Component Tree
+
+Requirement: People can review Todo Items, add new work, rename or complete items, and recover from failed operations. The experience has loading, empty, populated, and error states.
+
+Possible result: Evolve or create a Todo List Experience Spark when it owns that user-facing workflow, its interaction behavior, and its observable states. It uses the `todo-item` Domain Model and any applicable Service Sparks instead of repeating their fields, invariants, or capabilities.
+
+Do not create separate Sparks for Todo Row, Add Form, Empty State, Error Banner, Delete Dialog, or framework components merely because the implementation contains them. Introduce a smaller UI Spark only when it owns an independently meaningful user purpose, behavior, constraints, and reason to evolve or be reused.
+
 ## Domain Model and Standard Service Behavior
 
 Requirement: People can create Todo Items, give each one a non-empty title, mark it complete or active, rename it, and delete it.

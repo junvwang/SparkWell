@@ -75,6 +75,8 @@ When a candidate primarily owns domain data semantics, consider `domain-model` o
 
 When a candidate owns independently meaningful capabilities across a conceptual boundary, consider `service`. Create a Service Spark for behavior such as cross-model coordination, specialized queries, authorization, batching, orchestration, or distinct failure semantics. Do not create one merely because an implementation will contain a service class, endpoint, or automatic standard CRUD surface.
 
+For user-facing software, identify concepts by user purpose, behavior, state, and interaction boundaries rather than by the component tree. Create or separate a UI concept only when it owns independently meaningful behavior, constraints, lifecycle, or a reason to evolve or be reused; buttons, inputs, cards, rows, dialogs, and framework components normally remain engineering artifacts. A UI concept should use Domain Model and Service Sparks rather than duplicate their fields, invariants, or capabilities.
+
 ### 4. Model Relationships
 
 Use `composes` when a Spark directly owns another Spark as part of the larger concept.
