@@ -49,7 +49,7 @@ Load supporting contracts only when needed:
 
 Apply decisions in this order:
 
-1. Reviewed Spark intent for detailed behavior, states, validation rules, responsibilities, interactions, and conceptual boundaries.
+1. Reviewed Spark intent for owned behavior, states, validation rules, responsibilities, interactions, and conceptual boundaries.
 2. Implementation-profile constraints.
 3. Compatible explicit user choices.
 4. The established native project and its configuration.

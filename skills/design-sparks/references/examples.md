@@ -55,7 +55,7 @@ Possible result:
 - It composes a Todo Entry UI Component that owns text entry, validation presentation, and an `add-requested` interaction.
 - It composes a Todo List UI Component that receives the ordered Todo Items and reports completion intent.
 - Todo List composes a Todo Item Row UI Component when the row is an intentional modular boundary with item input, completion state presentation, and a `complete-requested` interaction.
-- These UI Components use the `todo-item` Domain Model and applicable Services instead of repeating their fields, invariants, or capabilities.
+- These UI Components use the `todo-item-model` Domain Model and applicable Services instead of repeating their fields, invariants, or capabilities.
 
 Do not create UI Component Sparks for the text box, add button, checkbox, stack panel, empty-state message, error banner, hook, view model, or framework component merely because the rendered tree contains them. Keep a proposed child inside its parent when its conceptual inputs, interactions, state ownership, and behavior cannot be reviewed independently.
 
@@ -63,11 +63,11 @@ Do not create UI Component Sparks for the text box, add button, checkbox, stack 
 
 Requirement: People can create Todo Items, give each one a non-empty title, mark it complete or active, rename it, and delete it.
 
-Possible result: Create one `todo-item` Domain Model Spark because a Todo Item has stable identity, independently meaningful fields and invariants, model-level state changes, and a reason to be used by several realizations.
+Possible result: Create one `todo-item-model` Domain Model Spark because a Todo Item has stable identity, independently meaningful fields and invariants, model-level state changes, and a reason to be used by several realizations.
 
 ```markdown
 ---
-id: todo-item
+id: todo-item-model
 name: Todo Item
 kind: domain-model
 summary: Represents one piece of work a person wants to track.
@@ -84,10 +84,6 @@ service-exposure:
 
 # Todo Item
 
-## Purpose
-
-Represent one piece of work from creation through completion.
-
 ## Data
 
 | Field | Meaning | Type | Required | Default | Constraints | Mutability |
@@ -101,20 +97,11 @@ Represent one piece of work from creation through completion.
 - Change the title while preserving identity.
 - Mark an active Todo Item complete.
 - Return a completed Todo Item to active.
-
-## Invariants
-
-- The title remains non-empty after trimming.
-- Changing title or completion does not change identity.
-
-## Boundaries
-
-This Spark does not define visual presentation, transport schemas, persistence layout, or framework types.
 ```
 
-A Todo List UI Component can `use` `todo-item` and state which standard operations its interactions require. Do not create an automatic Todo Item Service Spark merely to repeat standard CRUD. Create an explicit Service Spark only when independently meaningful service behavior exists, such as bulk completion, authorization, specialized queries, or cross-model operations.
+A Todo List UI Component can `use` `todo-item-model` and state which standard operations its interactions require. Do not create an automatic Todo Item Service Spark merely to repeat standard CRUD. Create an explicit Service Spark only when independently meaningful service behavior exists, such as bulk completion, authorization, specialized queries, or cross-model operations.
 
-Do not create separate Sparks for `CreateTodoInput`, `TodoItemDto`, an ORM `TodoEntity`, or a `todos` table. Those are possible engineering realizations of `todo-item`.
+Do not create separate Sparks for `CreateTodoInput`, `TodoItemDto`, an ORM `TodoEntity`, or a `todos` table. Those are possible engineering realizations of `todo-item-model`.
 
 If Todo Items must not receive an automatically derived public service, omit `service-exposure`. This still permits a reviewed explicit Service Spark to use Todo Items. If Todo Items must never cross a public service boundary, state that stronger rule explicitly in the Domain Model Spark.
 
@@ -122,42 +109,34 @@ If Todo Items must not receive an automatically derived public service, omit `se
 
 Requirement: People can mark every active Todo Item complete in one operation. The operation must not leave only part of the selected set completed if it fails.
 
-Possible result: Create a `todo-management` Service Spark because bulk completion coordinates behavior across multiple Todo Items and owns distinct all-or-nothing failure semantics. It uses `todo-item` rather than duplicating Todo Item fields and invariants.
+Possible result: Create a `todo-management-service` Service Spark because bulk completion coordinates behavior across multiple Todo Items and owns distinct all-or-nothing failure semantics. It uses `todo-item-model` rather than duplicating Todo Item fields and invariants.
 
 ```markdown
 ---
-id: todo-management
+id: todo-management-service
 name: Todo Management
 kind: service
 summary: Coordinates operations across Todo Items.
 composes: []
 uses:
-  - todo-item
+  - todo-item-model
 ---
 
 # Todo Management
-
-## Purpose
-
-Coordinate Todo Item operations that are broader than one model-level change.
 
 ## Capabilities
 
 | Capability | Purpose | Inputs | Output | Failure Behavior |
 |---|---|---|---|---|
-| `complete-all` | Mark every active Todo Item complete | None | Number of `todo-item` models changed | Fails without partial completion if the operation cannot complete |
+| `complete-all` | Mark every active Todo Item complete | None | Number of `todo-item-model` models changed | Fails without partial completion if the operation cannot complete |
 
 ## Rules
 
 - Already completed Todo Items remain unchanged.
 - The result counts only Todo Items changed by this operation.
-
-## Boundaries
-
-This Spark does not define transport routes, persistence, or Todo Item fields and invariants.
 ```
 
-A UI Component uses `todo-management` when it needs `complete-all`. Contract and target implementations may realize that capability through an API operation, but the Service Spark does not prescribe an HTTP route, verb, DTO, or generated client method.
+A UI Component uses `todo-management-service` when it needs `complete-all`. Contract and target implementations may realize that capability through an API operation, but the Service Spark does not prescribe an HTTP route, verb, DTO, or generated client method.
 
 ## Under-Decomposition
 

@@ -22,7 +22,7 @@ Apply these rules:
 - Do not nest one Spark directory inside another Spark directory.
 - `composes` and `uses` relationships do not affect directory placement.
 - Changing composition or usage relationships does not move a Spark Document.
-- Changing a Spark's kind moves its complete directory to the matching kind category but does not change its identifier.
+- Changing a Spark's kind moves its complete directory to the matching kind category but does not by itself change its identifier.
 
 ---
 
@@ -57,6 +57,18 @@ Use lowercase kebab-case identifiers matching this pattern:
 
 The Spark directory and filename must remain aligned with the stable identifier required by the Spark Specification.
 
+Consider these suffixes when they improve readability:
+
+| Kind | Suggested suffix | Example ID |
+|---|---|---|
+| `domain-model` | `-model` | `todo-item-model` |
+| `service` | `-service` | `todo-management-service` |
+| `ui-component` | `-ui` | `todo-entry-ui` |
+
+Suffixes can make relationship lists and realization provenance readable without opening each referenced Spark. They are optional naming hints and do not replace the authoritative `kind` field. Do not infer kind, validity, applicability, or behavior from a suffix.
+
+Keep the human-readable `name` natural and omit suffix wording unless it is part of the concept's ordinary name. Project-defined kinds may suggest their own suffixes.
+
 ---
 
 # Supported Kinds
@@ -87,7 +99,14 @@ A Spark does not change kind merely because it has multiple consumers. Reuse is 
 
 Begin the body with a level-one heading matching the Spark's `name`.
 
-Write the remaining body according to the Spark Specification. Omit sections that add no useful design information.
+Write the remaining body according to the Spark Specification using the minimum sufficient intent for correct review and realization.
+
+- State each decision once in the Spark that owns it.
+- Reference composed or used Sparks instead of summarizing their behavior.
+- Do not repeat the frontmatter summary as a Purpose section unless additional purpose or scope must be clarified.
+- Include boundaries only when they resolve plausible ownership or scope ambiguity; do not enumerate every unsupported behavior.
+- Omit generic quality expectations, implementation-freedom disclaimers, empty sections, and other boilerplate already established by the specification or project guidance.
+- Preserve every requested outcome and material product decision despite the concise form.
 
 ---
 
@@ -170,7 +189,7 @@ Example:
 
 ```markdown
 ---
-id: todo-item
+id: todo-item-model
 name: Todo Item
 kind: domain-model
 summary: Represents one piece of work a person wants to track.
@@ -187,10 +206,6 @@ service-exposure:
 
 # Todo Item
 
-## Purpose
-
-Represent one piece of work from creation through completion.
-
 ## Data
 
 | Field | Meaning | Type | Required | Default | Constraints | Mutability |
@@ -203,10 +218,6 @@ Represent one piece of work from creation through completion.
 
 - The title remains non-empty after trimming.
 - Changing completion does not change identity.
-
-## Boundaries
-
-This Spark does not define transport schemas, persistence layout, or visual presentation.
 ```
 
 An existing `data-model` Spark may move to `domain-model` only when it represents the same domain concept and is updated to satisfy these semantics and conventions. Preserve its stable Spark ID while moving its directory to `sparks/domain-model/<id>/`.
@@ -243,35 +254,27 @@ Example:
 
 ```markdown
 ---
-id: todo-management
+id: todo-management-service
 name: Todo Management
 kind: service
 summary: Provides operations that coordinate changes across Todo Items.
 composes: []
 uses:
-  - todo-item
+  - todo-item-model
 ---
 
 # Todo Management
-
-## Purpose
-
-Coordinate Todo Item operations that are broader than one model-level change.
 
 ## Capabilities
 
 | Capability | Purpose | Inputs | Output | Failure Behavior |
 |---|---|---|---|---|
-| `complete-all` | Mark every active Todo Item complete | None | Number of `todo-item` models changed | Fails without partial completion if the operation cannot complete |
+| `complete-all` | Mark every active Todo Item complete | None | Number of `todo-item-model` models changed | Fails without partial completion if the operation cannot complete |
 
 ## Rules
 
 - Already completed Todo Items remain unchanged.
 - The result counts only Todo Items changed by this operation.
-
-## Boundaries
-
-This Spark does not define transport routes, persistence, or Todo Item fields and invariants.
 ```
 
 ---
@@ -296,8 +299,8 @@ This UI Component composition:
 
 ```text
 todo-app-ui
-├── todo-entry
-└── todo-list
+├── todo-entry-ui
+└── todo-list-ui
 ```
 
 is stored as:
@@ -307,10 +310,10 @@ sparks/
 └── ui-component/
     ├── todo-app-ui/
     │   └── todo-app-ui.spark.md
-    ├── todo-entry/
-    │   └── todo-entry.spark.md
-    └── todo-list/
-        └── todo-list.spark.md
+    ├── todo-entry-ui/
+    │   └── todo-entry-ui.spark.md
+    └── todo-list-ui/
+      └── todo-list-ui.spark.md
 ```
 
 The `sparks/ui-component/todo-app-ui/todo-app-ui.spark.md` document begins:
@@ -322,10 +325,10 @@ name: Todo App UI
 kind: ui-component
 summary: Coordinates entry and list components for a Todo application.
 composes:
-  - todo-entry
-  - todo-list
+  - todo-entry-ui
+  - todo-list-ui
 uses:
-  - todo-item
+  - todo-item-model
 ---
 
 # Todo App UI
@@ -334,12 +337,12 @@ The Todo App UI provides the root user interface and owns the ordered Todo Item 
 
 It composes:
 
-- `todo-entry`, which collects a new Todo Item title and reports add intent;
-- `todo-list`, which receives the ordered collection and reports completion intent.
+- `todo-entry-ui`, which collects a new Todo Item title and reports add intent;
+- `todo-list-ui`, which receives the ordered collection and reports completion intent.
 
 When the collection is empty, the list presents its empty state. Otherwise, it presents items in their established order. Focus moves logically between entry and list content, and collection changes are communicated without relying on color alone.
 
-The children own their internal presentation and interactions. `todo-item` owns Todo Item data and invariants. Exact layout and target-framework mechanisms remain implementation choices.
+The children own their internal presentation and interactions. `todo-item-model` owns Todo Item data and invariants.
 ```
 
 ---
@@ -360,4 +363,4 @@ Before presenting them for review, verify that:
 
 Present the proposed Spark changes and their requirement mapping for offline human review, then stop before generating or modifying engineering artifacts. This checkpoint gives a human the opportunity to inspect or edit the documents; it does not require approval status, review files, or other workflow metadata.
 
-Review must evaluate substance, not only document structure. Verify that relevant requested outcomes and constraints were preserved; applicable success, failure, state, validation, lifecycle, persistence, interaction, and platform behavior is clear; ownership and boundaries are coherent; and implementation can proceed without inventing product decisions. Capture every implementation-critical clarification in the reviewed Spark Documents rather than relying on conversation history.
+Review must evaluate substance, not document length or structure. Verify that relevant requested outcomes and constraints were preserved; material behavior, failure, state, validation, lifecycle, persistence, interaction, and platform intent is clear; ownership and boundaries are coherent; each decision has one authoritative owner; and implementation can proceed without inventing product decisions. Remove repetition and boilerplate before review while retaining every implementation-critical clarification.

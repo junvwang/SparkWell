@@ -14,7 +14,7 @@ This skill owns test scenarios, test source, test-only configuration, and behavi
 
 ## Preconditions
 
-Use reviewed Sparks as the durable, detailed concept design and coverage source for this workflow.
+Use reviewed Sparks as the durable concept design and coverage source for this workflow.
 
 If testing exposes missing or contradictory product intent, return to `design-sparks`. If it exposes a runtime implementation defect, report it for `implement-sparks`. Do not change Spark or runtime artifacts merely to make a test pass.
 

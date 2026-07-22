@@ -31,7 +31,7 @@ When working in this project, think in terms of **software concepts** represente
 
 Sparks and engineering artifacts serve different and complementary purposes:
 
-- Sparks provide detailed, clarified design for meaningful software concepts.
+- Sparks provide durable, clarified design for meaningful software concepts.
 - Engineering artifacts realize that design within the established project and target platform.
 
 A Spark is not a compacted or partial version of the user's request. It narrows conceptual scope, not detail. Do not discard requested outcomes or constraints when translating them into Sparks.
@@ -47,6 +47,8 @@ This review is an offline human checkpoint. It does not require approval status 
 
 Before the checkpoint, capture every implementation-critical requested outcome, clarification, accepted constraint, and decision rationale whose loss could reverse the design in the affected Spark Documents. Do not rely on the design conversation as the only source of information needed for correct implementation.
 
+Keep Spark Documents concise. State each decision once in the Spark that owns it, reference related Sparks instead of restating their behavior, and omit generic engineering expectations or implementation-freedom disclaimers already established by project guidance.
+
 Designing Sparks and producing engineering artifacts are **separate tasks**.
 
 Do not automatically continue from Spark design into engineering artifact generation.
@@ -59,7 +61,7 @@ A Spark Document may also be corrected or clarified without changing the softwar
 
 Whenever practical, resolve design questions at the Spark level before changing engineering artifacts.
 
-When reasoning about a software system, use reviewed Sparks to understand detailed concept design and engineering artifacts to preserve established architecture and integration context. Do not let either layer silently erase compatible information from the other.
+When reasoning about a software system, use reviewed Sparks to understand concept design and engineering artifacts to preserve established architecture and integration context. Do not let either layer silently erase compatible information from the other.
 
 If a Spark and its engineering artifacts appear inconsistent, do not silently assume either one is correct.
 

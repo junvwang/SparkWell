@@ -43,6 +43,16 @@ The goal is not to maximize the number of Sparks, nor to minimize them.
 
 The goal is to produce the smallest cohesive set of independently meaningful software concepts that best represents the intended design.
 
+### Minimum Sufficient Intent
+
+Write the shortest Spark body that preserves correct design decisions. A statement belongs when removing it would force a reviewer or implementer to guess observable behavior, ownership, an invariant, a material constraint, or a relationship.
+
+State each decision once in the Spark that owns it. Reference composed and used Sparks rather than restating their behavior. Omit content already established by frontmatter, standardized kind representations, project guidance, or ordinary engineering practice.
+
+Do not add a Purpose section that only repeats `summary`, exhaustive lists of behavior the concept does not support, generic accessibility or quality expectations, repeated implementation-freedom disclaimers, empty sections, or prose that merely expands a table row. Keep such content only when it captures material software intent or resolves a plausible ambiguity.
+
+Concision must not weaken or omit requested outcomes and implementation-critical product decisions. There is no target line count; optimize for information density and clear ownership.
+
 ## Procedure
 
 ### 1. Understand the Requirement
@@ -93,9 +103,13 @@ Relationships should reflect conceptual ownership, dependency, or interaction ra
 
 Create or update Spark Documents using the project's storage, naming, identifier, frontmatter, and body conventions.
 
+When it improves readability, consider `-model` for `domain-model`, `-service` for `service`, and `-ui` for `ui-component`. This is optional naming guidance. Keep the human-readable name natural and always use the `kind` field, not the suffix, to classify the Spark.
+
 Describe software intent rather than incidental implementation. Include enough behavior, responsibilities, constraints, boundaries, and interactions for humans to review the concept and for later artifact generation to be grounded in it.
 
 Where applicable, describe success, failure, empty, loading, transitional, validation, lifecycle, persistence, and concurrency behavior. Include only topics that matter to the concept; do not add boilerplate sections with no useful intent.
+
+After drafting, remove statements duplicated by frontmatter or another Spark, collapse repeated rules into their authoritative owner, and delete generic quality or implementation-choice prose already supplied by project guidance.
 
 Place enduring platform-specific observable behavior or constraints in the relevant Spark when they are part of product intent. Keep framework, language, library, packaging, and ordinary platform implementation choices in implementation profiles, project guidance, or native artifacts unless those choices are themselves essential software intent.
 
@@ -121,6 +135,9 @@ Before presenting the changes, verify that:
 - composition and usage relationships are consistent with conceptual ownership;
 - bodies contain enough applicable behavioral, state, failure, validation, lifecycle, and interaction detail for implementation to proceed without inventing product behavior;
 - bodies describe intent without unnecessary implementation detail;
+- each decision appears once in its authoritative Spark and related Sparks do not restate it;
+- summaries, tables, and prose do not duplicate one another without adding material meaning;
+- bodies contain no generic quality, implementation-freedom, empty-section, or exhaustive negative-list boilerplate;
 - every Domain Model has a valid `## Data` table, stable field identities, technology-independent types, applicable invariants and relationships, and valid `service-exposure` frontmatter when automatic standard service operations are intended;
 - every Service has a valid `## Capabilities` table, stable capability identities, concept-level inputs and outputs, applicable failure behavior, and consistent `uses` relationships;
 - every UI Component clearly communicates its purpose and boundary, applicable information and interaction flow, material states and ownership, child composition responsibilities, and consistent `uses` relationships;
@@ -143,7 +160,9 @@ Summarize:
 
 Then stop so a human has an offline opportunity to review the Spark changes before engineering artifacts are generated. Do not add approval status or other review metadata unless project conventions require it.
 
-Invite the human to edit the proposed Spark Documents directly. Human review should verify requirement coverage, behavioral completeness, success and failure behavior, states, validation rules, invariants, ownership, interactions, lifecycle, persistence, applicable platform intent, and freedom for ordinary engineering decisions. The review is not complete merely because the documents are well formatted.
+Invite the human to edit the proposed Spark Documents directly. Human review should verify that requested outcomes and implementation-critical decisions are present, each decision has a clear owner, and ordinary engineering choices remain free. The review is not complete merely because the documents are long or well formatted.
+
+Invite reviewers to remove repetition as well as fill gaps. A longer document is not more complete when its extra text repeats another owner or project-wide guidance.
 
 An implementation request in the original prompt does not bypass this review checkpoint when software intent changed.
 
@@ -167,6 +186,8 @@ A successful Spark design should:
 - Do not create Service Sparks for controllers, endpoints, framework service classes, generated clients, or automatic standard CRUD unless they independently satisfy the Service semantics.
 - Do not create unsupported Spark kinds unless project guidance defines their semantics, document representation, design rules, and target applicability.
 - Do not create a UI Component Spark for a native control, layout container, style fragment, or framework-only component.
+- Do not repeat another Spark's owned behavior for local context; reference that Spark instead.
+- Do not add sections or boundary lists solely to make a document look complete.
 - Do not generate engineering artifacts as part of this skill.
 - Do not invent missing Spark semantics, storage conventions, or workflow metadata.
 - Do not silently resolve unclear ownership or contradictions between Sparks and engineering artifacts.

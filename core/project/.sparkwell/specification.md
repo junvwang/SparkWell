@@ -92,6 +92,10 @@ Every Spark has an `id` that is unique within its Sparkwell project.
 
 The identifier remains stable for the lifetime of the represented concept. Changing a Spark's human-readable name does not change its identity.
 
+IDs may use a kind suffix to make references easier to read: `-model` for `domain-model`, `-service` for `service`, and `-ui` for `ui-component`. This is a naming suggestion only. The `kind` field is authoritative, and workflows must not infer kind, validity, applicability, or behavior from an ID suffix.
+
+Changing a Spark's kind does not by itself change its stable ID. An intentional ID rename is a separate identity migration that updates every relationship and realization-state reference.
+
 Relationships reference Sparks by their stable identifiers.
 
 ---
@@ -198,6 +202,10 @@ A Spark body should describe whatever information is necessary to explain:
 - its boundaries;
 - its interactions with other concepts;
 - any other design information required to understand the concept.
+
+The body should contain the minimum sufficient intent for correct review and realization. Include a decision when omitting it would require a reader or implementer to guess observable behavior, ownership, an invariant, a material constraint, or a relationship. Omit information that is already authoritative in another Spark, follows from the frontmatter or standardized kind representation, or belongs to ordinary engineering practice.
+
+State each decision once in the Spark that owns it. Other Sparks should reference that owner through relationships instead of restating its behavior. Concision must not remove requested outcomes or material product decisions.
 
 The body intentionally uses natural language rather than a rigid schema.
 

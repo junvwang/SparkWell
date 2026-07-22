@@ -9,6 +9,12 @@ that best represents the software design.
 
 Each Spark should be meaningful to understand, review, evolve, or reuse independently. Start from desired outcomes and enduring responsibilities, not anticipated source-code structure.
 
+## Concise Documents
+
+Use one owner and one statement for each design decision. Keep content only when removing it would make a reviewer or implementer guess observable behavior, ownership, an invariant, a material constraint, or a relationship.
+
+Use `composes` and `uses` to reference related concepts instead of summarizing them. Omit repeated summaries, generic engineering expectations, implementation-freedom disclaimers, exhaustive negative boundaries, and empty sections. Concision does not permit dropping requested outcomes or material product decisions.
+
 ## Reuse Before Creation
 
 Before proposing a new Spark, ask:
@@ -155,6 +161,10 @@ Do not place unrelated domain, service, and UI responsibilities into one Spark m
 ### Relationship-Only Spark
 
 Do not create an otherwise empty Spark solely to connect other Sparks. A composing concept needs its own purpose and intent.
+
+### Distributed Repetition
+
+Do not repeat one decision across a parent, child, Domain Model, and Service for local context. Keep the full rule in its authoritative Spark and state only the distinct coordination or presentation behavior owned by each consumer.
 
 ## Candidate Decision Notes
 

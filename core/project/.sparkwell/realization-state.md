@@ -17,19 +17,19 @@ implementation-id: web-react
 artifacts:
   - path: src/web-react/TodoList.tsx
     derived-from:
-      - todo-list
+      - todo-list-ui
 
   - path: src/web-react/TodoList.test.tsx
     derived-from:
-      - todo-list
-      - todo-item
+      - todo-list-ui
+      - todo-item-model
 ```
 
 Each artifact entry has a unique project-relative `path` and a non-empty, duplicate-free list of stable Spark IDs in `derived-from`. Paths use `/`.
 
 ## Semantics
 
-- Reviewed Sparks remain authoritative for detailed concept design; native files remain authoritative for artifact content and existence. Surface conflicts rather than silently choosing one.
+- Reviewed Sparks remain authoritative for concept design; native files remain authoritative for artifact content and existence. Surface conflicts rather than silently choosing one.
 - State supports discovery and impact analysis. It does not prove correctness, validation, ownership, or permission to overwrite.
 - Artifacts and Sparks have a many-to-many relationship.
 - Map files created or changed to implement Spark intent, not files merely inspected or validated.

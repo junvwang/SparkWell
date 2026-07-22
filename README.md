@@ -25,7 +25,7 @@ SparkWell captures implementation-critical intent in persistent project artifact
 
 AI can generate implementation faster than humans can review it line by line. As systems grow, implementation alone becomes an increasingly expensive review surface.
 
-SparkWell lets people review detailed software intent and concept boundaries before implementation is generated.
+SparkWell lets people review software intent and concept boundaries before implementation is generated.
 
 ### Intent Loss
 
@@ -77,24 +77,18 @@ SparkWell introduces a **Spark** as an additional software engineering artifact 
               └── Platform-specific Implementations
 ```
 
-A Spark is not a compressed request or a file-generation template. It narrows conceptual scope, not detail. Through discussion and clarification, a Spark can contain more precise design information than the request that led to it. Depending on the concept, it can describe:
-
-- purpose and responsibilities;
-- observable behavior and states;
-- validation, invariants, and failure behavior;
-- boundaries and ownership;
-- interactions with other Sparks;
-- lifecycle, persistence, and concurrency expectations;
-- enduring platform-specific intent.
+A Spark is neither a compressed request nor an exhaustive design dossier. It captures the minimum sufficient intent for one concept: the decisions whose absence would force a reviewer or implementer to guess material behavior, ownership, invariants, constraints, or relationships. Each decision belongs in one authoritative Spark; related Sparks reference that owner instead of repeating it.
 
 Sparks can exist at different levels of abstraction. Bundled SparkWell workflows currently support three standardized kinds: Domain Models, Services, and modular UI Components. Projects may define another kind only by supplying its semantics, document rules, design rules, and target applicability.
+
+Spark IDs may use `-model`, `-service`, or `-ui` as readability hints. These suffixes are optional; the `kind` field remains authoritative and workflows do not depend on suffixes. Human-readable names remain natural.
 
 `domain-model` represents independently meaningful domain concepts with durable field semantics, invariants, lifecycle, and relationships. `service` represents independently meaningful capabilities, concept-level inputs and outputs, and failure behavior across a boundary. `ui-component` represents a modular interface boundary with user-facing behavior, state, interactions, accessibility intent, and optional child composition. A root UI Component may realize the application shell, window, page, route, or another platform entry surface.
 
 Each Spark is stored as a **Spark Document** with two complementary parts:
 
 - concise frontmatter for stable identity and relationships;
-- a natural-language body for detailed behavior, responsibilities, constraints, interactions, and boundaries.
+- a concise natural-language body for the concept's owned intent.
 
 The Spark Document is the durable design contract for that concept. It evolves when the software intent changes, not every time code is refactored, dependencies are upgraded, or implementation structure moves.
 
@@ -106,7 +100,7 @@ This separation allows implementations to evolve while the concept's identity an
 
 SparkWell does not turn a request into code in one uninterrupted step. It introduces an explicit review boundary between software design and artifact generation.
 
-First, humans and AI use `design-sparks` to clarify the requested change and express it as detailed Spark Documents. The workflow then stops. Reviewers can edit the proposed Sparks to close omissions, clarify states and failure behavior, resolve ownership, and ensure later work can proceed without inventing product decisions.
+First, humans and AI use `design-sparks` to clarify the requested change and express it as concise, reviewable Spark Documents. The workflow then stops. Reviewers can close omissions, remove repetition, resolve ownership, and ensure later work can proceed without inventing product decisions.
 
 After review, specialized workflows realize the same Sparks independently:
 

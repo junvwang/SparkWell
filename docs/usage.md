@@ -113,9 +113,11 @@ Design Sparks for a todo list where people can add todos and mark them complete.
 
 The agent uses `design-sparks` to extract requested outcomes, identify meaningful concepts, create or evolve Spark Documents, and present them for human review.
 
-Review the proposal for behavioral completeness, states, failure behavior, validation, ownership, interactions, lifecycle, persistence, and applicable platform intent. Edit the Spark Documents directly when needed.
+Review the proposal for complete requested outcomes, material product decisions, clear ownership, and freedom for ordinary engineering choices. Edit the Spark Documents directly when needed.
 
 The workflow stops at this checkpoint. Implementation-critical information must be durable in the reviewed Sparks rather than existing only in chat.
+
+Keep each body to the minimum sufficient intent. Include a statement when deleting it would force a reviewer or implementer to guess material behavior, ownership, an invariant, a constraint, or a relationship. State each decision once in its owning Spark and reference related Sparks instead of repeating their behavior. Omit repeated summaries, generic quality expectations, implementation-freedom disclaimers, exhaustive negative boundaries, and empty sections.
 
 Bundled SparkWell workflows support exactly these standardized kinds:
 
@@ -124,6 +126,16 @@ Bundled SparkWell workflows support exactly these standardized kinds:
 - `ui-component`
 
 A project-defined kind requires guidance for its concept semantics, document rules, design rules, and target applicability. When that guidance is incomplete, the agent stops for clarification.
+
+Spark IDs may use these suggested suffixes when they improve readability:
+
+| Kind | Suggested suffix | Example |
+|---|---|---|
+| `domain-model` | `-model` | `todo-item-model` |
+| `service` | `-service` | `todo-management-service` |
+| `ui-component` | `-ui` | `todo-entry-ui` |
+
+Suffixes can make `composes`, `uses`, and realization provenance readable without opening every referenced document. They are optional naming hints: the `kind` field is authoritative, workflows do not infer behavior or applicability from suffixes, and human-readable names omit mechanical suffix wording.
 
 #### UI Component Sparks
 
@@ -137,9 +149,9 @@ For example:
 
 ```text
 todo-app-ui
-├── todo-entry
-└── todo-list
-  └── todo-item-row
+├── todo-entry-ui
+└── todo-list-ui
+  └── todo-item-ui
 ```
 
 Web may realize these as framework components; Windows may use a root window plus user controls, views, or templates. Android and iOS use their established native component boundaries. The exact files, classes, props, events, commands, and bindings remain engineering choices. Every composed child must nevertheless retain an identifiable runtime component boundary, and one Spark does not imply exactly one source file.
@@ -189,7 +201,7 @@ Each Service Spark uses a lightweight capabilities table:
 
 | Capability | Purpose | Inputs | Output | Failure Behavior |
 |---|---|---|---|---|
-| `complete-all` | Mark every active Todo Item complete | None | Number of `todo-item` models changed | Fails without partial completion if the operation cannot complete |
+| `complete-all` | Mark every active Todo Item complete | None | Number of `todo-item-model` models changed | Fails without partial completion if the operation cannot complete |
 ```
 
 Capability IDs are stable lowercase kebab-case identities. Reference independently owned models and concepts through `uses`, keep inputs and outputs at the concept level, and describe only observable service failure behavior. Transport routes, HTTP verbs, status codes, DTOs, and framework types remain engineering-artifact choices unless they are enduring compatibility requirements.
@@ -249,7 +261,7 @@ The Contract target writes to `contracts.root`, and runtime targets read contrac
 After reviewing the relevant Sparks, invoke `implement-sparks` for the Contract target:
 
 ```text
-Implement todo-item and todo-management for the contract target.
+Implement todo-item-model and todo-management-service for the contract target.
 ```
 
 The initial bundled Contract target generates OpenAPI 3.1 Service Contracts:
@@ -275,13 +287,13 @@ Run the Contract target before profiles that consume or implement its contracts.
 After review, ask the agent to implement selected Sparks for a profile:
 
 ```text
-Implement todo-list for the web-react profile.
+Implement todo-app-ui for the web-react profile.
 ```
 
 To implement the server side of generated Service Contracts:
 
 ```text
-Implement todo-item and todo-management for the todo-api profile.
+Implement todo-item-model and todo-management-service for the todo-api profile.
 ```
 
 The API Service target implements matching OpenAPI operations, maps their boundary schemas to internal domain representations, and owns its configured persistence access and provider-specific artifacts. It does not generate a competing interface or modify public contract files.
@@ -295,7 +307,7 @@ It does not create or modify tests, test-only dependencies, test projects, or te
 Invoke the separate testing workflow when test authoring or broader behavioral verification is desired:
 
 ```text
-Create tests for todo-list using the web-react profile.
+Create tests for todo-app-ui using the web-react profile.
 ```
 
 `test-sparks` derives applicable scenarios from reviewed Sparks, reuses existing test conventions, updates test provenance, and classifies failures as runtime, test, intent, or environment defects.
