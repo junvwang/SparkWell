@@ -29,4 +29,4 @@ Use this optional reference when the effective target is `contract`. Reviewed Sp
 - Run the narrowest contract checks first, then the smallest relevant contract regression scope.
 - Adding a validator, compatibility tool, generated client, or test harness requires the normal test-infrastructure approval.
 - When no validator is available, perform the strongest structural checks possible and report the remaining validation gap.
-- Classify invalid generated contracts as runtime artifact defects requiring a later `/implement-sparks` invocation, ambiguous boundary intent as an intent defect requiring `/design-sparks`, and unavailable tooling as an environment defect. Do not invoke another workflow automatically.
+- Classify invalid generated contracts as runtime artifact defects requiring a later `/spark-impl` invocation, ambiguous boundary intent as an intent defect requiring `/spark-design`, and unavailable tooling as an environment defect. Do not invoke another workflow automatically.

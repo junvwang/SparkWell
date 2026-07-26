@@ -100,7 +100,7 @@ This separation allows implementations to evolve while the concept's identity an
 
 SparkWell is opt-in. Ordinary questions, coding, debugging, refactoring, and testing use the coding agent's normal workflow and do not create or update Sparks.
 
-Invoke `/design-sparks` to clarify a requested change. It first presents a concise Spark Proposal in chat, listing the Sparks to create and their summaries plus existing Sparks to evolve and why. It does not modify files before confirmation.
+Invoke `/spark-design` to clarify a requested change. It first presents a concise Spark Proposal in chat, listing the Sparks to create and their summaries plus existing Sparks to evolve and why. It does not modify files before confirmation.
 
 Reply `Revise: <comments>` to receive a complete replacement proposal, `Finalize` to generate the proposed Spark Documents, or `Cancel` to stop without changes. Finalized documents then receive a second human review before any implementation workflow begins.
 
@@ -108,12 +108,15 @@ After review, invoke later workflows independently:
 
 | Workflow | Responsibility | Does not own |
 |----------|----------------|--------------|
-| `/implement-sparks` | Creates or updates target engineering artifacts, including runtime and Service Contract realizations | Spark design or test authoring |
-| `/test-sparks` | Derives behavioral scenarios, creates or updates test artifacts, and reports verified and unverified intent | Spark design or production runtime changes |
+| `/spark-config` | Creates or revises one project implementation profile and its architecture guidance | Sparks, product code, tests, or dependencies |
+| `/spark-impl` | Creates or updates target engineering artifacts, including runtime and Service Contract realizations | Spark design or test authoring |
+| `/spark-test` | Derives behavioral scenarios, creates or updates test artifacts, and reports verified and unverified intent | Spark design or production runtime changes |
 
-Each slash command activates only that workflow for the current request. The direct Proposal controls are the only limited continuation of `/design-sparks`; any unrelated message ends that continuation. Workflows never activate automatically or chain into one another. A team can implement a Spark for multiple targets, add tests at a different time, or evolve either artifact set without forcing the Spark Documents to mirror the code or test structure.
+Each slash command activates only that workflow for the current request. Direct controls for the latest Spark or Implementation Configuration Proposal are the only limited continuations; any unrelated message ends that continuation. Workflows never activate automatically or chain into one another.
 
-When implementation or testing reveals missing or contradictory intent, the workflow stops and identifies `/design-sparks` as the explicit next command. It does not invoke that workflow, invent product behavior in code, or weaken a test.
+SparkWell provides the shared realization process, not a universal project architecture. Before generating a new runtime implementation, use `/spark-config` to confirm its profile and project guidance. Existing implementations preserve their established architecture. `/spark-impl` follows reviewed Sparks, profile constraints, project guidance, and native architecture; it does not choose MVC, MVVM, state management, persistence, synchronization, or module structure on the project's behalf.
+
+When implementation or testing reveals missing or contradictory intent, the workflow stops and identifies `/spark-design` as the explicit next command. It does not invoke that workflow, invent product behavior in code, or weaken a test.
 
 ## Quick Start
 
@@ -131,10 +134,18 @@ sparkwell init
 Then explicitly invoke a workflow, for example:
 
 ```text
-/design-sparks Design a todo list where people can add todos and mark them complete.
+/spark-design Design a todo list where people can add todos and mark them complete.
 ```
 
-Review the Spark Proposal, reply `Finalize`, then review the generated Spark Documents before separately invoking `/implement-sparks` or `/test-sparks` as needed.
+Review the Spark Proposal, reply `Finalize`, then review the generated Spark Documents before separately invoking `/spark-impl` or `/spark-test` as needed.
+
+Before the first new runtime realization, configure its architecture separately:
+
+```text
+/spark-config Configure a React Web implementation in src/web.
+```
+
+Review and finalize the configuration proposal before invoking `/spark-impl`.
 
 GitHub Copilot is the default adapter. SparkWell also supports Claude Code, `AGENTS.md`-compatible agents, multi-agent projects, and an agent-neutral initialization mode.
 
@@ -145,7 +156,7 @@ See the **[detailed usage guide](docs/usage.md)** for installation, adapters, co
 | Path | Purpose |
 |------|---------|
 | [`core/`](core/) | Canonical SparkWell instructions and project contracts |
-| [`skills/`](skills/) | Agent-neutral design, implementation, testing, and visualization workflows |
+| [`skills/`](skills/) | Agent-neutral design, configuration, implementation, testing, and visualization workflows |
 | [`adapters/`](adapters/) | Declarative mappings to coding-agent instruction and skill locations |
 | [`scripts/`](scripts/) | Dependency-free CLI and initialization engine |
 | [`docs/usage.md`](docs/usage.md) | Detailed installation and usage reference |
@@ -153,7 +164,7 @@ See the **[detailed usage guide](docs/usage.md)** for installation, adapters, co
 
 ## Current Status
 
-SparkWell is in early development. The core Spark specification, standardized Domain Model, Service, and UI Component kinds, OpenAPI Service Contract and API Service target guidance, design and implementation workflows, separate testing workflow, realization provenance, and multi-agent adapters are available today.
+SparkWell is in early development. The core Spark specification, standardized Domain Model, Service, and UI Component kinds, project implementation guidance, OpenAPI Service Contract and API Service target guidance, explicit design/configuration/implementation/testing workflows, realization provenance, and multi-agent adapters are available today.
 
 The methodology and tooling will continue to evolve through practical use and feedback while keeping existing project content safe and version controlled.
 

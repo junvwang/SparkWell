@@ -34,7 +34,7 @@ Use this optional reference when the effective target is `web`. The selected pro
 - Discover and run applicable install, build, type-check, lint, and format commands from package scripts, workspace configuration, task definitions, and CI configuration.
 - Run relevant existing tests when they provide a cheap regression signal, but do not create or modify tests or test infrastructure in this workflow.
 - Run the final application in a browser when the environment supports it and exercise the smallest material happy path needed to smoke-check the changed runtime behavior.
-- Leave comprehensive browser automation, screenshots, cross-viewport matrices, keyboard/accessibility test coverage, text-fit checks, and overlap campaigns to `test-sparks`.
+- Leave comprehensive browser automation, screenshots, cross-viewport matrices, keyboard/accessibility test coverage, text-fit checks, and overlap campaigns to `spark-test`.
 - After implementing a server-based web application, start its development server and report the local URL. If the experience works as a standalone file, report the file path instead.
 
 ## Boundaries

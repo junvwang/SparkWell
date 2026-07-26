@@ -551,12 +551,13 @@ Recommended targets after this change:
 
 ### 8.2 Framework and Tool Configuration
 
-Technology choices remain in implementation profiles or native project files:
+Structured technology and architecture choices remain in implementation profiles; nuanced architecture belongs in profile-referenced project guidance; native files own actual dependencies and build state:
 
 ```yaml
 constraints:
   runtime: dotnet
   framework: aspnet-core
+  architecture: clean-architecture
   persistence:
     provider: sqlite
     access: orm
@@ -577,14 +578,31 @@ constraints:
 
 Persistence constraints may select no persistence, a local file, an embedded database such as SQLite, or a directly accessed database service. Profiles do not contain connection secrets or duplicate dependencies, commands, formatter rules, or linter settings already owned by native project files.
 
-### 8.3 Scope Does Not Belong in Profiles
+### 8.3 Project Implementation Guidance
+
+Profiles may reference project-relative guidance:
+
+```yaml
+guidance:
+  - .sparkwell/guidance/todo-api.md
+```
+
+Guidance defines project-owned architecture and generation rules such as module boundaries, state ownership, model mappings, persistence access, local and remote data flow, repository and dependency-injection patterns, error handling, artifact placement, and workflow-maintained boundaries.
+
+Every guidance file must be read before implementation planning. Missing or conflicting guidance, disagreement with profile constraints, or conflict with established native architecture makes the task **Blocked**. List order does not resolve conflicts.
+
+Sparks retain product semantics such as offline behavior, synchronization outcomes, conflict presentation, and user-visible failures. Profiles and guidance own provider, adapter, ORM, repository, and source-layout choices.
+
+Use `/spark-config` to propose and finalize profiles and guidance. It does not generate product artifacts. New runtime implementations require a named profile and resolved consequential architecture; established implementations preserve their existing architecture.
+
+### 8.4 Scope Does Not Belong in Profiles
 
 An implementation profile answers "how," not "which product concepts." Do not add `realizes.roots`, exclusions, or other Spark lists.
 
 The implementation request chooses scope:
 
 ```text
-/implement-sparks Implement todo-item-model and todo-management-service for the contract target.
+/spark-impl Implement todo-item-model and todo-management-service for the contract target.
 ```
 
 Existing scope rules remain:
@@ -598,7 +616,7 @@ Existing scope rules remain:
 
 Ask for root Spark IDs when scope is ambiguous. Never persist a temporary scope choice in the profile.
 
-### 8.4 Shared Contract Configuration
+### 8.5 Shared Contract Configuration
 
 ```yaml
 contracts:
@@ -610,7 +628,7 @@ The root-level `contracts` configuration defines the service-contract format and
 
 The Contract target uses this configuration directly and does not require an implementation profile. It generates standard contract files for the requested Spark scope and records file-level artifact provenance in `.sparkwell/state/realizations/contract.yaml`.
 
-### 8.5 Contract Discovery
+### 8.6 Contract Discovery
 
 Runtime profiles contain only their own target-specific settings. They do not repeat the shared contract root:
 
@@ -620,10 +638,21 @@ implementations:
     todo-web:
       target: web
       source-root: apps/web
+      constraints:
+        framework: react
+        architecture: feature-modules
+      guidance:
+        - .sparkwell/guidance/todo-web.md
 
     todo-api:
       target: api-service
       source-root: services/todo-api
+      constraints:
+        runtime: dotnet
+        framework: aspnet-core
+        architecture: clean-architecture
+      guidance:
+        - .sparkwell/guidance/todo-api.md
 ```
 
 Rules:
@@ -669,11 +698,11 @@ After contracts are generated, API and UI implementations can be generated indep
 
 Current workflow:
 
-1. The user invokes `/implement-sparks` for the Contract target.
+1. The user invokes `/spark-impl` for the Contract target.
 2. The Contract target creates or updates standard contract files.
-3. The user separately invokes `/implement-sparks` for an API or UI profile.
+3. The user separately invokes `/spark-impl` for an API or UI profile.
 4. Those profiles read the existing standard contract files.
-5. `implement-sparks` does not run or modify other targets or profiles automatically.
+5. `spark-impl` does not run or modify other targets or profiles automatically.
 
 SparkWell does not persist an "already generated" status or preflight global execution order. The project-level `contracts.root` only locates contracts. Missing inputs are reported for the current task.
 
@@ -747,7 +776,7 @@ Compatibility responsibilities remain separate:
 
 ### 12.3 Design Skill
 
-#### `skills/design-sparks/SKILL.md`
+#### `skills/spark-design/SKILL.md`
 
 - Add `domain-model` design guidance.
 - Require field tables for fields, types, defaults, constraints, and mutability.
@@ -761,14 +790,14 @@ Compatibility responsibilities remain separate:
 - Require operation ownership to be clear in UI behavior.
 - Prevent DTOs, ORM entities, API schemas, and DB rows from becoming Sparks by default.
 
-#### `skills/design-sparks/references/granularity.md`
+#### `skills/spark-design/references/granularity.md`
 
 - Add a Domain Model separate-concept test.
 - Add aggregate and bounded-context parent guidance.
 - Prohibit empty parent Sparks created only for diagrams.
 - Add counterexamples for fields, simple value objects, DTOs, and ORM entities.
 
-#### `skills/design-sparks/references/examples.md`
+#### `skills/spark-design/references/examples.md`
 
 Add Todo examples for:
 
@@ -781,11 +810,29 @@ Add Todo examples for:
 - UI using both default and explicit services;
 - relationships among several Domain Models.
 
-### 12.4 Implementation Skill
+### 12.4 Configuration Skill
 
-#### `skills/implement-sparks/SKILL.md`
+Add `skills/spark-config/SKILL.md` as an explicit user-invoked workflow.
+
+It should:
+
+- inspect profiles, guidance, and established native architecture;
+- classify the target as a new or established implementation;
+- present an Implementation Configuration Proposal before writing files;
+- support `Revise:`, `Finalize`, and `Cancel` without persisting proposal state;
+- update only the finalized profile and guidance;
+- preserve unrelated contract settings, profiles, and native files;
+- stop before product generation and require a separate `/spark-impl` invocation.
+
+### 12.5 Implementation Skill
+
+#### `skills/spark-impl/SKILL.md`
 
 - Load project-level `contracts.root`, standard contract files, and matching realization-state entries.
+- Load the selected profile and every referenced project guidance document before planning.
+- Preserve established architecture and mark profile/guidance/native conflicts **Blocked**.
+- Require a named profile and resolved consequential architecture for new runtime implementations.
+- Never choose or migrate architecture, state management, persistence, synchronization, or module layout from generic target defaults.
 - Build and present the transient Effective Service Definition without persisting it.
 - Keep profile-less Contract target execution user-driven.
 - Report missing contract inputs without running the Contract target automatically.
@@ -796,18 +843,18 @@ Add Todo examples for:
 Add target references:
 
 ```text
-skills/implement-sparks/references/contract.md
-skills/implement-sparks/references/api-service.md
-skills/implement-sparks/references/openapi-client.md
+skills/spark-impl/references/contract.md
+skills/spark-impl/references/api-service.md
+skills/spark-impl/references/openapi-client.md
 ```
 
 Update existing target references:
 
 ```text
-skills/implement-sparks/references/web.md
-skills/implement-sparks/references/windows.md
-skills/implement-sparks/references/android.md
-skills/implement-sparks/references/ios.md
+skills/spark-impl/references/web.md
+skills/spark-impl/references/windows.md
+skills/spark-impl/references/android.md
+skills/spark-impl/references/ios.md
 ```
 
 The shared workflow and references should:
@@ -818,13 +865,13 @@ The shared workflow and references should:
 - never independently infer a competing wire format;
 - report compatibility and tooling blockers.
 
-### 12.5 Test Skill
+### 12.6 Test Skill
 
 Evaluate target references for:
 
 ```text
-skills/test-sparks/references/contract.md
-skills/test-sparks/references/api-service.md
+skills/spark-test/references/contract.md
+skills/spark-test/references/api-service.md
 ```
 
 Cover:
@@ -835,7 +882,7 @@ Cover:
 - breaking-change detection;
 - the distinction between contract validation and complete behavioral coverage.
 
-### 12.6 Documentation
+### 12.7 Documentation
 
 #### `README.md`
 
@@ -851,7 +898,7 @@ Cover:
 - Add project-level Contract configuration and runtime profile examples.
 - Document folder-based `contracts.root` discovery.
 
-### 12.7 Tests
+### 12.8 Tests
 
 #### `test/init-project.test.js`
 

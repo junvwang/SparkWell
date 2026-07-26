@@ -34,7 +34,7 @@ Use this optional reference when the effective target is `windows`. The selected
 - Discover and run applicable restore, build, format, and lint commands from solution and project files, build scripts, task definitions, and CI configuration.
 - Run relevant existing tests when they provide a cheap regression signal, but do not create or modify tests or test infrastructure in this workflow.
 - Launch the application and exercise the smallest material happy path needed to smoke-check the changed runtime behavior when the environment permits it.
-- Leave comprehensive UI Automation, resizing, scaling, keyboard, accessibility, packaging, and installer test matrices to `test-sparks` unless one bounded check is needed to diagnose a runtime defect.
+- Leave comprehensive UI Automation, resizing, scaling, keyboard, accessibility, packaging, and installer test matrices to `spark-test` unless one bounded check is needed to diagnose a runtime defect.
 - Validate packaging or installer output only when the profile or request includes it.
 - Never invoke an interactive elevation prompt. If a required validation needs elevation, report the blocked check for the user to run.
 

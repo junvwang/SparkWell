@@ -511,10 +511,10 @@ Spark 表达的是：
 
 ## 6.3 显式设计请求映射到受影响概念
 
-普通需求默认由 coding agent 按常规方式处理，不自动进入 SparkWell。用户显式调用 `/design-sparks` 后，设计流程是：
+普通需求默认由 coding agent 按常规方式处理，不自动进入 SparkWell。用户显式调用 `/spark-design` 后，设计流程是：
 
 ```text
-/design-sparks + requirement
+/spark-design + requirement
     ↓
 Understand desired outcome
     ↓
@@ -553,14 +553,15 @@ Review Spark Documents
 
 SparkWell 默认不介入普通问答、编码、调试、重构和测试。每个工作流都由用户单独显式调用：
 
-- `/design-sparks`：先在 chat 中提出 Spark Proposal，经确认后生成或演进 Spark Documents，并停在文档评审点；
-- `/implement-sparks`：从已评审 Sparks 生成一个目标的工程产物；
-- `/test-sparks`：从已评审 Sparks 创建、更新或执行测试。
+- `/spark-design`：先在 chat 中提出 Spark Proposal，经确认后生成或演进 Spark Documents，并停在文档评审点；
+- `/spark-config`：提出并确认 Implementation Configuration Proposal，只更新 Profile 与项目架构 Guidance；
+- `/spark-impl`：从已评审 Sparks 生成一个目标的工程产物；
+- `/spark-test`：从已评审 Sparks 创建、更新或执行测试。
 
-`/design-sparks` 的工作流是：
+`/spark-design` 的工作流是：
 
 ```text
-/design-sparks + Requirement
+/spark-design + Requirement
     ↓
 Propose Spark map in chat
     ↓
@@ -573,7 +574,7 @@ Generate Spark Documents
 Review Spark Documents
 ```
 
-Proposal 阶段不修改项目文件。`Finalize` 后才生成 Spark Documents；文档评审完成后，用户仍需另行调用 `/implement-sparks`。
+Proposal 阶段不修改项目文件。`Finalize` 后才生成 Spark Documents；文档评审完成后，用户仍需另行调用 `/spark-impl`。
 
 这里有两个 **Human Stop Point**：先确认概念集合和边界，再评审生成后的完整 Spark Documents。
 
@@ -598,7 +599,21 @@ Proposal 阶段不修改项目文件。`Finalize` 后才生成 Spark Documents�
 
 这两个阶段应明确分开。
 
-## 7.3 Offline Review 是核心能力
+## 7.3 Project Architecture 应由项目定义
+
+SparkWell Core 提供通用 realization 流程，但不替项目选择 MVC、MVVM、Clean Architecture、状态管理、repository、ORM、local/remote data flow 或目录结构。
+
+项目实现配置分为：
+
+- `.sparkwell/config.yaml` 中的 Profile `constraints` 和 `preferences`；
+- Profile 引用的 `.sparkwell/guidance/*.md` 项目架构指导；
+- native manifests、build files 和既有代码所表达的工程事实。
+
+新 runtime implementation 在生成代码前应通过 `/spark-config` 提出并确认 Implementation Configuration Proposal。已有系统应优先固化并保留现有架构，而不是借机重构。
+
+Sparks 继续拥有产品行为、用户可见状态、同步和冲突语义；Profile 与 Guidance 拥有 provider、adapter、repository、ORM、DI 和代码组织方式。
+
+## 7.4 Offline Review 是核心能力
 
 “Offline”强调 Spark 应成为可独立查看、比较和讨论的项目资产，而不是只存在于当前聊天上下文。
 
@@ -611,7 +626,7 @@ Review 可以包括：
 - 假设和开放问题；
 - 受影响 artifact 的预测。
 
-## 7.4 Review 不代表永远不看代码
+## 7.5 Review 不代表永远不看代码
 
 SparkWell 的目标不是取消代码审查，而是改变审查层次：
 
@@ -929,9 +944,9 @@ Skill 是可执行工作流程，不应重新定义 Spark 理论。
 
 当前 Todo Demo 已具备：
 
-- 通过 `/design-sparks` 分析需求并提出 Spark Proposal；
+- 通过 `/spark-design` 分析需求并提出 Spark Proposal；
 - 在 Proposal 确认后生成 Sparks，并让人评审完整文档；
-- 文档评审后通过 `/implement-sparks` 从 Sparks 生成代码；
+- 文档评审后通过 `/spark-impl` 从 Sparks 生成代码；
 - 从同一设计生成 Web；
 - 从同一设计生成 Windows。
 
@@ -1173,7 +1188,7 @@ Agent 可以在界面中：
 - 指出某个平台实现遗漏了约束；
 - 提出多个设计方案；
 - 展示每个方案的影响；
-- 在 Spark Documents 评审完成并收到显式 `/implement-sparks` 调用后执行 artifact generation；
+- 在 Spark Documents 评审完成并收到显式 `/spark-impl` 调用后执行 artifact generation；
 - 记录决策原因。
 
 ## 20.6 最终体验目标

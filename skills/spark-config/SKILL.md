@@ -1,0 +1,136 @@
+---
+name: spark-config
+description: 'User-invoked SparkWell workflow that proposes and finalizes project implementation profiles and architecture guidance without generating product code.'
+argument-hint: 'Describe the target/profile to configure, or use Revise: ..., Finalize, or Cancel for a pending proposal'
+user-invocable: true
+disable-model-invocation: true
+---
+
+# Spark Config
+
+## Purpose
+
+Create or revise one project-owned implementation profile and its architecture guidance so `/spark-impl` can generate code without choosing consequential project design.
+
+This workflow owns `.sparkwell/config.yaml` profile entries and profile-referenced guidance documents. It does not design Sparks, generate product code or tests, install dependencies, scaffold projects, or update realization state.
+
+## Sources of Authority
+
+Always inspect:
+
+1. `.sparkwell/config.yaml`.
+2. `.sparkwell/implementation-profiles.md`.
+3. Existing guidance referenced by the affected profile.
+4. Native manifests, build files, source layout, and representative code for the target.
+5. Relevant reviewed Sparks only when needed to distinguish product behavior from implementation architecture.
+
+Preserve unrelated profiles, contract settings, guidance, and project files.
+
+## Classify the Implementation
+
+Classify the requested profile as:
+
+- **Established implementation**: substantive native artifacts reveal a coherent architecture.
+- **New implementation**: the source root is missing, contains only a generic scaffold, or lacks enough architecture to extend safely.
+
+For an established implementation, summarize and preserve the detected architecture. Do not propose a framework, architecture, persistence, state-management, or module migration unless the user explicitly requests that migration.
+
+For a new implementation, identify consequential choices relevant to the target, including framework or project type, architecture and module boundaries, state ownership, persistence boundary, local and remote data flow, source root, and artifact ownership. Do not require irrelevant choices. Ask focused questions when the answer would materially change the architecture.
+
+Separate product intent from implementation decisions. User-visible offline behavior, synchronization semantics, conflict behavior, and failure outcomes belong in Sparks. Providers, repositories, ORMs, adapters, mappings, and module layout belong in the profile or guidance.
+
+## Choose the Configuration Layer
+
+Use:
+
+- `constraints` for structured choices `/spark-impl` must not override;
+- `preferences` for structured defaults that compatible explicit requests may override;
+- `guidance` for nuanced architecture and code-generation rules;
+- native project files for dependencies, versions, commands, and actual build configuration.
+
+Recommend `.sparkwell/guidance/<profile-id>.md` for a profile's primary guidance. Use more than one guidance file only when they have distinct scopes and equal authority. Never encode secrets.
+
+Guidance may describe architecture and module boundaries, state and data flow, model mappings, persistence responsibilities, repository and dependency-injection patterns, error and concurrency handling, UI projection, artifact placement, and workflow-maintained versus human-maintained files.
+
+## Prepare the Configuration Proposal
+
+Before modifying any file, present a concise proposal in chat.
+
+Use this shape, omitting empty sections:
+
+```markdown
+**Implementation Configuration Proposal**
+
+Profile: `web-react`
+Target: `web`
+Source root: `src/web`
+Classification: New implementation
+
+Constraints:
+- Framework: React
+- Architecture: feature modules
+- Persistence: IndexedDB
+
+Preferences:
+- State management: Zustand
+
+Guidance:
+- `.sparkwell/guidance/web-react.md` — Defines module boundaries, state ownership, persistence adapters, and artifact placement.
+
+Open questions:
+- Should shared state be limited to cross-feature data?
+```
+
+For an existing profile, list only changed fields and guidance plus the reason for each change. Surface removed profiles, renamed profiles, source-root changes, framework changes, and architecture migrations separately with their impact.
+
+End by asking the user to reply with `Revise: <comments>`, `Finalize`, or `Cancel`.
+
+During the proposal phase, do not modify `.sparkwell/config.yaml`, guidance, source code, native configuration, Sparks, tests, realization state, or any other project file. Keep proposal and approval state in chat only.
+
+When no configuration change is needed, explain that result briefly and stop without a confirmation cycle.
+
+## Review and Revise
+
+Present the complete proposal and stop.
+
+Handle `Revise:`, `Finalize`, or `Cancel` only when the latest complete Implementation Configuration Proposal is unambiguously available. If none is available, do not modify files; ask the user to invoke `/spark-config` with the configuration request or sufficient proposal context.
+
+For `Revise: <comments>`, incorporate the comments and present one complete replacement proposal without modifying files. Do not present only a delta.
+
+For `Cancel`, end without modifying files.
+
+For `Finalize`, continue below. The user may also invoke `/spark-config Revise: ...`, `/spark-config Finalize`, or `/spark-config Cancel` explicitly.
+
+Do not interpret silence, `yes`, `looks good`, or other ambiguous positive feedback as `Finalize`.
+
+## Finalize Configuration
+
+Before writing, re-read `.sparkwell/config.yaml`, affected guidance, and representative native artifacts. If relevant state changed or invalidates the proposal, present a revised complete proposal and wait for confirmation again.
+
+On finalization:
+
+1. Preserve contract settings and unrelated profiles.
+2. Create or update exactly the proposed profile entry.
+3. Create or update exactly the proposed guidance documents.
+4. Keep paths project-relative and inside the project root.
+5. Keep native dependencies, versions, commands, and secrets out of Sparkwell configuration.
+6. Validate YAML structure, profile ID uniqueness, required fields, guidance paths, and agreement between constraints and guidance.
+7. Compare guidance with established native architecture and report any unresolved conflict as **Blocked** rather than writing a migration implicitly.
+
+Do not scaffold, compile, install, or generate product artifacts as part of this workflow.
+
+## Report for Review
+
+Summarize the profile and guidance files created or updated, important architecture decisions, validation performed, and remaining open questions.
+
+Then stop for human review. The user must separately invoke `/spark-impl`; do not invoke it automatically.
+
+## Guardrails
+
+- Do not modify files before explicit `Finalize` of the latest complete proposal.
+- Do not persist proposal or approval state.
+- Do not modify Spark Documents, product code, tests, realization state, dependencies, or native build configuration.
+- Do not invent product behavior or move it into implementation guidance.
+- Do not replace established architecture unless the user explicitly requested and finalized that migration.
+- Do not use guidance list order to resolve conflicts.
+- Do not include credentials, tokens, connection secrets, or machine-specific paths.

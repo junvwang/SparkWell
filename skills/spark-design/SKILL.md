@@ -1,12 +1,12 @@
 ---
-name: design-sparks
+name: spark-design
 description: 'User-invoked SparkWell workflow that proposes Spark changes for confirmation before creating or evolving Spark Documents.'
 argument-hint: 'Describe the design request, or use Revise: ..., Finalize, or Cancel for a pending proposal'
 user-invocable: true
 disable-model-invocation: true
 ---
 
-# Design Sparks
+# Spark Design
 
 ## Purpose
 
@@ -164,13 +164,13 @@ Consult [the worked examples](./references/examples.md) when the appropriate dec
 
 Present the complete Spark Proposal and stop. Do not generate Spark Documents in the same turn.
 
-Handle `Revise:`, `Finalize`, or `Cancel` only when the latest complete proposal is unambiguously available in the conversation. If no pending proposal can be identified, do not modify files; ask the user to start `/design-sparks` with the design request or explicitly provide enough proposal context.
+Handle `Revise:`, `Finalize`, or `Cancel` only when the latest complete proposal is unambiguously available in the conversation. If no pending proposal can be identified, do not modify files; ask the user to start `/spark-design` with the design request or explicitly provide enough proposal context.
 
 For a direct `Revise: <comments>` response to the pending proposal, incorporate the comments, recheck the design, present one complete replacement proposal, and stop again without modifying files. Do not present only a delta.
 
 For `Cancel`, end the pending design workflow without modifying files.
 
-For `Finalize`, continue to finalization below. The user may also explicitly invoke `/design-sparks Revise: ...`, `/design-sparks Finalize`, or `/design-sparks Cancel`.
+For `Finalize`, continue to finalization below. The user may also explicitly invoke `/spark-design Revise: ...`, `/spark-design Finalize`, or `/spark-design Cancel`.
 
 ### 8. Finalize Spark Documents
 
@@ -227,11 +227,11 @@ Summarize the Sparks created, evolved, renamed, or removed; requested-outcome co
 
 Then stop so a human can review the generated Spark Documents. Do not add approval status or other review metadata.
 
-After document review, the user must explicitly invoke `/implement-sparks` or `/test-sparks` for a later phase. Do not invoke either workflow automatically.
+After document review, the user must explicitly invoke `/spark-impl` or `/spark-test` for a later phase. Do not invoke either workflow automatically.
 
 Invite reviewers to remove repetition as well as fill gaps. A longer document is not more complete when its extra text repeats another owner or project-wide guidance.
 
-Implementation wording supplied to `/design-sparks` does not bypass either review checkpoint or activate `/implement-sparks`.
+Implementation wording supplied to `/spark-design` does not bypass either review checkpoint or activate `/spark-impl`.
 
 ## Success Criteria
 

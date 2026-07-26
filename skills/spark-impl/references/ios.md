@@ -38,7 +38,7 @@ Use this optional reference when the effective target is `ios`. The selected pro
 - Build, install, launch, and exercise the smallest material happy path on an available simulator or connected device when the environment permits it.
 - Native iOS compilation, simulator or device execution, archiving, signing, and provisioning generally require macOS and Xcode. When the required Apple tooling, device, or credentials are unavailable, report the exact blocked check and do not infer success from source inspection alone.
 - A successful simulator debug build does not establish device, release, signing, or store readiness. Validate those outputs only when the profile or request includes them.
-- Leave comprehensive iOS-version, device, screen-size, orientation, accessibility, performance, lifecycle, and background-behavior matrices to `test-sparks`.
+- Leave comprehensive iOS-version, device, screen-size, orientation, accessibility, performance, lifecycle, and background-behavior matrices to `spark-test`.
 
 ## Decision Boundaries
 

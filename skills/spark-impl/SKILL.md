@@ -1,12 +1,12 @@
 ---
-name: implement-sparks
+name: spark-impl
 description: 'User-invoked SparkWell workflow for generating or updating one target realization from reviewed Spark Documents.'
 argument-hint: 'Specify root Spark IDs or all, plus a target or profile'
 user-invocable: true
 disable-model-invocation: true
 ---
 
-# Implement Sparks
+# Spark Implementation
 
 ## Purpose
 
@@ -14,7 +14,7 @@ Create or update one working target realization that faithfully realizes selecte
 
 This skill is target-agnostic. It owns the shared Spark-to-artifact workflow. Target-specific behavior comes from the selected implementation profile, existing native project, project guidance, and optional bundled target guidance.
 
-This skill does not create, update, delete, or redesign test artifacts or test infrastructure. Testing is a separate task that requires the user to invoke `/test-sparks`.
+This skill does not create, update, delete, or redesign test artifacts or test infrastructure. Testing is a separate task that requires the user to invoke `/spark-test`.
 
 ## Preconditions
 
@@ -22,9 +22,9 @@ Use this skill to generate engineering artifacts from existing Spark Documents.
 
 Treat the selected Sparks as reviewed design contracts containing the implementation-critical requested outcomes and clarified design for their concepts.
 
-If implementation requires changing software intent, stop before implementation and tell the user to invoke `/design-sparks`. Do not invoke it automatically.
+If implementation requires changing software intent, stop before implementation and tell the user to invoke `/spark-design`. Do not invoke it automatically.
 
-Never modify a Spark Document merely to make implementation easier. If required intent is missing or contradictory, identify the affected Spark and stop with the `/design-sparks` handoff.
+Never modify a Spark Document merely to make implementation easier. If required intent is missing or contradictory, identify the affected Spark and stop with the `/spark-design` handoff.
 
 ## Inputs and Precedence
 
@@ -104,7 +104,7 @@ For a new implementation, resolve every consequential choice relevant to the tar
 
 Do not select MVC, MVVM, Clean Architecture, state libraries, repository patterns, ORMs, local databases, synchronization strategies, dependency-injection structure, or comparable project architecture from generic target defaults. If a consequential choice is unresolved, stop as **Blocked** and tell the user to invoke `/spark-config`.
 
-`/implement-sparks` reads but never creates or edits implementation profiles or project guidance.
+`/spark-impl` reads but never creates or edits implementation profiles or project guidance.
 
 ## Build the Execution Plan
 
@@ -165,10 +165,10 @@ During implementation:
 
 1. Follow profile constraints and guidance, and reuse established project patterns, architecture, quality practices, and native framework capabilities.
 2. Modify only target artifacts required by **Create** and **Update**; preserve compatible **Validate only** artifacts.
-3. Do not create, update, delete, or rename test files; install test-only dependencies; create test projects; or redesign test infrastructure. Record missing, stale, or desirable coverage for a later `test-sparks` task.
+3. Do not create, update, delete, or rename test files; install test-only dependencies; create test projects; or redesign test infrastructure. Record missing, stale, or desirable coverage for a later `spark-test` task.
 4. Validate a new scaffold before adding the Spark-derived implementation.
 5. Track state changes as target artifacts are created, materially maintained, moved, split, merged, repurposed, or deleted; never map a planned artifact before it exists.
-6. Preserve valid mappings outside the affected scope, including mappings for test artifacts owned by `test-sparks`, and leave unrelated artifacts unchanged.
+6. Preserve valid mappings outside the affected scope, including mappings for test artifacts owned by `spark-test`, and leave unrelated artifacts unchanged.
 
 After the final artifact edits, reconcile and write the realization manifest before reporting. If validation causes further edits, reconcile it again afterward. Persist factual mappings even when validation fails; report the failure rather than encoding validation status in state.
 
@@ -178,9 +178,9 @@ Do not add realization mappings to Spark Documents.
 
 Discover applicable checks from native project files, including manifests, build files, task definitions, and CI configuration. Validate target artifacts with applicable schema or syntax checks, restore or install, compile or build, type-check, lint, format, and bounded runtime smoke checks.
 
-Run relevant existing tests when they provide a cheap regression signal. If an existing test failure exposes a runtime implementation defect, repair the runtime artifact and rerun it. If reviewed behavior intentionally makes a test expectation stale, report it for `test-sparks`; do not edit the test in this workflow. When no compatible test infrastructure exists, do not create it here.
+Run relevant existing tests when they provide a cheap regression signal. If an existing test failure exposes a runtime implementation defect, repair the runtime artifact and rerun it. If reviewed behavior intentionally makes a test expectation stale, report it for `spark-test`; do not edit the test in this workflow. When no compatible test infrastructure exists, do not create it here.
 
-Do not expand implementation validation into comprehensive scenario design, test generation, cross-platform test matrices, or broad visual/accessibility test campaigns. Those belong to `test-sparks`. Report the test coverage that was run, coverage needs discovered, and behavior that remains unverified.
+Do not expand implementation validation into comprehensive scenario design, test generation, cross-platform test matrices, or broad visual/accessibility test campaigns. Those belong to `spark-test`. Report the test coverage that was run, coverage needs discovered, and behavior that remains unverified.
 
 Validate every applicable candidate Spark, including **Validate only**, plus contextual Sparks at risk through shared artifacts. Verify every **Not applicable** classification against target guidance. Do not report a Spark as realized when material behavior is missing. Report checks that could not run and why.
 
@@ -192,7 +192,7 @@ Summarize:
 - Sparks created, updated, reused, blocked, or still unverified;
 - realization-state path and Spark-to-artifact mapping changes;
 - important decisions, validation, and results;
-- existing tests run and test-authoring needs deferred to `test-sparks`;
+- existing tests run and test-authoring needs deferred to `spark-test`;
 - assumptions, conflicts, and remaining gaps.
 
 ## Guardrails

@@ -12,11 +12,12 @@ SparkWell must not alter ordinary coding-agent behavior unless the user explicit
 
 Activate SparkWell only when the current user message directly invokes one of these slash commands:
 
-- `/design-sparks`
-- `/implement-sparks`
-- `/test-sparks`
+- `/spark-design`
+- `/spark-config`
+- `/spark-impl`
+- `/spark-test`
 
-The invoked command activates only its named workflow for the current request. It does not activate another SparkWell workflow or establish a session-wide mode. The only cross-message continuation is the pending Design Proposal response defined below.
+The invoked command activates only its named workflow for the current request. It does not activate another SparkWell workflow or establish a session-wide mode. The only cross-message continuations are the pending proposal responses defined below.
 
 A request that changes product behavior or software intent does not by itself activate SparkWell. Mentioning Sparks, reading a Spark file, asking about SparkWell, or working in a repository that contains `.sparkwell/` also does not activate it.
 
@@ -32,7 +33,7 @@ When a SparkWell command is invoked, load and follow that command's Agent Skill.
 
 ## Pending Design Proposal
 
-A `/design-sparks` request first produces a proposal in chat without modifying project files. The directly following user reply may continue that pending design workflow without another slash command only when it is one of these explicit controls:
+A `/spark-design` request first produces a proposal in chat without modifying project files. The directly following user reply may continue that pending design workflow without another slash command only when it is one of these explicit controls:
 
 - `Revise: <comments>` updates the proposal and presents one complete replacement proposal without writing files;
 - `Finalize` confirms the latest complete proposal and permits Spark Document generation;
@@ -40,9 +41,21 @@ A `/design-sparks` request first produces a proposal in chat without modifying p
 
 Each revised proposal may receive the same directly following controls. Treat the controls case-insensitively after trimming surrounding whitespace, but require `Revise:` to include the colon. Do not treat `yes`, `looks good`, silence, or other ambiguous approval as `Finalize`.
 
-Any other user message does not continue SparkWell and ends eligibility for implicit proposal continuation. To resume later, the user must explicitly invoke `/design-sparks` with the intended control and enough proposal context. Proposal and approval state remain in chat only and must not be persisted in project files.
+Any other user message does not continue SparkWell and ends eligibility for implicit proposal continuation. To resume later, the user must explicitly invoke `/spark-design` with the intended control and enough proposal context. Proposal and approval state remain in chat only and must not be persisted in project files.
 
-If no latest complete proposal is unambiguously available, `Revise:`, `Finalize`, and `Cancel` do not authorize file changes. Ask the user to invoke `/design-sparks` with the design request or provide sufficient proposal context.
+If no latest complete proposal is unambiguously available, `Revise:`, `Finalize`, and `Cancel` do not authorize file changes. Ask the user to invoke `/spark-design` with the design request or provide sufficient proposal context.
+
+## Pending Implementation Configuration Proposal
+
+A `/spark-config` request first produces an Implementation Configuration Proposal in chat without modifying project files. The same directly following controls apply:
+
+- `Revise: <comments>` updates the configuration proposal and presents one complete replacement without writing files;
+- `Finalize` confirms the latest complete configuration proposal and permits updates to the proposed profile and guidance only;
+- `Cancel` ends the pending configuration workflow without writing files.
+
+Any other user message ends eligibility for implicit configuration-proposal continuation. Proposal and approval state remain in chat only. If no latest complete Implementation Configuration Proposal is unambiguously available, these controls do not authorize file changes; invoke `/spark-config` with the configuration request or sufficient proposal context.
+
+Finalized implementation configuration does not activate `/spark-impl`. The user must invoke that command separately after reviewing the profile and guidance.
 
 ---
 
@@ -59,7 +72,7 @@ Sparks and engineering artifacts serve different and complementary purposes:
 
 A Spark is not a compacted or partial version of the user's request. It narrows conceptual scope, not detail. Do not discard requested outcomes or constraints when translating them into Sparks.
 
-During `/design-sparks`, when the requested design changes the software intent of a concept, including its responsibilities, observable behavior, constraints, composition, or relationships:
+During `/spark-design`, when the requested design changes the software intent of a concept, including its responsibilities, observable behavior, constraints, composition, or relationships:
 
 1. Identify the affected Spark(s).
 2. Present a concise Spark Proposal in chat without modifying project files.
@@ -76,7 +89,9 @@ Keep Spark Documents concise. State each decision once in the Spark that owns it
 
 Designing Sparks and producing engineering artifacts are **separate explicitly invoked tasks**.
 
-Do not continue from Spark design into engineering artifact generation. Stop and tell the user to invoke `/implement-sparks` after review.
+Do not continue from Spark design into engineering artifact generation. Stop and tell the user to invoke `/spark-impl` after review.
+
+Configuring a project implementation and generating code are also separate explicitly invoked tasks. `/spark-config` may update profiles and guidance only; it must stop before product generation.
 
 Changes to engineering artifacts do not necessarily require Spark changes.
 
@@ -130,6 +145,7 @@ Typical Spark-related tasks include:
 
 - creating Sparks;
 - evolving existing Sparks;
+- configuring implementation profiles and project architecture guidance;
 - generating engineering artifacts;
 - creating or improving test artifacts as a separate workflow;
 - reconciling Sparks and engineering artifacts.

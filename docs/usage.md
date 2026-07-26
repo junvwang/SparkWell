@@ -91,13 +91,14 @@ For GitHub Copilot, it also receives:
 .github/
 ├── copilot-instructions.md
 └── skills/
-    ├── design-sparks/
-    ├── implement-sparks/
-    ├── test-sparks/
+    ├── spark-design/
+    ├── spark-config/
+    ├── spark-impl/
+    ├── spark-test/
     └── visualize-sparks/
 ```
 
-Design, implementation, and testing are user-invoked, separate workflows. Visualization is currently a disabled placeholder.
+Design, implementation configuration, implementation, and testing are user-invoked, separate workflows. Visualization is currently a disabled placeholder.
 
 Initialization does not generate product Sparks, source code, framework projects, implementation profiles, or tests.
 
@@ -109,11 +110,12 @@ Activate one workflow for the current request by invoking its slash command:
 
 | Command | Purpose |
 |---|---|
-| `/design-sparks` | Propose a Spark map, then generate documents only after finalization |
-| `/implement-sparks` | Realize reviewed Sparks for one target or profile |
-| `/test-sparks` | Create, update, or execute tests derived from reviewed Sparks |
+| `/spark-design` | Propose a Spark map, then generate documents only after finalization |
+| `/spark-config` | Propose and finalize one implementation profile and its architecture guidance |
+| `/spark-impl` | Realize reviewed Sparks for one target or profile |
+| `/spark-test` | Create, update, or execute tests derived from reviewed Sparks |
 
-Changing software intent does not activate SparkWell automatically. Each command activates only its named workflow and does not invoke the next phase. The only limited cross-message continuation is a direct `Revise:`, `Finalize`, or `Cancel` response to the latest pending Spark Proposal. Any unrelated message ends that implicit continuation. When a workflow identifies any other handoff, invoke the named slash command in a new request.
+Changing software intent does not activate SparkWell automatically. Each command activates only its named workflow and does not invoke the next phase. The only limited cross-message continuation is a direct `Revise:`, `Finalize`, or `Cancel` response to the latest pending Spark or Implementation Configuration Proposal. Any unrelated message ends that implicit continuation. When a workflow identifies any other handoff, invoke the named slash command in a new request.
 
 ## Working With Sparks
 
@@ -122,10 +124,10 @@ Changing software intent does not activate SparkWell automatically. Each command
 Invoke the design workflow explicitly:
 
 ```text
-/design-sparks Design a todo list where people can add todos and mark them complete.
+/spark-design Design a todo list where people can add todos and mark them complete.
 ```
 
-The `/design-sparks` workflow extracts requested outcomes and identifies meaningful concepts, but it does not modify files immediately. It first presents a Spark Proposal in chat.
+The `/spark-design` workflow extracts requested outcomes and identifies meaningful concepts, but it does not modify files immediately. It first presents a Spark Proposal in chat.
 
 The proposal is intentionally brief:
 
@@ -161,7 +163,7 @@ Respond to the latest proposal with:
 - `Finalize` to revalidate the current workspace and generate the proposed Spark Documents;
 - `Cancel` to stop without modifying files.
 
-The controls may also be invoked explicitly as `/design-sparks Revise: ...`, `/design-sparks Finalize`, and `/design-sparks Cancel`. Ambiguous approval such as `looks good` does not finalize the proposal.
+The controls may also be invoked explicitly as `/spark-design Revise: ...`, `/spark-design Finalize`, and `/spark-design Cancel`. Ambiguous approval such as `looks good` does not finalize the proposal.
 
 If affected Sparks or proposed paths changed before finalization, the workflow presents a revised proposal instead of writing stale changes.
 
@@ -275,7 +277,17 @@ implementations:
   profiles: {}
 ```
 
-Add one profile per concrete runtime implementation:
+Before a new runtime realization, invoke the configuration workflow:
+
+```text
+/spark-config Configure a React Web implementation in src/web.
+```
+
+It inspects existing profiles, guidance, and native artifacts, then presents an Implementation Configuration Proposal in chat. For an established implementation it proposes codifying the detected architecture without redesigning it. For a new implementation it asks about consequential choices rather than selecting them automatically.
+
+Reply `Revise: <comments>`, `Finalize`, or `Cancel`. Before `Finalize`, no profile, guidance, source, dependency, Spark, test, or realization file changes. Finalization may update only `.sparkwell/config.yaml` and the proposed guidance documents, then stops for review without generating product code.
+
+A finalized profile may look like:
 
 ```yaml
 schema-version: 1
@@ -288,11 +300,16 @@ implementations:
   profiles:
     web-react:
       target: web
-      source-root: src/web-react
+      source-root: src/web
       constraints:
         framework: react
+        architecture: feature-modules
+        persistence:
+          provider: indexeddb
       preferences:
-        language: typescript
+        state-management: zustand
+      guidance:
+        - .sparkwell/guidance/web-react.md
 
     todo-api:
       target: api-service
@@ -300,20 +317,27 @@ implementations:
       constraints:
         runtime: dotnet
         framework: aspnet-core
+        architecture: clean-architecture
         persistence:
           provider: sqlite
+      guidance:
+        - .sparkwell/guidance/todo-api.md
 ```
 
-Native project files remain authoritative for dependencies, versions, commands, formatting, linting, and build configuration.
+Profile `constraints` are mandatory structured choices; `preferences` are overridable defaults; `guidance` contains nuanced project architecture such as module boundaries, state ownership, data flow, model mappings, persistence patterns, and artifact ownership. The recommended guidance path is `.sparkwell/guidance/<profile-id>.md`.
+
+Native project files remain authoritative for dependencies, versions, commands, formatting, linting, build configuration, and actual existing structure. Guidance and native architecture must agree. Missing referenced guidance, unresolved consequential architecture, or conflicts make `/spark-impl` **Blocked** and require `/spark-config` rather than an AI-selected architecture.
+
+Resolution order is: reviewed Spark intent, profile constraints, profile guidance, compatible explicit choices, established native architecture, profile preferences, then optional target defaults. This order never silently resolves contradictions.
 
 The Contract target writes to `contracts.root`, and runtime targets read contracts from that same project-wide folder. Each runtime profile's `source-root` remains the output root for its own artifacts.
 
 ### 3. Generate Service Contracts
 
-After reviewing the relevant Sparks, invoke `/implement-sparks` for the Contract target:
+After reviewing the relevant Sparks, invoke `/spark-impl` for the Contract target:
 
 ```text
-/implement-sparks Implement todo-item-model and todo-management-service for the contract target.
+/spark-impl Implement todo-item-model and todo-management-service for the contract target.
 ```
 
 The initial bundled Contract target generates OpenAPI 3.1 Service Contracts:
@@ -336,33 +360,33 @@ Run the Contract target before profiles that consume or implement its contracts.
 
 ### 4. Implement
 
-After review, invoke `/implement-sparks` for a profile:
+After review, invoke `/spark-impl` for a profile:
 
 ```text
-/implement-sparks Implement todo-app-ui for the web-react profile.
+/spark-impl Implement todo-app-ui for the web-react profile.
 ```
 
 To implement the server side of generated Service Contracts:
 
 ```text
-/implement-sparks Implement todo-item-model and todo-management-service for the todo-api profile.
+/spark-impl Implement todo-item-model and todo-management-service for the todo-api profile.
 ```
 
 The API Service target implements matching OpenAPI operations, maps their boundary schemas to internal domain representations, and owns its configured persistence access and provider-specific artifacts. It does not generate a competing interface or modify public contract files.
 
-`implement-sparks` creates or updates artifacts for the selected target, maintains realization provenance, runs applicable checks, and may run relevant existing tests as regression evidence.
+`spark-impl` creates or updates artifacts for the selected target, maintains realization provenance, runs applicable checks, and may run relevant existing tests as regression evidence.
 
 It does not create or modify tests, test-only dependencies, test projects, or test infrastructure.
 
 ### 5. Test
 
-Invoke `/test-sparks` when test authoring or broader behavioral verification is desired:
+Invoke `/spark-test` when test authoring or broader behavioral verification is desired:
 
 ```text
-/test-sparks Create tests for todo-app-ui using the web-react profile.
+/spark-test Create tests for todo-app-ui using the web-react profile.
 ```
 
-`test-sparks` derives applicable scenarios from reviewed Sparks, reuses existing test conventions, updates test provenance, and classifies failures as runtime, test, intent, or environment defects.
+`spark-test` derives applicable scenarios from reviewed Sparks, reuses existing test conventions, updates test provenance, and classifies failures as runtime, test, intent, or environment defects.
 
 Adding a new test framework, dependency, project, browser harness, emulator, or other consequential infrastructure requires confirmation unless explicitly requested.
 

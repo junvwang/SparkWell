@@ -56,7 +56,7 @@ Use this reference when the effective target is `api-service`. The selected prof
 - Run the owning generator when applicable, then restore or install, compile, type-check, lint, and format through the native toolchain.
 - Validate the OpenAPI document and verify route, input, security, response, and schema conformance with established project tooling when available.
 - Launch the service and exercise the smallest safe material operation set when the environment permits it. Do not invoke destructive operations without controlled data and explicit justification.
-- Run relevant existing tests as regression evidence, but leave new or changed test artifacts to `test-sparks`.
+- Run relevant existing tests as regression evidence, but leave new or changed test artifacts to `spark-test`.
 - Report unavailable validators, dependencies, endpoints, credentials, and runtime checks precisely.
 
 ## Boundaries

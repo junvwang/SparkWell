@@ -1,12 +1,12 @@
 ---
-name: test-sparks
+name: spark-test
 description: 'User-invoked SparkWell workflow for creating, updating, or executing tests derived from reviewed Spark Documents.'
 argument-hint: 'Specify root Spark IDs or all, plus a target or profile'
 user-invocable: true
 disable-model-invocation: true
 ---
 
-# Test Sparks
+# Spark Test
 
 ## Purpose
 
@@ -18,7 +18,7 @@ This skill owns test scenarios, test source, test-only configuration, and behavi
 
 Use reviewed Sparks as the durable concept design and coverage source for this workflow.
 
-If testing exposes missing or contradictory product intent, stop and tell the user to invoke `/design-sparks`. If it exposes a runtime implementation defect, report it and tell the user to invoke `/implement-sparks`. Do not invoke either workflow automatically, and do not change Spark or runtime artifacts merely to make a test pass.
+If testing exposes missing or contradictory product intent, stop and tell the user to invoke `/spark-design`. If it exposes a runtime implementation defect, report it and tell the user to invoke `/spark-impl`. Do not invoke either workflow automatically, and do not change Spark or runtime artifacts merely to make a test pass.
 
 ## Inputs and Precedence
 
@@ -41,7 +41,7 @@ Reviewed Spark intent defines required observable coverage. Profile constraints 
 
 ## Resolve Target and Scope
 
-Resolve the profile, effective target, implementation ID, requested roots, candidate scope, and contextual Sparks using the same composition and target rules as `implement-sparks`:
+Resolve the profile, effective target, implementation ID, requested roots, candidate scope, and contextual Sparks using the same composition and target rules as `spark-impl`:
 
 - **Requested roots**: explicitly selected Spark IDs, or every project Spark for `all`.
 - **Candidate scope**: requested roots plus all transitively composed descendants.
@@ -89,7 +89,7 @@ During test work:
 2. Test observable behavior through stable public interfaces or native interaction surfaces. Avoid asserting incidental implementation structure.
 3. Keep coverage proportional to risk. Prefer the smallest scenario set that distinguishes required behavior and likely regressions.
 4. Avoid redundant tests, broad snapshots, timing-sensitive waits, and cross-platform matrices unless the reviewed intent or risk requires them.
-5. Do not modify production runtime artifacts. Report testability blockers for a separate `implement-sparks` task.
+5. Do not modify production runtime artifacts. Report testability blockers for a separate `spark-impl` task.
 6. Update realization state for test artifacts created or materially maintained from Sparks. Preserve valid runtime and out-of-scope mappings.
 
 Test artifacts may derive from multiple Sparks. Realization state records provenance, not coverage status or correctness.
@@ -100,9 +100,9 @@ Run the narrowest changed scenarios first, then the smallest relevant regression
 
 Classify failures before editing:
 
-- **Runtime defect**: the implementation violates reviewed intent. Report the failing evidence and hand off to `implement-sparks`; do not change production code here.
+- **Runtime defect**: the implementation violates reviewed intent. Report the failing evidence and hand off to `spark-impl`; do not change production code here.
 - **Test defect**: the test incorrectly expresses reviewed intent or uses an obsolete test interface. Repair the test and rerun it.
-- **Intent defect**: requirements or Sparks are missing, ambiguous, or contradictory. Stop and hand off to an explicit `/design-sparks` invocation.
+- **Intent defect**: requirements or Sparks are missing, ambiguous, or contradictory. Stop and hand off to an explicit `/spark-design` invocation.
 - **Environment defect**: required infrastructure or permissions are unavailable. Report the blocked validation and reproducible setup needed.
 
 Do not weaken assertions merely to make a failing implementation pass.

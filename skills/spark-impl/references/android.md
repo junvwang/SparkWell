@@ -38,7 +38,7 @@ Use this optional reference when the effective target is `android`. The selected
 - Build, install, launch, and exercise the smallest material happy path on an available emulator or connected device when the environment permits it.
 - If the required Android SDK, build tools, emulator, device, or credentials are unavailable, report the exact blocked check and do not infer success from source inspection alone.
 - A successful debug build does not establish release, signing, or store readiness. Validate those outputs only when the profile or request includes them.
-- Leave comprehensive API-level, device, screen-size, orientation, accessibility, performance, lifecycle, and background-behavior matrices to `test-sparks`.
+- Leave comprehensive API-level, device, screen-size, orientation, accessibility, performance, lifecycle, and background-behavior matrices to `spark-test`.
 
 ## Decision Boundaries
 
