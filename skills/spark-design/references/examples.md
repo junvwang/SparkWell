@@ -59,7 +59,7 @@ Possible result:
 
 Do not create UI Component Sparks for the text box, add button, checkbox, stack panel, empty-state message, error banner, hook, view model, or framework component merely because the rendered tree contains them. Keep a proposed child inside its parent when its conceptual inputs, interactions, state ownership, and behavior cannot be reviewed independently.
 
-## Domain Model and Standard Service Behavior
+## Domain Model and Service Boundaries
 
 Requirement: People can create Todo Items, give each one a non-empty title, mark it complete or active, rename it, and delete it.
 
@@ -73,13 +73,6 @@ kind: domain-model
 summary: Represents one piece of work a person wants to track.
 composes: []
 uses: []
-service-exposure:
-  standard-operations:
-    - create
-    - get
-    - list
-    - update
-    - delete
 ---
 
 # Todo Item
@@ -99,17 +92,17 @@ service-exposure:
 - Return a completed Todo Item to active.
 ```
 
-A Todo List UI Component can `use` `todo-item-model` and state which standard operations its interactions require. Do not create an automatic Todo Item Service Spark merely to repeat standard CRUD. Create an explicit Service Spark only when independently meaningful service behavior exists, such as bulk completion, authorization, specialized queries, or cross-model operations.
+A Todo List UI Component can `use` `todo-item-model` directly when the interaction is local to that realization. This does not imply any public service.
 
 Do not create separate Sparks for `CreateTodoInput`, `TodoItemDto`, an ORM `TodoEntity`, or a `todos` table. Those are possible engineering realizations of `todo-item-model`.
 
-If Todo Items must not receive an automatically derived public service, omit `service-exposure`. This still permits a reviewed explicit Service Spark to use Todo Items. If Todo Items must never cross a public service boundary, state that stronger rule explicitly in the Domain Model Spark.
+When Todo Item capabilities must be offered across a conceptual service boundary, create a Service Spark and state each public capability explicitly. If Todo Items must never cross a Service boundary, state that restriction in the Domain Model body.
 
 ## Explicit Service Spark
 
 Requirement: People can mark every active Todo Item complete in one operation. The operation must not leave only part of the selected set completed if it fails.
 
-Possible result: Create a `todo-management-service` Service Spark because bulk completion coordinates behavior across multiple Todo Items and owns distinct all-or-nothing failure semantics. It uses `todo-item-model` rather than duplicating Todo Item fields and invariants.
+Possible result: Create a `todo-management-service` Service Spark because bulk completion coordinates behavior across multiple Todo Items and owns distinct all-or-nothing failure semantics. It uses `todo-item-model` rather than duplicating Todo Item fields and invariants. Familiar create, retrieve, update, or delete capabilities would also be listed here when this Service intentionally offers them; they are never inferred from the Domain Model.
 
 ```markdown
 ---

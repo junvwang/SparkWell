@@ -10,13 +10,14 @@
     "adapters",
     "core",
     "docs",
+    "packs",
     "scripts",
     "skills",
     "LICENSE",
     "README.md"
   ],
   "scripts": {
-    "check": "node --check scripts/sparkwell.js && node --check scripts/adapter-registry.js && node --check scripts/cli.js && node --check scripts/init-project.js",
+    "check": "node --check scripts/sparkwell.js && node --check scripts/adapter-registry.js && node --check scripts/pack-registry.js && node --check scripts/cli.js && node --check scripts/init-project.js",
     "test": "node --test"
   },
   "engines": {

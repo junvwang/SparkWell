@@ -26,9 +26,12 @@ Always inspect:
 
 1. The requested Sparks, composed descendants, and related contextual Sparks.
 2. `.sparkwell/config.yaml` and the selected implementation profile when one exists.
-3. `.sparkwell/state/realizations/<implementation-id>.yaml` when it exists.
-4. Relevant runtime artifacts and interfaces that realize the selected Sparks.
-5. Native test manifests, test configuration, existing tests, CI configuration, and project test guidance.
+3. Every implementation pack selected by the profile, starting with `.sparkwell/packs/<pack-id>/PACK.md`, plus the references that pack requires for testing this target.
+4. `.sparkwell/state/realizations/<implementation-id>.yaml` when it exists.
+5. Relevant runtime artifacts and interfaces that realize the selected Sparks.
+6. Native test manifests, test configuration, existing tests, CI configuration, and project test guidance.
+
+Installed packs are inactive unless the selected profile lists them. Validate every pack-defined required field, value, and cross-profile reference before resolving test artifacts. Reject absolute paths, `..` components, paths outside the project root, and pack references outside their installed pack directory. A missing or unreadable selected pack, incompatible reference or pack/profile combination, or conflict among Spark intent, profile configuration, pack guidance, and established test architecture makes the task **Blocked**.
 
 Load supporting contracts only when needed:
 

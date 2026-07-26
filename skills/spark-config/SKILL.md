@@ -20,11 +20,12 @@ Always inspect:
 
 1. `.sparkwell/config.yaml`.
 2. `.sparkwell/implementation-profiles.md`.
-3. Existing guidance referenced by the affected profile.
-4. Native manifests, build files, source layout, and representative code for the target.
-5. Relevant reviewed Sparks only when needed to distinguish product behavior from implementation architecture.
+3. Every installed pack selected by the affected profile, starting with `.sparkwell/packs/<pack-id>/PACK.md`.
+4. Existing guidance referenced by the affected profile.
+5. Native manifests, build files, source layout, and representative code for the target.
+6. Relevant reviewed Sparks only when needed to distinguish product behavior from implementation architecture.
 
-Preserve unrelated profiles, contract settings, guidance, and project files.
+Preserve unrelated profiles, installed packs, guidance, and project files.
 
 ## Classify the Implementation
 
@@ -43,12 +44,19 @@ Separate product intent from implementation decisions. User-visible offline beha
 
 Use:
 
+- `packs` for explicitly installed reusable realization guidance activated by this profile;
 - `constraints` for structured choices `/spark-impl` must not override;
 - `preferences` for structured defaults that compatible explicit requests may override;
 - `guidance` for nuanced architecture and code-generation rules;
 - native project files for dependencies, versions, commands, and actual build configuration.
 
 Recommend `.sparkwell/guidance/<profile-id>.md` for a profile's primary guidance. Use more than one guidance file only when they have distinct scopes and equal authority. Never encode secrets.
+
+Activate a pack only when its `.sparkwell/packs/<pack-id>/PACK.md` exists and the requested target and configuration satisfy its contract. If a requested bundled pack is not installed, stop without modifying files and tell the user to run `sparkwell init --pack <pack-id>`. `/spark-config` configures packs but does not install or edit them.
+
+Validate every pack-defined required field, value, and cross-profile reference before finalization. A referenced profile must already exist or be created in the same finalized proposal and satisfy the selected pack's target, pack, constraint, and source-root requirements. Mark unresolved or incompatible references **Blocked**.
+
+Reject absolute paths, paths containing a `..` component after normalizing `/` and `\`, and paths that resolve outside the project root. Pack references must also remain inside their installed pack directory.
 
 Guidance may describe architecture and module boundaries, state and data flow, model mappings, persistence responsibilities, repository and dependency-injection patterns, error and concurrency handling, UI projection, artifact placement, and workflow-maintained versus human-maintained files.
 
@@ -65,6 +73,9 @@ Profile: `web-react`
 Target: `web`
 Source root: `src/web`
 Classification: New implementation
+
+Packs:
+- None
 
 Constraints:
 - Framework: React
@@ -113,13 +124,13 @@ Before writing, re-read `.sparkwell/config.yaml`, affected guidance, and represe
 
 On finalization:
 
-1. Preserve contract settings and unrelated profiles.
+1. Preserve installed packs and unrelated profiles.
 2. Create or update exactly the proposed profile entry.
 3. Create or update exactly the proposed guidance documents.
-4. Keep paths project-relative and inside the project root.
+4. Keep paths project-relative and inside the project root; reject absolute paths and `..` components.
 5. Keep native dependencies, versions, commands, and secrets out of Sparkwell configuration.
-6. Validate YAML structure, profile ID uniqueness, required fields, guidance paths, and agreement between constraints and guidance.
-7. Compare guidance with established native architecture and report any unresolved conflict as **Blocked** rather than writing a migration implicitly.
+6. Validate YAML structure, profile ID uniqueness, required fields, pack IDs, pack-defined cross-profile references, guidance paths, and agreement among packs, constraints, and guidance.
+7. Compare packs and guidance with established native architecture and report any unresolved conflict as **Blocked** rather than writing a migration implicitly.
 
 Do not scaffold, compile, install, or generate product artifacts as part of this workflow.
 
@@ -136,5 +147,6 @@ Then stop for human review. The user must separately invoke `/spark-impl`; do no
 - Do not modify Spark Documents, product code, tests, realization state, dependencies, or native build configuration.
 - Do not invent product behavior or move it into implementation guidance.
 - Do not replace established architecture unless the user explicitly requested and finalized that migration.
+- Do not install or modify implementation packs.
 - Do not use guidance list order to resolve conflicts.
 - Do not include credentials, tokens, connection secrets, or machine-specific paths.

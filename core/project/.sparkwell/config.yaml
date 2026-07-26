@@ -1,8 +1,4 @@
 schema-version: 1
 
-contracts:
-  root: src/contracts
-  service-format: openapi-3.1
-
 implementations:
   profiles: {}

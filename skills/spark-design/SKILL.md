@@ -192,7 +192,7 @@ After drafting, remove statements duplicated by frontmatter or another Spark, co
 
 Place enduring platform-specific observable behavior or constraints in the relevant Spark when they are part of product intent. Keep framework, language, library, packaging, and ordinary platform implementation choices in implementation profiles, project guidance, or native artifacts unless those choices are themselves essential software intent.
 
-For `domain-model`, follow the standardized kind semantics in the Spark Specification and the field-table, type, relationship, and `service-exposure` frontmatter representation in project conventions. Preserve stable logical field identities, distinguish field rules from cross-field invariants, and model referenced domain concepts through `composes` or `uses`. Add `service-exposure` only when reviewed intent explicitly enables automatic standard service operations; omit it otherwise. Do not infer permission for an operation absent from `standard-operations`.
+For `domain-model`, follow the standardized kind semantics in the Spark Specification and the field-table, type, and relationship representation in project conventions. Preserve stable logical field identities, distinguish field rules from cross-field invariants, and model referenced domain concepts through `composes` or `uses`. State any product-level restriction on crossing a Service boundary in the Domain Model body.
 
 For `service`, follow the standardized kind semantics and `## Capabilities` table in project conventions. Give each capability a stable logical identifier, describe concept-level inputs and outputs, capture observable failure behavior, and include every independently owned referenced concept in `uses`. Do not duplicate Domain Model fields or prescribe transport routes, DTOs, controllers, or framework service types.
 
@@ -217,7 +217,7 @@ Before reporting the written documents, verify that:
 - each decision appears once in its authoritative Spark and related Sparks do not restate it;
 - summaries, tables, and prose do not duplicate one another without adding material meaning;
 - bodies contain no generic quality, implementation-freedom, empty-section, or exhaustive negative-list boilerplate;
-- every Domain Model has a valid `## Data` table, stable field identities, technology-independent types, applicable invariants and relationships, and valid `service-exposure` frontmatter when automatic standard service operations are intended;
+- every Domain Model has a valid `## Data` table, stable field identities, technology-independent types, and applicable invariants, relationships, and public-boundary restrictions;
 - every Service has a valid `## Capabilities` table, stable capability identities, concept-level inputs and outputs, applicable failure behavior, and consistent `uses` relationships;
 - every UI Component clearly communicates its purpose and boundary, applicable information and interaction flow, material states and ownership, child composition responsibilities, and consistent `uses` relationships;
 - proposed design remains compatible with relevant established architecture, or any intentional architectural conflict is surfaced;

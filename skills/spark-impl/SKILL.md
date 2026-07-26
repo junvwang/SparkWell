@@ -32,23 +32,21 @@ Always inspect:
 
 1. The requested Sparks, composed descendants, and related Sparks needed for context.
 2. `.sparkwell/config.yaml` and `.sparkwell/implementation-profiles.md`.
-3. Every guidance file referenced by the selected profile.
-4. Native manifests, build files, target artifacts, relevant existing tests, and established source architecture. Existing tests are regression evidence, not artifacts owned by this skill.
-5. After resolving the implementation ID, `.sparkwell/state/realizations/<implementation-id>.yaml` when that file exists.
+3. Every implementation pack selected by the profile, starting with `.sparkwell/packs/<pack-id>/PACK.md`, plus the references that pack requires for this target and workflow.
+4. Every guidance file referenced by the selected profile.
+5. Native manifests, build files, target artifacts, relevant existing tests, and established source architecture. Existing tests are regression evidence, not artifacts owned by this skill.
+6. After resolving the implementation ID, `.sparkwell/state/realizations/<implementation-id>.yaml` when that file exists.
 
-Resolve every guidance path relative to the project root. Read all referenced files before planning. Mark the task **Blocked** when a path escapes the project root; a guidance file is missing or unreadable; guidance documents conflict with one another; or guidance conflicts with the profile, reviewed Sparks, or established native architecture.
+Installed packs are inactive unless the selected profile lists them. Resolve each selected pack ID to `.sparkwell/packs/<pack-id>/PACK.md`. Read all pack and guidance references before planning. Validate every pack-defined required field, value, and cross-profile reference before resolving artifacts. Mark the task **Blocked** when a required profile is absent or incompatible, or when a pack or guidance path is missing, unreadable, unsafe, or conflicts with the profile, reviewed Sparks, another selected source, or established native architecture.
 
-For a task that creates, implements, or consumes contracts, resolve `contracts.root` from `.sparkwell/config.yaml`. Inspect conventional contract paths first, then realization manifests that map files beneath that root. Broaden discovery only when needed.
-
-Use realization state to associate contract files with stable Spark IDs and the contract files themselves for operations and schemas; do not infer a competing wire format. When provenance is missing, inspect the contract directly and mark the task **Blocked** only if its Spark correspondence remains ambiguous.
+Reject absolute paths, paths containing a `..` component after normalizing `/` and `\`, and paths that resolve outside the project root. Pack references must remain inside their installed pack directory.
 
 For runtime persistence, resolve provider and access choices from the selected profile and established native project. Keep persistence access and provider-specific artifacts in the current target. Mark an independently managed persistence boundary **Blocked** unless an explicit established contract defines it.
 
-Load supporting contracts only when needed:
+Load supporting documents only when needed:
 
 - `.sparkwell/specification.md` and `.sparkwell/conventions.md` to resolve unclear or invalid Spark structure or relationships.
 - `.sparkwell/realization-state.md` before creating or repairing realization state.
-- [OpenAPI client guidance](./references/openapi-client.md) when `contracts.service-format` is `openapi-3.1` and runtime artifacts call a service.
 - `./references/<target>.md`, when present, for general target defaults.
 
 Apply decisions in this order:
@@ -56,14 +54,15 @@ Apply decisions in this order:
 1. Reviewed Spark intent for owned behavior, states, validation rules, responsibilities, interactions, and conceptual boundaries.
 2. Implementation-profile constraints.
 3. Profile-referenced project guidance.
-4. Compatible explicit user choices.
-5. The established native project and its configuration.
-6. Profile preferences.
-7. Optional target-guide defaults.
+4. Selected implementation packs.
+5. Compatible explicit user choices.
+6. The established native project and its configuration.
+7. Profile preferences.
+8. Optional target-guide defaults.
 
 Native files remain authoritative for artifact content, dependencies, versions, and build state. Realization state is only an index.
 
-Precedence does not authorize silent conflict resolution. Stop as **Blocked** when Spark intent, constraints, guidance, explicit choices, or established architecture contradict one another. Preferences and target defaults apply only when compatible with all higher-authority sources.
+Precedence does not authorize silent conflict resolution. Stop as **Blocked** when Spark intent, constraints, guidance, selected packs, explicit choices, or established architecture contradict one another. Preferences and target defaults apply only when compatible with all higher-authority sources.
 
 A Spark is a required design contract for its concept, not an exhaustive implementation checklist or a ceiling on quality. Preserve compatible established architecture, security, accessibility, reliability, maintainability, performance, platform conventions, and normal engineering quality expectations even when they are not repeated in every Spark. Do not use quality improvements as a reason to invent observable product behavior or contradict reviewed intent.
 
@@ -77,7 +76,7 @@ The **effective target** is the selected profile's `target`, otherwise the expli
 
 Use the exact lowercase kebab-case effective target in `./references/<target>.md`; load that optional guide when present. Its defaults never override the profile or established project, and its absence does not make a target unsupported. A target guide supplies baseline platform considerations, not framework selection, comprehensive platform support, or permission to bypass the artifact-owning toolchain.
 
-Bundled target guidance is available for [contract](./references/contract.md), [api-service](./references/api-service.md), [web](./references/web.md), [windows](./references/windows.md), [android](./references/android.md), and [ios](./references/ios.md).
+Bundled target guidance is available for [web](./references/web.md), [windows](./references/windows.md), [android](./references/android.md), and [ios](./references/ios.md). Technology-specific targets may come from selected implementation packs.
 
 Resolve the **implementation ID** and load `.sparkwell/state/realizations/<implementation-id>.yaml` according to `.sparkwell/realization-state.md`.
 
@@ -112,7 +111,7 @@ Before editing:
 
 1. Verify the manifest's implementation ID, Spark IDs, and paths; compare mapped paths with the configured or inferred source root when available.
 2. Confirm whether this is an established or new implementation and summarize the evidence.
-3. Summarize the selected profile, source root, constraints, preferences, guidance files read, and effective project architecture.
+3. Summarize the selected profile, source root, selected packs, constraints, preferences, guidance files read, and effective project architecture.
 4. Inspect mapped target artifacts, relevant unmapped source, nearby existing tests, and native configuration. Missing or incomplete state does not prove that no realization exists.
 5. Verify that candidate Sparks define the product decisions needed for their behavior, states, boundaries, validation, interactions, failures, lifecycle, and applicable platform constraints.
 6. Mark unresolved product intent, architecture, target configuration, required dependencies, or artifact ownership as **Blocked** rather than guessing.
@@ -198,7 +197,7 @@ Summarize:
 ## Guardrails
 
 - Do not edit Sparks or invent observable behavior in this workflow.
-- Do not create or edit `.sparkwell/config.yaml`, implementation profiles, or project guidance.
+- Do not create or edit `.sparkwell/config.yaml`, implementation profiles, installed packs, or project guidance.
 - Do not choose or migrate consequential project architecture.
 - Do not rewrite a descendant solely because its parent was selected, or omit a missing descendant from a complete parent realization.
 - Do not replace an established framework or perform destructive regeneration without an explicit compatible request.

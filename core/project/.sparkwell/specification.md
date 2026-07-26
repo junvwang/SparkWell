@@ -2,29 +2,11 @@
 
 > Status: Draft
 
-This document defines the concepts, semantics, and structure of **Sparks**.
-
-It serves as the normative specification for Sparkwell projects.
-
-This specification intentionally defines **what a Spark is**, not how Sparks are created, reviewed, stored, or transformed into engineering artifacts.
-
----
-
-# Purpose
-
-Sparkwell introduces **Spark** as the primary design artifact of a software system.
-
-Rather than describing software primarily through implementation, Sparkwell describes software through **Sparks**—persistent representations of meaningful software concepts.
-
-Engineering artifacts are realizations of Sparks rather than the primary representation of software design.
-
----
+This normative specification defines what a **Spark** is, including its concepts, semantics, and document structure. Workflows and project conventions define how Sparks are created, reviewed, stored, and transformed into engineering artifacts.
 
 # Spark
 
-A **Spark** represents a meaningful software concept.
-
-A Spark captures the software intent of that concept independently of any particular engineering artifact.
+A **Spark** is the persistent representation of a meaningful software concept and its software intent, independent of any particular engineering artifact. Engineering artifacts realize Sparks rather than define the primary software design.
 
 A Spark may represent software concepts at different levels of abstraction. Bundled SparkWell workflows currently support:
 
@@ -32,38 +14,15 @@ A Spark may represent software concepts at different levels of abstraction. Bund
 - a service
 - a modular UI component
 
-Spark intentionally does not prescribe a fixed granularity.
-
-Projects should choose a granularity that makes each Spark meaningful to understand, review, evolve, and reuse.
-
----
+Spark does not prescribe fixed granularity. Each Spark should remain meaningful to understand, review, evolve, and reuse.
 
 # Spark Document
 
-A Spark is described by a **Spark Document**.
-
-A Spark Document is the canonical representation of a Spark within a Sparkwell project.
-
-Each Spark Document consists of two complementary parts:
-
-- Frontmatter
-- Body
-
-These parts serve different purposes.
-
----
+A **Spark Document** is the canonical representation of a Spark within a Sparkwell project. It consists of structured frontmatter and a natural-language body.
 
 ## Frontmatter
 
-The frontmatter contains concise, structured metadata describing the identity and relationships of a Spark.
-
-Its purpose is to support:
-
-- identification
-- navigation
-- indexing
-- dependency analysis
-- tooling
+Frontmatter contains concise, relatively stable metadata for identity, relationships, navigation, indexing, dependency analysis, and tooling.
 
 Every Spark Document defines the following core fields:
 
@@ -76,15 +35,7 @@ Every Spark Document defines the following core fields:
 | `composes` | Collection of Sparks directly composed by this Spark |
 | `uses` | Collection of other Sparks referenced but not owned |
 
-`composes` and `uses` remain part of the Spark Document when they are empty. Individual projects define how fields and empty collections are serialized.
-
-Projects may define additional metadata when appropriate.
-
-Established kinds may define standardized kind-specific frontmatter fields. Those fields are part of the represented software intent and must follow the semantics defined for their kind.
-
-The frontmatter should remain concise and relatively stable.
-
----
+`composes` and `uses` remain present when empty; project conventions define serialization. Projects may add metadata, and established kinds may define standardized kind-specific fields. Such fields represent software intent and follow their kind's semantics.
 
 ## Identity
 
@@ -112,7 +63,7 @@ Bundled SparkWell workflows support exactly these standardized kinds:
 
 The kind system remains extensible, but a project-defined kind is supported only when project guidance defines its concept semantics, document representation, design rules, and target applicability. Without that guidance, design and realization workflows must treat the kind as unsupported rather than infer behavior from its name.
 
-The standardized kinds define additional semantics for the concepts they represent. Those semantics do not impose one universal body template. Project conventions define how kind-specific information is serialized.
+Standardized kinds add concept semantics without imposing a universal body template. Project conventions define how kind-specific information is serialized.
 
 ### Domain Model
 
@@ -127,11 +78,7 @@ A Domain Model Spark communicates:
 - field mutability and applicable lifecycle behavior;
 - relationships with other domain concepts;
 - model-level behavior that belongs to the concept;
-- any standard public service operations explicitly enabled for automatic derivation.
-
-A Domain Model may include the optional `service-exposure` frontmatter field. Its non-empty `standard-operations` list explicitly enables the standard operations that may be derived automatically from the model. Omitting `service-exposure` means that no model-derived public service is generated.
-
-`service-exposure` governs only standard public service behavior derived from the Domain Model. It does not prevent an explicit Service Spark from using the model. When the model must not cross any public service boundary, the Domain Model must state that stronger prohibition in its body. Implementation configuration must not add or remove operations declared by the Spark.
+- public-boundary restrictions when the model must not cross a Service boundary.
 
 Field identifiers are stable logical identities within the model. Renaming a display label does not by itself rename a field. A field-identity change is software-intent evolution and may affect every realization of the model.
 
@@ -160,7 +107,7 @@ A Service Spark references independently owned Domain Models and other concepts 
 
 A Service Spark does not prescribe HTTP routes, verbs, transport schemas, controllers, framework services, or generated operation names. Those are engineering artifacts unless they are themselves essential software intent.
 
-Do not create a Service Spark solely to restate standard model operations derived from Domain Model service exposure. Create one when service behavior has an independently meaningful boundary, such as cross-model operations, specialized queries, authorization, batching, orchestration, or distinct failure semantics.
+Create a Service Spark when capabilities are intentionally offered across an independently meaningful conceptual boundary. Even familiar create, retrieve, update, or delete capabilities are explicit Service intent rather than behavior inferred automatically from a Domain Model.
 
 ### UI Component
 
@@ -188,96 +135,26 @@ Native controls, layout containers, framework components, source files, and styl
 
 ## Body
 
-The body describes the software concept itself.
-
-Unlike the frontmatter, the body is intentionally flexible.
-
-Its purpose is to communicate the software design clearly enough for both humans and AI to understand the concept.
-
-A Spark body should describe whatever information is necessary to explain:
-
-- the behavior of the concept;
-- its responsibilities;
-- its constraints;
-- its boundaries;
-- its interactions with other concepts;
-- any other design information required to understand the concept.
+The flexible, natural-language body describes the concept's behavior, responsibilities, constraints, boundaries, interactions, and other design information needed by humans and AI.
 
 The body should contain the minimum sufficient intent for correct review and realization. Include a decision when omitting it would require a reader or implementer to guess observable behavior, ownership, an invariant, a material constraint, or a relationship. Omit information that is already authoritative in another Spark, follows from the frontmatter or standardized kind representation, or belongs to ordinary engineering practice.
 
-State each decision once in the Spark that owns it. Other Sparks should reference that owner through relationships instead of restating its behavior. Concision must not remove requested outcomes or material product decisions.
-
-The body intentionally uses natural language rather than a rigid schema.
-
-Different kinds of Sparks naturally require different kinds of descriptions.
-
----
+State each decision once in the Spark that owns it. Other Sparks should reference that owner through relationships instead of restating its behavior. Concision must not remove requested outcomes or material product decisions. Different kinds naturally require different descriptions; no rigid body schema applies.
 
 # Spark Principles
 
-Every Spark should follow the following principles.
-
----
-
-## One Concept
-
-Each Spark represents one meaningful software concept.
-
-The represented concept should have a clear purpose and a well-defined boundary.
-
----
-
-## Intent Before Implementation
-
-A Spark describes software intent rather than implementation.
-
-Implementation details belong to engineering artifacts unless they are essential to understanding the software concept itself.
-
----
-
-## Implementation Independent
-
-Whenever practical, a Spark should remain independent of implementation technologies, programming languages, frameworks, and platforms.
-
-Implementation-specific concepts are valid exceptions.
-
----
-
-## Human and AI Readable
-
-A Spark should be understandable by both humans and AI.
-
-Understanding a Spark should require significantly less effort than reconstructing software intent from engineering artifacts.
-
----
-
-## Long-lived
-
-Engineering artifacts evolve continuously.
-
-A Spark evolves only when the software intent it represents changes.
-
-Changes to engineering artifacts alone do not necessarily require changes to a Spark.
-
----
-
-## Composable
-
-A Spark may directly compose other Sparks that it conceptually owns.
-
-Composition allows larger software concepts to be represented without sacrificing the independence of individual Sparks.
-
-Shared or independently owned concepts are used rather than composed.
-
----
+| Principle | Rule |
+|---|---|
+| One concept | Represent one meaningful concept with a clear purpose and boundary. |
+| Intent before implementation | Describe software intent. Keep implementation details in engineering artifacts unless they are essential to the concept. |
+| Implementation independent | Remain independent of technologies, languages, frameworks, and platforms whenever practical; implementation-specific concepts are valid exceptions. |
+| Human and AI readable | Be understandable with significantly less effort than reconstructing intent from engineering artifacts. |
+| Long-lived | Evolve when represented software intent changes; engineering-artifact changes alone do not necessarily require Spark changes. |
+| Composable | Directly compose conceptually owned Sparks; use shared or independently owned Sparks. |
 
 # Recommended Body Organization
 
-Different kinds of Sparks naturally emphasize different aspects of software design.
-
-This specification intentionally does not prescribe a universal template.
-
-Instead, projects should organize Spark bodies in whatever way communicates the software concept most clearly.
+Projects should organize each body in the clearest way for its concept rather than follow a universal template. Typical topics include:
 
 Typical examples include:
 
@@ -287,9 +164,7 @@ Typical examples include:
 | Service | Purpose, Capabilities, Inputs, Outputs, Rules, Failure Behavior |
 | Domain Model | Domain Meaning, Data, Validation, Invariants, Lifecycle, Relationships |
 
-These examples are recommendations rather than requirements.
-
----
+These topics are recommendations, not requirements.
 
 # Requirements
 
@@ -299,30 +174,11 @@ Sparks represent the software concepts and detailed design intent responsible fo
 
 Sparks are not summaries, subsets, or compressed copies of requirements. A Spark narrows the scope to one meaningful software concept, but that narrower scope must not imply reduced behavioral detail. Through design and clarification, a Spark may contain more precise behavior, states, responsibilities, constraints, boundaries, interactions, failure behavior, and invariants than any one originating requirement.
 
-A requirement may be realized by multiple Sparks, and a Spark may contribute to realizing multiple requirements. The relationship between Requirements and Sparks is therefore many-to-many.
-
----
+A requirement may be realized by multiple Sparks, and a Spark may contribute to multiple requirements; the relationship is many-to-many.
 
 # Engineering Artifacts
 
-Engineering artifacts are concrete realizations of Sparks.
-
-Examples include:
-
-- source code
-- tests
-- documentation
-- diagrams
-- API specifications
-- platform-specific implementations
-
-A Spark may be realized by multiple engineering artifacts.
-
-Likewise, an engineering artifact may contribute to realizing multiple Sparks.
-
-Engineering artifacts should remain consistent with the Sparks they realize.
-
----
+Engineering artifacts are concrete realizations of Sparks, including source code, tests, documentation, diagrams, API specifications, and platform-specific implementations. A Spark may have multiple artifacts, and an artifact may realize multiple Sparks. Artifacts should remain consistent with the Sparks they realize.
 
 # Relationships
 
@@ -354,8 +210,4 @@ Projects may introduce additional relationship types when appropriate.
 
 # Evolution
 
-SparkWell is an experimental project.
-
-This specification intentionally defines only the minimum concepts required to support experimentation.
-
-Future versions may refine these concepts as implementation experience, experiments, and community feedback accumulate.
+SparkWell is experimental. This specification defines the minimum concepts needed for experimentation and may evolve with implementation experience and feedback.

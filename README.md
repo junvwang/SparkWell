@@ -109,12 +109,14 @@ After review, invoke later workflows independently:
 | Workflow | Responsibility | Does not own |
 |----------|----------------|--------------|
 | `/spark-config` | Creates or revises one project implementation profile and its architecture guidance | Sparks, product code, tests, or dependencies |
-| `/spark-impl` | Creates or updates target engineering artifacts, including runtime and Service Contract realizations | Spark design or test authoring |
+| `/spark-impl` | Creates or updates target engineering artifacts using the selected profile and implementation packs | Spark design or test authoring |
 | `/spark-test` | Derives behavioral scenarios, creates or updates test artifacts, and reports verified and unverified intent | Spark design or production runtime changes |
 
 Each slash command activates only that workflow for the current request. A decision collected by the host UI, or a direct fallback control for the latest Spark or Implementation Configuration Proposal, is the only limited continuation. Workflows never activate automatically or chain into one another.
 
-SparkWell provides the shared realization process, not a universal project architecture. Before generating a new runtime implementation, use `/spark-config` to confirm its profile and project guidance. Existing implementations preserve their established architecture. `/spark-impl` follows reviewed Sparks, profile constraints, project guidance, and native architecture; it does not choose MVC, MVVM, state management, persistence, synchronization, or module structure on the project's behalf.
+SparkWell provides the shared realization process, not a universal project architecture or interface format. Before generating a new implementation, use `/spark-config` to confirm its profile, optional implementation packs, and project guidance. Existing implementations preserve their established architecture. `/spark-impl` follows reviewed Sparks, profile constraints, selected packs, project guidance, and native architecture; it does not choose MVC, MVVM, state management, persistence, synchronization, module structure, or a wire protocol on the project's behalf.
+
+Reusable technology behavior is distributed as optional implementation packs. Install a bundled pack explicitly, then activate it only in profiles that need it. For example, `sparkwell init --pack openapi` installs OpenAPI 3.1 producer, server, client, and test guidance without making OpenAPI part of SparkWell Core or enabling it for every profile.
 
 When implementation or testing reveals missing or contradictory intent, the workflow stops and identifies `/spark-design` as the explicit next command. It does not invoke that workflow, invent product behavior in code, or weaken a test.
 
@@ -129,6 +131,12 @@ npm link
 
 cd ../MyProject
 sparkwell init
+```
+
+Optional implementation packs are installed separately:
+
+```sh
+sparkwell init --pack openapi
 ```
 
 Then explicitly invoke a workflow, for example:
@@ -157,14 +165,16 @@ See the **[detailed usage guide](docs/usage.md)** for installation, adapters, co
 |------|---------|
 | [`core/`](core/) | Canonical SparkWell instructions and project contracts |
 | [`skills/`](skills/) | Agent-neutral design, configuration, implementation, testing, and visualization workflows |
+| [`packs/`](packs/) | Optional reusable technology-specific implementation and test guidance |
 | [`adapters/`](adapters/) | Declarative mappings to coding-agent instruction and skill locations |
 | [`scripts/`](scripts/) | Dependency-free CLI and initialization engine |
 | [`docs/usage.md`](docs/usage.md) | Detailed installation and usage reference |
+| [`docs/implementation-packs.md`](docs/implementation-packs.md) | Pack boundary, activation, OpenAPI example, and migration guide |
 | [`test/`](test/) | CLI, projection, migration, safety, and methodology integrity tests |
 
 ## Current Status
 
-SparkWell is in early development. The core Spark specification, standardized Domain Model, Service, and UI Component kinds, project implementation guidance, OpenAPI Service Contract and API Service target guidance, explicit design/configuration/implementation/testing workflows, realization provenance, and multi-agent adapters are available today.
+SparkWell is in early development. The core Spark specification, standardized Domain Model, Service, and UI Component kinds, project implementation guidance, explicit design/configuration/implementation/testing workflows, realization provenance, multi-agent adapters, and an optional OpenAPI implementation pack are available today.
 
 The methodology and tooling will continue to evolve through practical use and feedback while keeping existing project content safe and version controlled.
 

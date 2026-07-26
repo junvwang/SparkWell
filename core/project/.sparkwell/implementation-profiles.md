@@ -4,22 +4,7 @@ Implementation profiles hold project-specific target, framework, source-layout, 
 
 ## Configuration
 
-Define profiles in `.sparkwell/config.yaml`:
-
-```yaml
-schema-version: 1
-
-contracts:
-  root: src/contracts
-  service-format: openapi-3.1
-
-implementations:
-  profiles: {}
-```
-
-`contracts` defines project-wide contract settings shared by every target. `contracts.root` is the project-relative folder where the Contract target writes contracts and other targets read them. `contracts.service-format` selects the service-contract format. The bundled Contract target supports `openapi-3.1`.
-
-`implementations.profiles` maps a unique profile ID to each runtime implementation profile. Profile and target IDs use lowercase kebab-case. Targets are extensible, and multiple profiles may share a target.
+`.sparkwell/config.yaml` is the single profile-configuration source. `implementations.profiles` maps a unique profile ID to each implementation profile. Profile, target, and pack IDs use lowercase kebab-case. Targets are extensible, and multiple profiles may share a target.
 
 ## Profile Fields
 
@@ -27,6 +12,7 @@ implementations:
 |-------|----------|---------|
 | `target` | yes | Implementation target |
 | `source-root` | yes | Project-relative artifact root |
+| `packs` | no | Implementation pack IDs activated for this profile |
 | `constraints` | no | Mandatory implementation choices |
 | `preferences` | no | Overridable defaults |
 | `guidance` | no | Ordered list of project-relative implementation-guidance documents |
@@ -35,7 +21,15 @@ Constraint and preference keys are extensible. Constraints are mandatory impleme
 
 Paths use `/` and are relative to the project root. Guidance paths must resolve to readable files and must not escape the project root. The recommended location is `.sparkwell/guidance/<profile-id>.md`.
 
-Profiles do not inherit and must not contain secrets. `.sparkwell/config.yaml` is the single profile-configuration source.
+Profiles do not inherit and must not contain secrets.
+
+## Implementation Packs
+
+An implementation pack is reusable, technology-specific guidance installed at `.sparkwell/packs/<pack-id>/PACK.md`. Install bundled packs explicitly with `sparkwell init --pack <pack-id>`.
+
+A profile activates only the pack IDs listed in its `packs` field. Installation alone does not activate a pack. Before planning implementation or tests, read every selected `PACK.md` and the references it requires for the effective target and workflow. Pack references must remain inside that pack's directory. A missing pack, unreadable or escaping reference, or incompatible pack/profile combination makes the task **Blocked**.
+
+Packs may define target applicability, required profile keys and values, cross-profile references, artifact mapping, generation rules, validation, and test guidance. Pack requirements are not defaults and cannot be overridden by profile constraints or guidance; contradictions are **Blocked**. Packs do not own product behavior and must not introduce capabilities absent from reviewed Sparks. Multiple packs have equal authority; list order is for reading only and never resolves conflicts.
 
 ## Decision Ownership
 
@@ -47,6 +41,7 @@ Keep each decision in its owning layer:
 | Profile `constraints` | Structured choices the implementation workflow must not change |
 | Profile `preferences` | Structured defaults that may be overridden compatibly |
 | Profile `guidance` | Nuanced project architecture and code-generation rules |
+| Selected implementation packs | Reusable technology-specific realization and validation rules |
 | Native project files and source | Actual dependencies, versions, commands, build state, and existing implementation structure |
 
 Do not move product decisions into implementation guidance. For example, whether offline work is allowed and how conflicts appear to users belong in Sparks; SQLite, repository organization, and synchronization adapters belong in the profile or guidance.
@@ -92,27 +87,25 @@ Apply compatible decisions in this order:
 1. Reviewed Spark intent.
 2. Profile `constraints`.
 3. Profile-referenced project guidance.
-4. Compatible explicit user choices.
-5. Established native architecture and configuration.
-6. Profile `preferences`.
-7. Optional SparkWell target defaults.
+4. Selected implementation packs.
+5. Compatible explicit user choices.
+6. Established native architecture and configuration.
+7. Profile `preferences`.
+8. Optional target defaults.
 
-This order does not authorize silent conflict resolution. Stop as **Blocked** when Spark intent, constraints, guidance, explicit choices, or established architecture contradict one another. Preferences and target defaults apply only when they are compatible with all higher-authority sources.
+This order does not authorize silent conflict resolution. Stop as **Blocked** when Spark intent, constraints, guidance, selected packs, explicit choices, or established architecture contradict one another. Preferences and target defaults apply only when they are compatible with all higher-authority sources.
 
 ## Example
 
 ```yaml
 schema-version: 1
 
-contracts:
-  root: src/contracts
-  service-format: openapi-3.1
-
 implementations:
   profiles:
     web-react:
       target: web
       source-root: src/web
+      packs: []
       constraints:
         framework: react
         architecture: feature-modules
@@ -122,24 +115,10 @@ implementations:
         state-management: zustand
       guidance:
         - .sparkwell/guidance/web-react.md
-
-    todo-api:
-      target: api-service
-      source-root: src/todo-api
-      constraints:
-        runtime: dotnet
-        framework: aspnet-core
-        architecture: clean-architecture
-        persistence:
-          provider: sqlite
-      guidance:
-        - .sparkwell/guidance/todo-api.md
 ```
 
 ## Selection
 
-- Select a named profile when it exists and matches any requested target.
-- For a target with exactly one profile, select it automatically.
-- For multiple matching profiles, ask for a profile ID.
+- Select a named profile that matches the requested target. For exactly one match, select it automatically; for multiple matches, ask for a profile ID.
 - With no matching profile, use an unambiguous established implementation only when its architecture is clear and no new implementation surface is required.
 - A new runtime implementation requires a named profile and resolved consequential choices. Stop and direct the user to `/spark-config` when either is missing.

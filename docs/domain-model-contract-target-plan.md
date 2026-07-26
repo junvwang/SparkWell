@@ -1,8 +1,8 @@
 # Domain Model, Contract, and Multi-Target Implementation Plan
 
-> Status: In Progress
+> Status: Superseded
 >
-> Domain Model and Service kinds plus Agent Skill guidance for OpenAPI Service Contract and API Service targets are implemented. End-to-end Todo validation and deterministic validation tooling remain incomplete. Independently managed persistence boundaries and event contracts remain out of scope.
+> This document records the former design in which Contract/OpenAPI behavior and `service-exposure` were bundled into SparkWell Core. The current design moves technology-specific behavior into optional implementation packs, requires explicit Service capabilities, and configures contract producers and consumers through profiles. See [Optional Implementation Packs](implementation-packs.md). The material below is historical and must not be used as current workflow guidance.
 
 ## 1. Background
 

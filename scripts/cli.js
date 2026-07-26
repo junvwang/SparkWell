@@ -5,7 +5,9 @@ import {
   InitConflictError,
   initializeProject,
   normalizeAgents,
+  normalizePacks,
   SUPPORTED_AGENTS,
+  SUPPORTED_PACKS,
 } from './init-project.js'
 
 const usage = `Usage:
@@ -14,6 +16,8 @@ const usage = `Usage:
 Options:
   --agent <name>  Coding-agent integration; repeat for multiple agents
                   Supported: ${SUPPORTED_AGENTS.join(', ')}
+  --pack <id>      Optional implementation pack; repeat for multiple packs
+                   Supported: ${SUPPORTED_PACKS.join(', ')}
   --dry-run       Show planned changes without writing files
   --force         Overwrite conflicting Sparkwell-managed files
   --help, -h      Show this help
@@ -31,6 +35,7 @@ export async function runCli(args, environment = {}) {
       strict: true,
       options: {
         agent: { type: 'string', multiple: true },
+        pack: { type: 'string', multiple: true },
         'dry-run': { type: 'boolean', default: false },
         force: { type: 'boolean', default: false },
         help: { type: 'boolean', short: 'h', default: false },
@@ -60,10 +65,12 @@ export async function runCli(args, environment = {}) {
     }
 
     const agents = normalizeAgents(parsed.values.agent)
+    const packs = normalizePacks(parsed.values.pack)
     const destination = path.resolve(cwd, destinationArgument ?? '.')
     const result = await initializeProject({
       destination,
       agents,
+      packs,
       dryRun: parsed.values['dry-run'],
       force: parsed.values.force,
     })
@@ -72,6 +79,7 @@ export async function runCli(args, environment = {}) {
     stdout.write(`${action} Sparkwell in ${destination}\n`)
     const integrationLabel = agents.length === 1 ? 'integration' : 'integrations'
     stdout.write(`Agent ${integrationLabel}: ${agents.join(', ')}\n`)
+    stdout.write(`Implementation packs: ${packs.length ? packs.join(', ') : 'none'}\n`)
     stdout.write(
       `Files: ${result.created} created, ${result.updated} updated, ${result.unchanged} unchanged\n`,
     )
@@ -91,6 +99,12 @@ export async function runCli(args, environment = {}) {
     if (error instanceof TypeError && error.message.includes('Unsupported agent')) {
       stderr.write(`${error.message}\n`)
       stderr.write(`Supported agents: ${SUPPORTED_AGENTS.join(', ')}\n`)
+      return 1
+    }
+
+    if (error instanceof TypeError && error.message.includes('Unsupported implementation pack')) {
+      stderr.write(`${error.message}\n`)
+      stderr.write(`Supported implementation packs: ${SUPPORTED_PACKS.join(', ')}\n`)
       return 1
     }
 

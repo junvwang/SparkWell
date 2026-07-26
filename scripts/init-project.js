@@ -15,12 +15,23 @@ import {
   normalizeAgents,
   SUPPORTED_AGENTS,
 } from './adapter-registry.js'
+import {
+  getPack,
+  normalizePacks,
+  SUPPORTED_PACKS,
+} from './pack-registry.js'
 
 const packageRoot = fileURLToPath(new URL('../', import.meta.url))
 const requiredDirectories = ['sparks', '.sparkwell/state/realizations']
 const projectOwnedSeeds = new Set(['.sparkwell/config.yaml'])
 
-export { normalizeAgent, normalizeAgents, SUPPORTED_AGENTS }
+export {
+  normalizeAgent,
+  normalizeAgents,
+  normalizePacks,
+  SUPPORTED_AGENTS,
+  SUPPORTED_PACKS,
+}
 
 export class InitConflictError extends Error {
   constructor(conflicts) {
@@ -34,16 +45,26 @@ export async function initializeProject({
   destination,
   agent,
   agents,
+  packs,
   dryRun = false,
   force = false,
 }) {
   const normalizedAgents = normalizeAgents(agents ?? (agent ? [agent] : undefined))
+  const normalizedPacks = normalizePacks(packs)
   const templateSources = [
     {
       sourceRoot: path.join(packageRoot, 'core', 'project'),
       destinationRoot: '',
     },
   ]
+
+  for (const packId of normalizedPacks) {
+    const pack = getPack(packId)
+    templateSources.push({
+      sourceRoot: pack.sourceRoot,
+      destinationRoot: path.join('.sparkwell', 'packs', pack.id),
+    })
+  }
 
   const agentTemplates = await collectAgentTemplates(normalizedAgents)
   templateSources.push(...agentTemplates.templateSources)
@@ -155,6 +176,7 @@ export async function initializeProject({
   return {
     agent: normalizedAgents.length === 1 ? normalizedAgents[0] : undefined,
     agents: normalizedAgents,
+    packs: normalizedPacks,
     created,
     updated,
     unchanged,

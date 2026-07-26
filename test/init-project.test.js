@@ -18,7 +18,9 @@ import {
   InitConflictError,
   initializeProject,
   normalizeAgents,
+  normalizePacks,
   SUPPORTED_AGENTS,
+  SUPPORTED_PACKS,
 } from '../scripts/init-project.js'
 
 const repositoryRoot = fileURLToPath(new URL('../', import.meta.url))
@@ -29,7 +31,8 @@ test('initializes core contracts and GitHub Copilot workflows by default', async
   const result = await initializeProject({ destination: target })
 
   assert.equal(result.agent, 'github-copilot')
-  assert.equal(result.created, 24)
+  assert.deepEqual(result.packs, [])
+  assert.equal(result.created, 19)
   assert.equal(result.updated, 0)
   assert.match(
     await readFile(path.join(target, '.sparkwell', 'config.yaml'), 'utf8'),
@@ -40,6 +43,9 @@ test('initializes core contracts and GitHub Copilot workflows by default', async
     path.join(target, '.sparkwell', 'state', 'realizations'),
     'directory',
   )
+  await assert.rejects(access(path.join(target, '.sparkwell', 'packs')), {
+    code: 'ENOENT',
+  })
   await assertPathExists(
     path.join(target, '.github', 'copilot-instructions.md'),
     'file',
@@ -97,7 +103,7 @@ test('initializes Claude Code instructions and shared skills', async (context) =
 
   assert.equal(result.agent, 'claude-code')
   assert.deepEqual(result.agents, ['claude-code'])
-  assert.equal(result.created, 24)
+  assert.equal(result.created, 19)
   await assertPathExists(path.join(target, 'CLAUDE.md'), 'file')
   await assertPathExists(
     path.join(target, '.claude', 'skills', 'spark-design', 'SKILL.md'),
@@ -115,7 +121,7 @@ test('initializes AGENTS.md-compatible instructions and skills', async (context)
   })
 
   assert.equal(result.agent, 'agents-md')
-  assert.equal(result.created, 24)
+  assert.equal(result.created, 19)
   await assertPathExists(path.join(target, 'AGENTS.md'), 'file')
   await assertPathExists(
     path.join(target, '.agents', 'skills', 'spark-impl', 'SKILL.md'),
@@ -133,7 +139,7 @@ test('composes multiple selected agent adapters', async (context) => {
 
   assert.equal(result.agent, undefined)
   assert.deepEqual(result.agents, ['github-copilot', 'claude-code'])
-  assert.equal(result.created, 43)
+  assert.equal(result.created, 33)
   await assertPathExists(
     path.join(target, '.github', 'copilot-instructions.md'),
     'file',
@@ -165,6 +171,46 @@ test('discovers adapter ids and aliases from manifests', () => {
   )
 })
 
+test('installs only explicitly selected implementation packs', async (context) => {
+  const target = await createTemporaryTarget(context)
+  const packRoot = path.join(repositoryRoot, 'packs', 'openapi')
+  const packFileCount = (await collectRelativeFiles(packRoot)).length
+
+  const first = await initializeProject({
+    destination: target,
+    agent: 'none',
+    packs: ['openapi', 'openapi'],
+  })
+
+  assert.deepEqual(first.packs, ['openapi'])
+  assert.equal(first.created, 5 + packFileCount)
+  for (const relativeFile of await collectRelativeFiles(packRoot)) {
+    assert.equal(
+      await readFile(
+        path.join(target, '.sparkwell', 'packs', 'openapi', relativeFile),
+        'utf8',
+      ),
+      await readFile(path.join(packRoot, relativeFile), 'utf8'),
+      relativeFile,
+    )
+  }
+
+  const second = await initializeProject({
+    destination: target,
+    agent: 'none',
+    packs: ['openapi'],
+  })
+  assert.equal(second.created, 0)
+  assert.equal(second.updated, 0)
+  assert.equal(second.unchanged, 5 + packFileCount)
+})
+
+test('discovers implementation packs and rejects unknown ids', () => {
+  assert.deepEqual(SUPPORTED_PACKS, ['openapi'])
+  assert.deepEqual(normalizePacks(['openapi', 'openapi']), ['openapi'])
+  assert.throws(() => normalizePacks(['unknown']), /Unsupported implementation pack/)
+})
+
 test('is idempotent when managed files are unchanged', async (context) => {
   const target = await createTemporaryTarget(context)
   await initializeProject({ destination: target })
@@ -173,7 +219,7 @@ test('is idempotent when managed files are unchanged', async (context) => {
 
   assert.equal(result.created, 0)
   assert.equal(result.updated, 0)
-  assert.equal(result.unchanged, 24)
+  assert.equal(result.unchanged, 19)
 })
 
 test('treats line-ending and final-newline differences as unchanged', async (context) => {
@@ -226,7 +272,7 @@ test('appends a managed section to existing Copilot instructions', async (contex
   const result = await initializeProject({ destination: target })
   const merged = await readFile(instructionsPath, 'utf8')
 
-  assert.equal(result.created, 23)
+  assert.equal(result.created, 18)
   assert.equal(result.updated, 1)
   assert.ok(merged.startsWith(projectInstructions))
   assert.match(merged, /# Sparkwell Project Instructions/)
@@ -235,7 +281,7 @@ test('appends a managed section to existing Copilot instructions', async (contex
 
   const repeated = await initializeProject({ destination: target })
   assert.equal(repeated.updated, 0)
-  assert.equal(repeated.unchanged, 24)
+  assert.equal(repeated.unchanged, 19)
 })
 
 test('updates only the valid Sparkwell managed section', async (context) => {
@@ -447,6 +493,55 @@ test('CLI accepts repeated agent selections', async (context) => {
   )
 })
 
+test('CLI installs repeated implementation pack selections once', async (context) => {
+  const target = await createTemporaryTarget(context)
+  const output = createOutputCapture()
+  const errors = createOutputCapture()
+
+  const exitCode = await runCli(
+    ['init', target, '--agent', 'none', '--pack', 'openapi', '--pack', 'openapi'],
+    { cwd: repositoryRoot, stdout: output, stderr: errors },
+  )
+
+  assert.equal(exitCode, 0)
+  assert.match(output.text, /Implementation packs: openapi/)
+  assert.equal(errors.text, '')
+  await assertPathExists(
+    path.join(target, '.sparkwell', 'packs', 'openapi', 'PACK.md'),
+    'file',
+  )
+})
+
+test('CLI rejects unknown implementation packs', async () => {
+  const output = createOutputCapture()
+  const errors = createOutputCapture()
+
+  const exitCode = await runCli(
+    ['init', '.', '--pack', 'unknown'],
+    { cwd: repositoryRoot, stdout: output, stderr: errors },
+  )
+
+  assert.equal(exitCode, 1)
+  assert.equal(output.text, '')
+  assert.match(errors.text, /Unsupported implementation pack: unknown/)
+  assert.match(errors.text, /Supported implementation packs: openapi/)
+})
+
+test('CLI help lists optional implementation packs', async () => {
+  const output = createOutputCapture()
+  const errors = createOutputCapture()
+
+  const exitCode = await runCli(
+    ['--help'],
+    { cwd: repositoryRoot, stdout: output, stderr: errors },
+  )
+
+  assert.equal(exitCode, 0)
+  assert.match(output.text, /--pack <id>/)
+  assert.match(output.text, /Supported: openapi/)
+  assert.equal(errors.text, '')
+})
+
 test('CLI exposes initialization only', async () => {
   const output = createOutputCapture()
   const errors = createOutputCapture()
@@ -469,16 +564,12 @@ test('canonical Agent Skills have valid metadata and project unchanged', async (
   const projectedRoot = path.join(target, '.github', 'skills')
   const relativeFiles = await collectRelativeFiles(skillsRoot)
 
-  assert.ok(relativeFiles.includes('spark-impl/references/contract.md'))
   assert.ok(relativeFiles.includes('spark-config/SKILL.md'))
-  assert.ok(relativeFiles.includes('spark-impl/references/api-service.md'))
-  assert.ok(relativeFiles.includes('spark-impl/references/openapi-client.md'))
   assert.ok(relativeFiles.includes('spark-impl/references/android.md'))
   assert.ok(relativeFiles.includes('spark-impl/references/ios.md'))
   assert.ok(relativeFiles.includes('spark-test/references/web.md'))
   assert.ok(relativeFiles.includes('spark-test/references/windows.md'))
-  assert.ok(relativeFiles.includes('spark-test/references/contract.md'))
-  assert.ok(relativeFiles.includes('spark-test/references/api-service.md'))
+  assert.ok(!relativeFiles.some((relativeFile) => /contract|openapi|api-service/.test(relativeFile)))
 
   for (const relativeFile of relativeFiles) {
     assert.equal(
@@ -528,6 +619,10 @@ test('core project templates preserve the methodology quality contract', async (
     path.join(repositoryRoot, 'docs', 'usage.md'),
     'utf8',
   )
+  const implementationPacks = await readFile(
+    path.join(repositoryRoot, 'docs', 'implementation-packs.md'),
+    'utf8',
+  )
   const config = await readFile(
     path.join(coreRoot, 'config.yaml'),
     'utf8',
@@ -552,21 +647,25 @@ test('core project templates preserve the methodology quality contract', async (
     path.join(repositoryRoot, 'skills', 'spark-config', 'SKILL.md'),
     'utf8',
   )
+  const openApiPack = await readFile(
+    path.join(repositoryRoot, 'packs', 'openapi', 'PACK.md'),
+    'utf8',
+  )
   const contractReference = await readFile(
     path.join(
       repositoryRoot,
-      'skills',
-      'spark-impl',
+      'packs',
+      'openapi',
       'references',
-      'contract.md',
+      'openapi-contract.md',
     ),
     'utf8',
   )
   const apiServiceReference = await readFile(
     path.join(
       repositoryRoot,
-      'skills',
-      'spark-impl',
+      'packs',
+      'openapi',
       'references',
       'api-service.md',
     ),
@@ -575,8 +674,8 @@ test('core project templates preserve the methodology quality contract', async (
   const openApiClientReference = await readFile(
     path.join(
       repositoryRoot,
-      'skills',
-      'spark-impl',
+      'packs',
+      'openapi',
       'references',
       'openapi-client.md',
     ),
@@ -625,20 +724,20 @@ test('core project templates preserve the methodology quality contract', async (
   const apiServiceTestReference = await readFile(
     path.join(
       repositoryRoot,
-      'skills',
-      'spark-test',
+      'packs',
+      'openapi',
       'references',
-      'api-service.md',
+      'api-service-test.md',
     ),
     'utf8',
   )
   const contractTestReference = await readFile(
     path.join(
       repositoryRoot,
-      'skills',
-      'spark-test',
+      'packs',
+      'openapi',
       'references',
-      'contract.md',
+      'openapi-contract-test.md',
     ),
     'utf8',
   )
@@ -673,6 +772,8 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(specification, /Changing a Spark's kind does not by itself change its stable ID/)
   assert.match(specification, /minimum sufficient intent for correct review and realization/)
   assert.match(specification, /State each decision once in the Spark that owns it/)
+  assert.match(specification, /familiar create, retrieve, update, or delete capabilities are explicit Service intent/)
+  assert.doesNotMatch(specification, /service-exposure|OpenAPI|contracts\.root/)
   assert.doesNotMatch(specification, /project default/)
   assert.doesNotMatch(specification, /`(?:application|feature|workflow|screen|function|reusable-element)`/)
   assert.match(projectInstructions, /## Activation/)
@@ -707,12 +808,13 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(usage, /Propose a Spark map, then generate documents only after finalization/)
   assert.match(usage, /No Spark Documents, realization state, source code, tests, contracts, profiles, or proposal-state files are changed during this phase/)
   assert.match(usage, /`\/spark-config` \| Propose and finalize one implementation profile/)
-  assert.match(usage, /Missing referenced guidance, unresolved consequential architecture, or conflicts make `\/spark-impl` \*\*Blocked\*\*/)
+  assert.match(usage, /A missing selected pack, missing referenced guidance, unresolved consequential architecture, or conflict makes `\/spark-impl` \*\*Blocked\*\*/)
   assert.doesNotMatch(usage, /## Bypass SparkWell for a Task/)
-  assert.match(contractReference, /A `service` Spark is applicable whenever it is in candidate scope/)
+  assert.match(contractReference, /A `service` Spark is applicable and produces one contract/)
   assert.match(contractReference, /construct a transient Effective Service Definition/)
   assert.match(contractReference, /Do not persist it or add it to realization state/)
-  assert.match(config, /contracts:\r?\n  root: src\/contracts\r?\n  service-format: openapi-3\.1/)
+  assert.match(config, /schema-version: 1\r?\n\r?\nimplementations:\r?\n  profiles: \{\}/)
+  assert.doesNotMatch(config, /contracts:|openapi/i)
   assert.match(conventions, /Review must evaluate substance/)
   assert.match(conventions, /Before modifying Spark Documents, present a concise Spark Proposal in chat/)
   assert.match(conventions, /Proposal review and generated-document review are separate checkpoints/)
@@ -731,9 +833,8 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(conventions, /\| Kind \| Suggested suffix \| Example ID \|/)
   assert.match(conventions, /They are optional naming hints/)
   assert.match(conventions, /Do not infer kind, validity, applicability, or behavior from a suffix/)
-  assert.match(conventions, /Omit `service-exposure` when no model-derived public service/)
-  assert.match(conventions, /non-empty, duplicate-free list containing only `create`, `get`, `list`, `update`, and `delete`/)
-  assert.match(conventions, /must not cross any public service boundary/)
+  assert.match(conventions, /Do not infer public capabilities from a Domain Model/)
+  assert.doesNotMatch(conventions, /service-exposure|OpenAPI|contracts\.root/)
   assert.doesNotMatch(conventions, /project defaults/)
   assert.doesNotMatch(conventions, /`data-model`\s*$/m)
   assert.match(designSkill, /For `domain-model`, follow the standardized kind semantics/)
@@ -758,14 +859,18 @@ test('core project templates preserve the methodology quality contract', async (
   assert.doesNotMatch(designSkill, /`(?:application|feature|workflow|screen|function|reusable-element)`/)
   assert.match(designExamples, /## UI Component Composition Versus Rendered Tree/)
   assert.match(designExamples, /`add-requested` interaction/)
-  assert.match(designExamples, /## Domain Model and Standard Service Behavior/)
+  assert.match(designExamples, /## Domain Model and Service Boundaries/)
   assert.match(designExamples, /## Explicit Service Spark/)
   assert.match(designExamples, /id: todo-item-model/)
   assert.match(designExamples, /id: todo-management-service/)
   assert.match(designExamples, /# Todo Item\r?\n\r?\n## Data/)
   assert.match(designExamples, /# Todo Management\r?\n\r?\n## Capabilities/)
-  assert.match(implementationProfiles, /`contracts\.root` is the project-relative folder where the Contract target writes contracts and other targets read them/)
   assert.match(implementationProfiles, /Profiles do not inherit and must not contain secrets/)
+  assert.match(implementationProfiles, /## Implementation Packs/)
+  assert.match(implementationProfiles, /Installation alone does not activate a pack/)
+  assert.match(implementationProfiles, /\.sparkwell\/packs\/<pack-id>\/PACK\.md/)
+  assert.match(implementationProfiles, /Pack requirements are not defaults and cannot be overridden/)
+  assert.match(implementationProfiles, /Pack references must remain inside that pack's directory/)
   assert.match(implementationProfiles, /## Project Implementation Guidance/)
   assert.match(implementationProfiles, /recommended location is `\.sparkwell\/guidance\/<profile-id>\.md`/)
   assert.match(implementationProfiles, /Every referenced guidance file must be read before implementation planning/)
@@ -773,12 +878,16 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(implementationProfiles, /A new runtime implementation requires a named profile/)
   assert.match(implementationProfiles, /## Resolution and Conflicts/)
   assert.match(implementationProfiles, /Profile-referenced project guidance/)
+  assert.match(implementationProfiles, /Selected implementation packs/)
+  assert.doesNotMatch(implementationProfiles, /contracts\.root|openapi-3\.1|Contract target/)
   assert.doesNotMatch(implementationProfiles, /`contract-root`/)
   assert.doesNotMatch(implementationProfiles, /`contract-source`/)
   assert.doesNotMatch(implementationSkill, /`contract-root`/)
-  assert.match(implementationSkill, /do not infer a competing wire format/)
-  assert.match(implementationSkill, /\[api-service\]\(\.\/references\/api-service\.md\)/)
-  assert.match(implementationSkill, /\.\/references\/openapi-client\.md/)
+  assert.match(implementationSkill, /\.sparkwell\/packs\/<pack-id>\/PACK\.md/)
+  assert.match(implementationSkill, /Installed packs are inactive unless the selected profile lists them/)
+  assert.match(implementationSkill, /Validate every pack-defined required field, value, and cross-profile reference/)
+  assert.match(implementationSkill, /Reject absolute paths, paths containing a `\.\.` component/)
+  assert.doesNotMatch(implementationSkill, /OpenAPI|contracts\.root|references\/api-service/)
   assert.match(implementationSkill, /must have an identifiable runtime component boundary/)
   assert.match(implementationSkill, /Have children report user intent or other outcomes to their owner/)
   assert.match(implementationSkill, /Every guidance file referenced by the selected profile/)
@@ -797,30 +906,37 @@ test('core project templates preserve the methodology quality contract', async (
     windowsReference,
     androidReference,
     iosReference,
-    apiServiceReference,
   ]) {
     assert.match(runtimeReference, /## Architecture Boundary/)
     assert.match(runtimeReference, /direct the user to `\/spark-config`/)
   }
   assert.match(apiServiceReference, /A `ui-component` Spark is \*\*Not applicable\*\*/)
-  assert.match(apiServiceReference, /Implement every selected contract operation by its `operationId`/)
+  assert.match(apiServiceReference, /Implement every selected operation by `operationId`/)
   assert.match(apiServiceReference, /duplicate path and HTTP method pairs/)
-  assert.match(apiServiceReference, /Do not reconstruct the public interface from Sparks/)
-  assert.match(apiServiceReference, /The API Service owns the data-access code and provider-specific artifacts it needs/)
+  assert.match(apiServiceReference, /Do not reconstruct a public interface from Sparks/)
+  assert.match(apiServiceReference, /constraints\.contract-profile/)
   assert.match(implementationSkill, /Keep persistence access and provider-specific artifacts in the current target/)
   assert.match(implementationSkill, /Mark an independently managed persistence boundary \*\*Blocked\*\*/)
-  assert.match(openApiClientReference, /Select one contract operation by `operationId`/)
+  assert.match(openApiClientReference, /Select one unique `operationId`/)
   assert.match(openApiClientReference, /Prefer established client-generation tooling/)
-  assert.match(apiServiceTestReference, /Verify HTTP method, path, parameter location/)
+  assert.match(apiServiceTestReference, /Verify method, path, parameter location/)
   assert.doesNotMatch(testSkill, /suffix/i)
-  assert.match(contractTestReference, /operations exactly match `service-exposure\.standard-operations`/)
-  assert.match(contractTestReference, /Compare an updated contract with the existing interface/)
-  assert.match(contractReference, /Record every generated or materially updated contract file in `\.sparkwell\/state\/realizations\/contract\.yaml`/)
-  assert.doesNotMatch(contractReference, /profile's `source-root`|constraints\.service-format/)
-  assert.match(realizationState, /Map each contract file to its source Sparks/)
+  assert.match(contractTestReference, /one operation per Service capability/)
+  assert.match(contractTestReference, /Compare updates with the existing interface/)
+  assert.match(contractReference, /Record every generated or materially updated file in `\.sparkwell\/state\/realizations\/<implementation-id>\.yaml`/)
+  assert.match(contractReference, /selected producer profile's `source-root`/)
+  assert.match(openApiPack, /never publishes a Domain Model or derives CRUD operations merely because a model exists/)
+  assert.match(openApiPack, /target: openapi-contract/)
+  assert.match(openApiPack, /constraints\.contract-profile/)
+  assert.match(openApiPack, /require `constraints\.openapi-version: '3\.1'`/)
+  assert.match(openApiPack, /These are pack requirements, not overridable defaults/)
+  assert.doesNotMatch(openApiPack, /\t/)
+  assert.match(realizationState, /Map each artifact to every Spark whose intent it materially realizes/)
+  assert.match(realizationState, /implementation packs may define more specific artifact-granularity rules/)
   assert.match(realizationState, /- todo-list-ui/)
   assert.match(realizationState, /- todo-item-model/)
-  assert.match(designExamples, /omit `service-exposure`/)
+  assert.match(designExamples, /create a Service Spark and state each public capability explicitly/)
+  assert.doesNotMatch(designExamples, /service-exposure/)
   for (const explicitSkill of [
     designSkill,
     sparkConfigSkill,
@@ -832,6 +948,10 @@ test('core project templates preserve the methodology quality contract', async (
     assert.match(explicitSkill, /description: 'User-invoked SparkWell workflow/)
   }
   assert.match(sparkConfigSkill, /name: spark-config/)
+  assert.match(sparkConfigSkill, /sparkwell init --pack <pack-id>/)
+  assert.match(sparkConfigSkill, /configures packs but does not install or edit them/)
+  assert.match(sparkConfigSkill, /Validate every pack-defined required field, value, and cross-profile reference/)
+  assert.match(sparkConfigSkill, /Reject absolute paths, paths containing a `\.\.` component/)
   assert.match(sparkConfigSkill, /## Prepare the Configuration Proposal/)
   assert.match(sparkConfigSkill, /During the proposal phase, do not modify `\.sparkwell\/config\.yaml`/)
   assert.match(sparkConfigSkill, /Handle a UI decision or direct control only when the latest complete Implementation Configuration Proposal is unambiguously available/)
@@ -843,6 +963,12 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(testSkill, /Do not invoke either workflow automatically/)
   assert.doesNotMatch(testSkill, /disabled placeholder/)
   assert.match(testSkill, /Do not modify production runtime artifacts/)
+  assert.match(testSkill, /Installed packs are inactive unless the selected profile lists them/)
+  assert.match(testSkill, /Validate every pack-defined required field, value, and cross-profile reference/)
+  assert.match(testSkill, /Reject absolute paths, `\.\.` components/)
+  assert.match(implementationPacks, /## Migration From the Former Contract Model/)
+  assert.match(implementationPacks, /Replace Domain Model `service-exposure` with explicit Service capabilities/)
+  assert.match(implementationPacks, /\| `create-todo` \|/)
 
   for (const proposalSkill of [designSkill, sparkConfigSkill]) {
     assert.match(proposalSkill, /user-question tool such as `vscode_askQuestions`/)

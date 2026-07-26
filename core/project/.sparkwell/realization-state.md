@@ -36,7 +36,7 @@ Each artifact entry has a unique project-relative `path` and a non-empty, duplic
 - Exclude caches, build outputs, lock files, and generic tooling unless intentionally derived from Spark intent.
 - Do not store hashes, validation results, timestamps, secrets, or absolute paths.
 - Test artifacts may be mapped like other engineering artifacts. State records their Spark provenance, not requirement coverage, pass status, or completeness.
-- Map each contract file to its source Sparks: a model-derived contract to its Domain Model; an explicit service contract to its Service and any represented Domain Models. Do not map individual operations or schemas.
+- Map each artifact to every Spark whose intent it materially realizes. Selected implementation packs may define more specific artifact-granularity rules.
 
 ## Lifecycle
 

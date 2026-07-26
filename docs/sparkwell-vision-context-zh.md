@@ -606,12 +606,15 @@ SparkWell Core 提供通用 realization 流程，但不替项目选择 MVC、MVV
 项目实现配置分为：
 
 - `.sparkwell/config.yaml` 中的 Profile `constraints` 和 `preferences`；
+- Profile 显式选择的 optional implementation packs，用于复用特定技术的 realization 与测试规则；
 - Profile 引用的 `.sparkwell/guidance/*.md` 项目架构指导；
 - native manifests、build files 和既有代码所表达的工程事实。
 
+Pack 需要先显式安装，再由具体 Profile 激活；安装本身不会让某项技术成为所有项目或所有 target 的默认选择。协议、contract format、framework、generator 和 persistence provider 都不属于 Core 语义。
+
 新 runtime implementation 在生成代码前应通过 `/spark-config` 提出并确认 Implementation Configuration Proposal。已有系统应优先固化并保留现有架构，而不是借机重构。
 
-Sparks 继续拥有产品行为、用户可见状态、同步和冲突语义；Profile 与 Guidance 拥有 provider、adapter、repository、ORM、DI 和代码组织方式。
+Sparks 继续拥有产品行为、用户可见状态、Service capabilities、同步和冲突语义；Profile、Pack 与 Guidance 拥有 protocol、contract format、provider、adapter、repository、ORM、DI、generator 和代码组织方式。
 
 ## 7.4 Offline Review 是核心能力
 

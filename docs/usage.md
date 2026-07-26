@@ -2,6 +2,8 @@
 
 This guide covers installation, initialization, coding-agent adapters, implementation profiles, workflow usage, safety behavior, and CLI development.
 
+See [Optional Implementation Packs](implementation-packs.md) for the extension contract, OpenAPI profile model, and migration from the former Core Contract configuration.
+
 ## Requirements
 
 - Node.js 20 or later
@@ -36,6 +38,14 @@ Initialize another directory:
 ```sh
 sparkwell init ../MyProject
 ```
+
+Install an optional implementation pack by repeating `--pack` as needed:
+
+```sh
+sparkwell init ../MyProject --pack openapi
+```
+
+Installation makes pack guidance available under `.sparkwell/packs/`; only profiles that list a pack activate it.
 
 Create only the agent-neutral SparkWell contract:
 
@@ -78,6 +88,7 @@ Every initialized project receives:
 ├── config.yaml
 ├── conventions.md
 ├── implementation-profiles.md
+├── packs/                  # only when explicitly installed
 ├── realization-state.md
 ├── specification.md
 └── state/
@@ -232,27 +243,13 @@ Each Domain Model uses a technology-independent `## Data` table:
 | `completed` | Whether the work is complete | boolean | Yes | `false` | None | Mutable |
 ```
 
-Use stable logical field identifiers and domain types rather than language, transport, ORM, or database types. Put cross-field rules under `## Invariants`, describe material model relationships through `composes` or `uses`, and use optional `service-exposure` frontmatter only when automatic standard service operations are explicitly intended.
+Use stable logical field identifiers and domain types rather than language, transport, ORM, or database types. Put cross-field rules under `## Invariants` and describe material model relationships through `composes` or `uses`. A Domain Model does not automatically publish operations. If it must not cross any Service boundary, state that product restriction in its body.
 
-To enable a model-derived standard service, add the allowed operations after `uses`:
-
-```yaml
-service-exposure:
-  standard-operations:
-    - create
-    - get
-    - list
-    - update
-    - delete
-```
-
-Omit `service-exposure` to generate no model-derived service. The list must be non-empty and is the exact set of automatically derived operations. Omission does not prevent an explicit Service Spark from using the model unless the Domain Model body states that it must not cross any public service boundary.
-
-The projected `.sparkwell/specification.md` defines Domain Model semantics. `.sparkwell/conventions.md` defines the exact field-table, type, relationship, and service-exposure representation.
+The projected `.sparkwell/specification.md` defines Domain Model semantics. `.sparkwell/conventions.md` defines the exact field-table, type, and relationship representation.
 
 #### Service Sparks
 
-Use `kind: service` for independently meaningful capabilities across a conceptual boundary, such as cross-model coordination, specialized queries, authorization, batching, orchestration, or distinct failure behavior. Do not create Service Sparks mechanically for controllers, endpoints, framework service classes, generated clients, or automatic standard CRUD.
+Use `kind: service` for independently meaningful capabilities across a conceptual boundary. Public create, retrieve, update, and delete behavior is explicit Service intent just like specialized queries, authorization, batching, orchestration, or distinct failures. Do not create Service Sparks mechanically for controllers, endpoints, framework classes, or generated clients.
 
 Each Service Spark uses a lightweight capabilities table:
 
@@ -270,14 +267,10 @@ The projected `.sparkwell/specification.md` defines Service semantics. `.sparkwe
 
 ### 2. Configure an implementation
 
-Initialization creates shared contract settings and an empty profile map in `.sparkwell/config.yaml`:
+Initialization creates an empty profile map in `.sparkwell/config.yaml`:
 
 ```yaml
 schema-version: 1
-
-contracts:
-  root: src/contracts
-  service-format: openapi-3.1
 
 implementations:
   profiles: {}
@@ -298,15 +291,12 @@ A finalized profile may look like:
 ```yaml
 schema-version: 1
 
-contracts:
-  root: src/contracts
-  service-format: openapi-3.1
-
 implementations:
   profiles:
     web-react:
       target: web
       source-root: src/web
+      packs: []
       constraints:
         framework: react
         architecture: feature-modules
@@ -317,10 +307,44 @@ implementations:
       guidance:
         - .sparkwell/guidance/web-react.md
 
+```
+
+Profile `packs` activate explicitly installed reusable guidance; `constraints` are mandatory structured choices; `preferences` are overridable defaults; `guidance` contains nuanced project architecture such as module boundaries, state ownership, data flow, model mappings, persistence patterns, and artifact ownership. The recommended guidance path is `.sparkwell/guidance/<profile-id>.md`.
+
+Native project files remain authoritative for dependencies, versions, commands, formatting, linting, build configuration, and actual existing structure. Packs, guidance, and native architecture must agree. A missing selected pack, missing referenced guidance, unresolved consequential architecture, or conflict makes `/spark-impl` **Blocked**.
+
+Resolution order is: reviewed Spark intent, profile constraints, profile guidance, selected packs, compatible explicit choices, established native architecture, profile preferences, then optional target defaults. This order never silently resolves contradictions.
+
+### 3. Use optional implementation packs
+
+SparkWell Core does not select a framework, protocol, contract format, persistence provider, or generator. Packs provide reusable technology behavior while profiles decide where and how it applies.
+
+Install the bundled OpenAPI pack:
+
+```sh
+sparkwell init --pack openapi
+```
+
+Then use `/spark-config` to create profiles like these:
+
+```yaml
+implementations:
+  profiles:
+    public-api-contract:
+      target: openapi-contract
+      source-root: src/contracts
+      packs:
+        - openapi
+      constraints:
+        openapi-version: '3.1'
+
     todo-api:
       target: api-service
       source-root: src/todo-api
+      packs:
+        - openapi
       constraints:
+        contract-profile: public-api-contract
         runtime: dotnet
         framework: aspnet-core
         architecture: clean-architecture
@@ -330,39 +354,29 @@ implementations:
         - .sparkwell/guidance/todo-api.md
 ```
 
-Profile `constraints` are mandatory structured choices; `preferences` are overridable defaults; `guidance` contains nuanced project architecture such as module boundaries, state ownership, data flow, model mappings, persistence patterns, and artifact ownership. The recommended guidance path is `.sparkwell/guidance/<profile-id>.md`.
+Installation alone does not activate OpenAPI. Each participating profile lists `openapi`, and consumers identify the producer through `constraints.contract-profile`.
 
-Native project files remain authoritative for dependencies, versions, commands, formatting, linting, build configuration, and actual existing structure. Guidance and native architecture must agree. Missing referenced guidance, unresolved consequential architecture, or conflicts make `/spark-impl` **Blocked** and require `/spark-config` rather than an AI-selected architecture.
+#### OpenAPI example
 
-Resolution order is: reviewed Spark intent, profile constraints, profile guidance, compatible explicit choices, established native architecture, profile preferences, then optional target defaults. This order never silently resolves contradictions.
-
-The Contract target writes to `contracts.root`, and runtime targets read contracts from that same project-wide folder. Each runtime profile's `source-root` remains the output root for its own artifacts.
-
-### 3. Generate Service Contracts
-
-After reviewing the relevant Sparks, invoke `/spark-impl` for the Contract target:
+After reviewing an explicit Service Spark, invoke `/spark-impl` for the producer profile:
 
 ```text
-/spark-impl Implement todo-item-model and todo-management-service for the contract target.
+/spark-impl Implement todo-management-service using the public-api-contract profile.
 ```
 
-The initial bundled Contract target generates OpenAPI 3.1 Service Contracts:
+The optional pack generates one OpenAPI 3.1 contract from each selected Service Spark. Domain Models used by Service capabilities provide schema context but never publish operations automatically.
 
-- A Domain Model Spark generates a model-derived contract only when it contains a non-empty `service-exposure.standard-operations` list.
-- A Service Spark in the requested candidate scope always generates a contract containing its capability rows.
-
-Default paths beneath `contracts.root` are:
+The producer profile's `source-root` owns its artifacts:
 
 ```text
 src/contracts/
 └── service/
-    ├── <domain-model-spark-id>.openapi.yaml
-    └── <service-spark-id>.openapi.yaml
+  └── <service-spark-id>.openapi.yaml
 ```
 
-The Contract target records each file in `.sparkwell/state/realizations/contract.yaml`. Runtime targets inspect `contracts.root`, conventional paths, and realization manifests whose artifact paths are under that folder. Contract generation does not create server, client, UI, storage, or test code.
+The producer records files in `.sparkwell/state/realizations/public-api-contract.yaml`. Consumers resolve that profile, its source root, and its realization state. Contract production does not create server, client, UI, storage, or test code.
 
-Run the Contract target before profiles that consume or implement its contracts. SparkWell does not automate this ordering.
+Run the producer before profiles that consume or implement its contracts. SparkWell does not automate this ordering.
 
 ### 4. Implement
 
@@ -372,13 +386,13 @@ After review, invoke `/spark-impl` for a profile:
 /spark-impl Implement todo-app-ui for the web-react profile.
 ```
 
-To implement the server side of generated Service Contracts:
+To implement the server side of the selected OpenAPI contracts:
 
 ```text
-/spark-impl Implement todo-item-model and todo-management-service for the todo-api profile.
+/spark-impl Implement todo-management-service using the todo-api profile.
 ```
 
-The API Service target implements matching OpenAPI operations, maps their boundary schemas to internal domain representations, and owns its configured persistence access and provider-specific artifacts. It does not generate a competing interface or modify public contract files.
+The selected OpenAPI pack implements matching operations, maps boundary schemas to internal representations, and follows the API profile's architecture and persistence choices. It does not generate a competing interface or modify producer-owned files.
 
 `spark-impl` creates or updates artifacts for the selected target, maintains realization provenance, runs applicable checks, and may run relevant existing tests as regression evidence.
 
@@ -426,6 +440,7 @@ Always inspect a `--dry-run` before using `--force`.
 sparkwell init [directory] [options]
 
 --agent <name>  Coding-agent integration; repeat for multiple agents
+--pack <id>      Optional implementation pack; repeat for multiple packs
 --dry-run       Show planned changes without writing files
 --force         Overwrite conflicting SparkWell-managed files
 --help, -h      Show help
@@ -447,6 +462,7 @@ adapters/                    Declarative coding-agent mappings
 core/
 ├── instructions/            Canonical agent-neutral instructions
 └── project/                 Files projected into every initialized project
+packs/                       Optional reusable implementation guidance
 scripts/                     CLI executable and initialization logic
 skills/                      Agent-neutral SparkWell workflows
 test/                        CLI, safety, projection, and integrity tests

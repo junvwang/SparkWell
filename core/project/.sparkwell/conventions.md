@@ -41,8 +41,6 @@ Serialize the core fields defined by the Spark Specification in this order:
 
 Serialize `id`, `name`, `kind`, and `summary` as YAML strings. Serialize `composes` and `uses` as YAML lists of Spark IDs, using `[]` when a collection is empty.
 
-For a Domain Model Spark, serialize the optional `service-exposure` field after `uses`.
-
 Do not add approval status or review metadata. Introduce other frontmatter fields only when project conventions explicitly define them.
 
 ---
@@ -150,41 +148,6 @@ A `reference(<spark-id>)` type must resolve to an existing Spark that the Domain
 
 Describe model-wide validation and cross-field invariants outside the table. Include lifecycle, state transitions, concurrency, and persistence behavior only where they are part of the model's software intent.
 
-## Service Exposure Frontmatter
-
-Use the optional `service-exposure` frontmatter field only when a Domain Model explicitly enables automatic standard service operations.
-
-Allow all standard operations explicitly:
-
-```yaml
-service-exposure:
-  standard-operations:
-    - create
-    - get
-    - list
-    - update
-    - delete
-```
-
-Allow only read operations:
-
-```yaml
-service-exposure:
-  standard-operations:
-    - get
-    - list
-```
-
-Apply these rules:
-
-- Omit `service-exposure` when no model-derived public service should be generated.
-- When `service-exposure` is present, `standard-operations` is required.
-- `standard-operations` is a non-empty, duplicate-free list containing only `create`, `get`, `list`, `update`, and `delete`, serialized in that order when present.
-- The list is the exact standard operation set for a model-derived Service Contract. An implementation profile must not add or remove operations.
-- This field does not prohibit an explicit Service Spark from using the model.
-- To prohibit every public service representation, state in `## Boundaries` that the model must not cross any public service boundary, including through explicit services.
-- When a consumer requests a prohibited standard operation, return to Spark design rather than generating that operation.
-
 Example:
 
 ```markdown
@@ -195,13 +158,6 @@ kind: domain-model
 summary: Represents one piece of work a person wants to track.
 composes: []
 uses: []
-service-exposure:
-  standard-operations:
-    - create
-    - get
-    - list
-    - update
-    - delete
 ---
 
 # Todo Item
@@ -248,7 +204,7 @@ Describe permissions, ordering, idempotency, concurrency, transactional behavior
 
 Do not put HTTP routes, verbs, status codes, DTO names, framework types, controller names, or generated client method names in the capabilities table unless they are enduring compatibility requirements of the software concept.
 
-Do not create a Service Spark solely to repeat standard operations already represented by a Domain Model's service exposure.
+Represent every capability offered across the Service boundary explicitly, including familiar create, retrieve, update, and delete behavior. Do not infer public capabilities from a Domain Model.
 
 Example:
 
