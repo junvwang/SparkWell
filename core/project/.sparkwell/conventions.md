@@ -347,9 +347,11 @@ The children own their internal presentation and interactions. `todo-item-model`
 
 ---
 
-# Creation and Review
+# Proposal, Creation, and Review
 
-Create or update proposed Spark Documents as normal working-tree changes.
+Before modifying Spark Documents, present a concise Spark Proposal in chat and wait for explicit finalization. The proposal lists new Spark IDs, kinds, and summaries; existing Sparks to evolve and why; and any identity or destructive changes. Do not persist the proposal or approval state.
+
+After finalization, revalidate the affected Sparks and proposed paths, then create or update Spark Documents as normal working-tree changes. If relevant project state changed, revise the proposal and obtain confirmation again before writing.
 
 Before presenting them for review, verify that:
 
@@ -361,6 +363,6 @@ Before presenting them for review, verify that:
 - IDs and relationships satisfy the Spark Specification;
 - bodies satisfy the Spark Specification and begin with the expected heading.
 
-Present the proposed Spark changes and their requirement mapping for offline human review, then stop before generating or modifying engineering artifacts. This checkpoint gives a human the opportunity to inspect or edit the documents; it does not require approval status, review files, or other workflow metadata.
+Present the generated Spark Documents and their requirement mapping for human review, then stop before generating or modifying engineering artifacts. Proposal review and generated-document review are separate checkpoints; neither requires approval status, review files, or other workflow metadata.
 
 Review must evaluate substance, not document length or structure. Verify that relevant requested outcomes and constraints were preserved; material behavior, failure, state, validation, lifecycle, persistence, interaction, and platform intent is clear; ownership and boundaries are coherent; each decision has one authoritative owner; and implementation can proceed without inventing product decisions. Remove repetition and boilerplate before review while retaining every implementation-critical clarification.

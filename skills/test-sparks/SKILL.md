@@ -1,7 +1,9 @@
 ---
 name: test-sparks
-description: 'Create, update, or execute test artifacts derived from reviewed Spark design for a configured implementation target. Use when adding behavioral coverage, reconciling tests after Spark or runtime changes, verifying a realization, or reporting covered and unverified intent. Do not use for runtime implementation or Spark design.'
+description: 'User-invoked SparkWell workflow for creating, updating, or executing tests derived from reviewed Spark Documents.'
 argument-hint: 'Specify root Spark IDs or all, plus a target or profile'
+user-invocable: true
+disable-model-invocation: true
 ---
 
 # Test Sparks
@@ -16,7 +18,7 @@ This skill owns test scenarios, test source, test-only configuration, and behavi
 
 Use reviewed Sparks as the durable concept design and coverage source for this workflow.
 
-If testing exposes missing or contradictory product intent, return to `design-sparks`. If it exposes a runtime implementation defect, report it for `implement-sparks`. Do not change Spark or runtime artifacts merely to make a test pass.
+If testing exposes missing or contradictory product intent, stop and tell the user to invoke `/design-sparks`. If it exposes a runtime implementation defect, report it and tell the user to invoke `/implement-sparks`. Do not invoke either workflow automatically, and do not change Spark or runtime artifacts merely to make a test pass.
 
 ## Inputs and Precedence
 
@@ -100,7 +102,7 @@ Classify failures before editing:
 
 - **Runtime defect**: the implementation violates reviewed intent. Report the failing evidence and hand off to `implement-sparks`; do not change production code here.
 - **Test defect**: the test incorrectly expresses reviewed intent or uses an obsolete test interface. Repair the test and rerun it.
-- **Intent defect**: requirements or Sparks are missing, ambiguous, or contradictory. Return to `design-sparks`.
+- **Intent defect**: requirements or Sparks are missing, ambiguous, or contradictory. Stop and hand off to an explicit `/design-sparks` invocation.
 - **Environment defect**: required infrastructure or permissions are unavailable. Report the blocked validation and reproducible setup needed.
 
 Do not weaken assertions merely to make a failing implementation pass.

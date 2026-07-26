@@ -244,7 +244,7 @@ test('updates only the valid Sparkwell managed section', async (context) => {
 Keep this content before SparkWell.
 
 ${initialized.replace(
-  'This project is developed using **Sparkwell**.',
+  'This project includes **Sparkwell** as an opt-in workflow.',
   'Outdated managed content.',
 ).trim()}
 
@@ -258,7 +258,7 @@ Keep this content after SparkWell.
   assert.equal(result.updated, 1)
   assert.match(refreshed, /Keep this content before SparkWell\./)
   assert.match(refreshed, /Keep this content after SparkWell\./)
-  assert.match(refreshed, /This project is developed using \*\*Sparkwell\*\*\./)
+  assert.match(refreshed, /This project includes \*\*Sparkwell\*\* as an opt-in workflow\./)
   assert.doesNotMatch(refreshed, /Outdated managed content/)
   assert.equal(countOccurrences(refreshed, '<!-- sparkwell:start -->'), 1)
   assert.equal(countOccurrences(refreshed, '<!-- sparkwell:end -->'), 1)
@@ -511,6 +511,18 @@ test('core project templates preserve the methodology quality contract', async (
     path.join(coreRoot, 'specification.md'),
     'utf8',
   )
+  const projectInstructions = await readFile(
+    path.join(repositoryRoot, 'core', 'instructions', 'sparkwell.md'),
+    'utf8',
+  )
+  const readme = await readFile(
+    path.join(repositoryRoot, 'README.md'),
+    'utf8',
+  )
+  const usage = await readFile(
+    path.join(repositoryRoot, 'docs', 'usage.md'),
+    'utf8',
+  )
   const config = await readFile(
     path.join(coreRoot, 'config.yaml'),
     'utf8',
@@ -634,11 +646,36 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(specification, /State each decision once in the Spark that owns it/)
   assert.doesNotMatch(specification, /project default/)
   assert.doesNotMatch(specification, /`(?:application|feature|workflow|screen|function|reusable-element)`/)
+  assert.match(projectInstructions, /# Explicit Activation/)
+  assert.match(projectInstructions, /current user message directly invokes one of these slash commands/)
+  assert.match(projectInstructions, /A request that changes product behavior or software intent does not by itself activate SparkWell/)
+  assert.match(projectInstructions, /The only cross-message continuation is the pending Design Proposal response/)
+  assert.match(projectInstructions, /## Pending Design Proposal/)
+  assert.match(projectInstructions, /`Revise: <comments>` updates the proposal/)
+  assert.match(projectInstructions, /`Finalize` confirms the latest complete proposal/)
+  assert.match(projectInstructions, /`Cancel` ends the pending design workflow/)
+  assert.match(projectInstructions, /Any other user message does not continue SparkWell/)
+  assert.match(projectInstructions, /Proposal and approval state remain in chat only/)
+  assert.match(projectInstructions, /If no latest complete proposal is unambiguously available/)
+  assert.match(projectInstructions, /do not create, update, or delete Spark Documents/)
+  assert.doesNotMatch(projectInstructions, /For product development, follow the Spark-first workflow/)
+  assert.match(readme, /SparkWell is opt-in/)
+  assert.match(readme, /Each slash command activates only that workflow for the current request/)
+  assert.match(readme, /It first presents a concise Spark Proposal in chat/)
+  assert.match(readme, /It does not modify files before confirmation/)
+  assert.match(readme, /Finalized documents then receive a second human review/)
+  assert.match(usage, /## Explicit Activation/)
+  assert.match(usage, /SparkWell is inactive by default/)
+  assert.match(usage, /Propose a Spark map, then generate documents only after finalization/)
+  assert.match(usage, /No Spark Documents, realization state, source code, tests, contracts, profiles, or proposal-state files are changed during this phase/)
+  assert.doesNotMatch(usage, /## Bypass SparkWell for a Task/)
   assert.match(contractReference, /A `service` Spark is applicable whenever it is in candidate scope/)
   assert.match(contractReference, /construct a transient Effective Service Definition/)
   assert.match(contractReference, /Do not persist it or add it to realization state/)
   assert.match(config, /contracts:\r?\n  root: src\/contracts\r?\n  service-format: openapi-3\.1/)
   assert.match(conventions, /Review must evaluate substance/)
+  assert.match(conventions, /Before modifying Spark Documents, present a concise Spark Proposal in chat/)
+  assert.match(conventions, /Proposal review and generated-document review are separate checkpoints/)
   assert.match(conventions, /\| Field \| Meaning \| Type \| Required \| Default \| Constraints \| Mutability \|/)
   assert.match(conventions, /\| Capability \| Purpose \| Inputs \| Output \| Failure Behavior \|/)
   assert.match(conventions, /whatever prose, lists, tables, or sections communicate that intent most clearly/)
@@ -667,6 +704,17 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(designSkill, /This is optional naming guidance/)
   assert.match(designSkill, /### Minimum Sufficient Intent/)
   assert.match(designSkill, /There is no target line count/)
+  assert.match(designSkill, /### 5\. Prepare the Spark Proposal/)
+  assert.match(designSkill, /For each proposed new Spark, provide only/)
+  assert.match(designSkill, /For each proposed evolution, provide only/)
+  assert.match(designSkill, /do not modify Spark Documents, realization state, source code, tests, contracts, profiles, or any other project file/)
+  assert.match(designSkill, /present one complete replacement proposal/)
+  assert.match(designSkill, /Handle `Revise:`, `Finalize`, or `Cancel` only when the latest complete proposal is unambiguously available/)
+  assert.match(designSkill, /### 8\. Finalize Spark Documents/)
+  assert.match(designSkill, /Before writing, re-read every affected existing Spark/)
+  assert.match(designSkill, /present a revised complete proposal and wait for confirmation again/)
+  assert.match(designSkill, /### 10\. Present Spark Documents for Review/)
+  assert.match(designSkill, /does not bypass either review checkpoint/)
   assert.doesNotMatch(designSkill, /`(?:application|feature|workflow|screen|function|reusable-element)`/)
   assert.match(designExamples, /## UI Component Composition Versus Rendered Tree/)
   assert.match(designExamples, /`add-requested` interaction/)
@@ -708,7 +756,15 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(realizationState, /- todo-list-ui/)
   assert.match(realizationState, /- todo-item-model/)
   assert.match(designExamples, /omit `service-exposure`/)
-  assert.doesNotMatch(testSkill, /disabled placeholder|disable-model-invocation/)
+  for (const explicitSkill of [designSkill, implementationSkill, testSkill]) {
+    assert.match(explicitSkill, /user-invocable: true/)
+    assert.match(explicitSkill, /disable-model-invocation: true/)
+    assert.match(explicitSkill, /description: 'User-invoked SparkWell workflow/)
+  }
+  assert.match(designSkill, /user must explicitly invoke `\/implement-sparks` or `\/test-sparks`/)
+  assert.match(implementationSkill, /tell the user to invoke `\/design-sparks`\. Do not invoke it automatically/)
+  assert.match(testSkill, /Do not invoke either workflow automatically/)
+  assert.doesNotMatch(testSkill, /disabled placeholder/)
   assert.match(testSkill, /Do not modify production runtime artifacts/)
 })
 

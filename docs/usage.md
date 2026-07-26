@@ -97,25 +97,77 @@ For GitHub Copilot, it also receives:
     └── visualize-sparks/
 ```
 
-Design, implementation, and testing are active, separate workflows. Visualization is currently a disabled placeholder.
+Design, implementation, and testing are user-invoked, separate workflows. Visualization is currently a disabled placeholder.
 
 Initialization does not generate product Sparks, source code, framework projects, implementation profiles, or tests.
+
+## Explicit Activation
+
+SparkWell is inactive by default. Ordinary questions, implementation, debugging, refactoring, testing, and documentation use the coding agent's normal workflow and do not create or update Spark Documents.
+
+Activate one workflow for the current request by invoking its slash command:
+
+| Command | Purpose |
+|---|---|
+| `/design-sparks` | Propose a Spark map, then generate documents only after finalization |
+| `/implement-sparks` | Realize reviewed Sparks for one target or profile |
+| `/test-sparks` | Create, update, or execute tests derived from reviewed Sparks |
+
+Changing software intent does not activate SparkWell automatically. Each command activates only its named workflow and does not invoke the next phase. The only limited cross-message continuation is a direct `Revise:`, `Finalize`, or `Cancel` response to the latest pending Spark Proposal. Any unrelated message ends that implicit continuation. When a workflow identifies any other handoff, invoke the named slash command in a new request.
 
 ## Working With Sparks
 
 ### 1. Design
 
-Ask the coding agent to design Sparks for the requested software change. For example:
+Invoke the design workflow explicitly:
 
 ```text
-Design Sparks for a todo list where people can add todos and mark them complete.
+/design-sparks Design a todo list where people can add todos and mark them complete.
 ```
 
-The agent uses `design-sparks` to extract requested outcomes, identify meaningful concepts, create or evolve Spark Documents, and present them for human review.
+The `/design-sparks` workflow extracts requested outcomes and identifies meaningful concepts, but it does not modify files immediately. It first presents a Spark Proposal in chat.
 
-Review the proposal for complete requested outcomes, material product decisions, clear ownership, and freedom for ordinary engineering choices. Edit the Spark Documents directly when needed.
+The proposal is intentionally brief:
 
-The workflow stops at this checkpoint. Implementation-critical information must be durable in the reviewed Sparks rather than existing only in chat.
+- new Sparks list only ID, kind, and one-sentence `summary`;
+- existing Sparks list only ID and the reason they need to evolve;
+- renames, kind changes, and removals are listed separately;
+- contextual and unchanged Sparks are omitted unless needed to explain a boundary;
+- open questions appear only when they are material.
+
+For example:
+
+```markdown
+**Spark Proposal**
+
+Create:
+
+| Spark | Kind | Summary |
+|---|---|---|
+| `todo-item-model` | `domain-model` | Represents one tracked piece of work and its completion state. |
+
+Evolve:
+
+| Spark | Why |
+|---|---|
+| `todo-app-ui` | Coordinate the proposed entry and list components. |
+```
+
+No Spark Documents, realization state, source code, tests, contracts, profiles, or proposal-state files are changed during this phase.
+
+Respond to the latest proposal with:
+
+- `Revise: <comments>` to receive one complete replacement proposal;
+- `Finalize` to revalidate the current workspace and generate the proposed Spark Documents;
+- `Cancel` to stop without modifying files.
+
+The controls may also be invoked explicitly as `/design-sparks Revise: ...`, `/design-sparks Finalize`, and `/design-sparks Cancel`. Ambiguous approval such as `looks good` does not finalize the proposal.
+
+If affected Sparks or proposed paths changed before finalization, the workflow presents a revised proposal instead of writing stale changes.
+
+Review the proposal for the correct concept set, granularity, and ownership. After finalization, review the generated Spark Documents for complete requested outcomes, material product decisions, and freedom for ordinary engineering choices.
+
+The workflow stops at both checkpoints. Implementation-critical information must be durable in the finalized Sparks rather than existing only in chat.
 
 Keep each body to the minimum sufficient intent. Include a statement when deleting it would force a reviewer or implementer to guess material behavior, ownership, an invariant, a constraint, or a relationship. State each decision once in its owning Spark and reference related Sparks instead of repeating their behavior. Omit repeated summaries, generic quality expectations, implementation-freedom disclaimers, exhaustive negative boundaries, and empty sections.
 
@@ -258,10 +310,10 @@ The Contract target writes to `contracts.root`, and runtime targets read contrac
 
 ### 3. Generate Service Contracts
 
-After reviewing the relevant Sparks, invoke `implement-sparks` for the Contract target:
+After reviewing the relevant Sparks, invoke `/implement-sparks` for the Contract target:
 
 ```text
-Implement todo-item-model and todo-management-service for the contract target.
+/implement-sparks Implement todo-item-model and todo-management-service for the contract target.
 ```
 
 The initial bundled Contract target generates OpenAPI 3.1 Service Contracts:
@@ -284,16 +336,16 @@ Run the Contract target before profiles that consume or implement its contracts.
 
 ### 4. Implement
 
-After review, ask the agent to implement selected Sparks for a profile:
+After review, invoke `/implement-sparks` for a profile:
 
 ```text
-Implement todo-app-ui for the web-react profile.
+/implement-sparks Implement todo-app-ui for the web-react profile.
 ```
 
 To implement the server side of generated Service Contracts:
 
 ```text
-Implement todo-item-model and todo-management-service for the todo-api profile.
+/implement-sparks Implement todo-item-model and todo-management-service for the todo-api profile.
 ```
 
 The API Service target implements matching OpenAPI operations, maps their boundary schemas to internal domain representations, and owns its configured persistence access and provider-specific artifacts. It does not generate a competing interface or modify public contract files.
@@ -304,25 +356,15 @@ It does not create or modify tests, test-only dependencies, test projects, or te
 
 ### 5. Test
 
-Invoke the separate testing workflow when test authoring or broader behavioral verification is desired:
+Invoke `/test-sparks` when test authoring or broader behavioral verification is desired:
 
 ```text
-Create tests for todo-app-ui using the web-react profile.
+/test-sparks Create tests for todo-app-ui using the web-react profile.
 ```
 
 `test-sparks` derives applicable scenarios from reviewed Sparks, reuses existing test conventions, updates test provenance, and classifies failures as runtime, test, intent, or environment defects.
 
 Adding a new test framework, dependency, project, browser harness, emulator, or other consequential infrastructure requires confirmation unless explicitly requested.
-
-## Bypass SparkWell for a Task
-
-To handle a specific task without the SparkWell workflow, tell the coding agent explicitly. For example:
-
-```text
-For this task, do not use the SparkWell workflow and do not create or update Spark Documents. Work directly on the engineering artifacts.
-```
-
-This instruction applies to the requested task and does not change project files or persist an activation state.
 
 ## Safety and Reinitialization
 

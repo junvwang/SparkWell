@@ -44,6 +44,8 @@ All source paths are relative to the SparkWell package root. All destination pat
 
 The current instruction strategy is `managed-section`. It preserves project-authored content outside the adapter's markers and updates only the SparkWell-owned block.
 
+Active SparkWell skills are user-invocable commands with automatic model invocation disabled. Adapters must preserve the canonical Skill frontmatter so ordinary coding requests do not activate SparkWell.
+
 ## Add an Agent
 
 1. Confirm the agent supports the Agent Skills `SKILL.md` standard or document any genuine compatibility gap.

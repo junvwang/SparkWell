@@ -1,7 +1,9 @@
 ---
 name: implement-sparks
-description: 'Generate or update engineering artifacts from reviewed Spark Documents for a configured implementation target. Use when implementing selected Sparks, regenerating target artifacts after Spark changes, or applying an implementation profile. Do not use for Spark design, test authoring, test-infrastructure changes, or diagrams.'
+description: 'User-invoked SparkWell workflow for generating or updating one target realization from reviewed Spark Documents.'
 argument-hint: 'Specify root Spark IDs or all, plus a target or profile'
+user-invocable: true
+disable-model-invocation: true
 ---
 
 # Implement Sparks
@@ -12,7 +14,7 @@ Create or update one working target realization that faithfully realizes selecte
 
 This skill is target-agnostic. It owns the shared Spark-to-artifact workflow. Target-specific behavior comes from the selected implementation profile, existing native project, project guidance, and optional bundled target guidance.
 
-This skill does not create, update, delete, or redesign test artifacts or test infrastructure. Use `test-sparks` for that work.
+This skill does not create, update, delete, or redesign test artifacts or test infrastructure. Testing is a separate task that requires the user to invoke `/test-sparks`.
 
 ## Preconditions
 
@@ -20,9 +22,9 @@ Use this skill to generate engineering artifacts from existing Spark Documents.
 
 Treat the selected Sparks as reviewed design contracts containing the implementation-critical requested outcomes and clarified design for their concepts.
 
-If implementation requires changing software intent, use `design-sparks` and stop before implementation.
+If implementation requires changing software intent, stop before implementation and tell the user to invoke `/design-sparks`. Do not invoke it automatically.
 
-Never modify a Spark Document merely to make implementation easier. If required intent is missing or contradictory, identify the affected Spark and return to Spark design.
+Never modify a Spark Document merely to make implementation easier. If required intent is missing or contradictory, identify the affected Spark and stop with the `/design-sparks` handoff.
 
 ## Inputs and Precedence
 

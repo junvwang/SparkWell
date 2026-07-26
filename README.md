@@ -98,20 +98,22 @@ This separation allows implementations to evolve while the concept's identity an
 
 ## How SparkWell Works
 
-SparkWell does not turn a request into code in one uninterrupted step. It introduces an explicit review boundary between software design and artifact generation.
+SparkWell is opt-in. Ordinary questions, coding, debugging, refactoring, and testing use the coding agent's normal workflow and do not create or update Sparks.
 
-First, humans and AI use `design-sparks` to clarify the requested change and express it as concise, reviewable Spark Documents. The workflow then stops. Reviewers can close omissions, remove repetition, resolve ownership, and ensure later work can proceed without inventing product decisions.
+Invoke `/design-sparks` to clarify a requested change. It first presents a concise Spark Proposal in chat, listing the Sparks to create and their summaries plus existing Sparks to evolve and why. It does not modify files before confirmation.
 
-After review, specialized workflows realize the same Sparks independently:
+Reply `Revise: <comments>` to receive a complete replacement proposal, `Finalize` to generate the proposed Spark Documents, or `Cancel` to stop without changes. Finalized documents then receive a second human review before any implementation workflow begins.
+
+After review, invoke later workflows independently:
 
 | Workflow | Responsibility | Does not own |
 |----------|----------------|--------------|
-| `implement-sparks` | Creates or updates target engineering artifacts, including runtime and Service Contract realizations | Spark design or test authoring |
-| `test-sparks` | Derives behavioral scenarios, creates or updates test artifacts, and reports verified and unverified intent | Spark design or production runtime changes |
+| `/implement-sparks` | Creates or updates target engineering artifacts, including runtime and Service Contract realizations | Spark design or test authoring |
+| `/test-sparks` | Derives behavioral scenarios, creates or updates test artifacts, and reports verified and unverified intent | Spark design or production runtime changes |
 
-Implementation and testing are separate realization paths rather than one automatic pipeline. A team can implement a Spark for multiple targets, add tests at a different time, or evolve either artifact set without forcing the Spark Documents to mirror the code or test structure.
+Each slash command activates only that workflow for the current request. The direct Proposal controls are the only limited continuation of `/design-sparks`; any unrelated message ends that continuation. Workflows never activate automatically or chain into one another. A team can implement a Spark for multiple targets, add tests at a different time, or evolve either artifact set without forcing the Spark Documents to mirror the code or test structure.
 
-When implementation or testing reveals missing or contradictory intent, the workflow returns to Spark design and human review. It does not hide the gap by inventing product behavior in code or weakening a test.
+When implementation or testing reveals missing or contradictory intent, the workflow stops and identifies `/design-sparks` as the explicit next command. It does not invoke that workflow, invent product behavior in code, or weaken a test.
 
 ## Quick Start
 
@@ -126,7 +128,13 @@ cd ../MyProject
 sparkwell init
 ```
 
-Then ask your coding agent to design Sparks for a change. Review and edit the proposal before invoking the implementation and testing workflows as needed.
+Then explicitly invoke a workflow, for example:
+
+```text
+/design-sparks Design a todo list where people can add todos and mark them complete.
+```
+
+Review the Spark Proposal, reply `Finalize`, then review the generated Spark Documents before separately invoking `/implement-sparks` or `/test-sparks` as needed.
 
 GitHub Copilot is the default adapter. SparkWell also supports Claude Code, `AGENTS.md`-compatible agents, multi-agent projects, and an agent-neutral initialization mode.
 
