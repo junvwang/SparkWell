@@ -115,7 +115,7 @@ Activate one workflow for the current request by invoking its slash command:
 | `/spark-impl` | Realize reviewed Sparks for one target or profile |
 | `/spark-test` | Create, update, or execute tests derived from reviewed Sparks |
 
-Changing software intent does not activate SparkWell automatically. Each command activates only its named workflow and does not invoke the next phase. The only limited cross-message continuation is a direct `Revise:`, `Finalize`, or `Cancel` response to the latest pending Spark or Implementation Configuration Proposal. Any unrelated message ends that implicit continuation. When a workflow identifies any other handoff, invoke the named slash command in a new request.
+Changing software intent does not activate SparkWell automatically. Each command activates only its named workflow and does not invoke the next phase. For a pending Spark or Implementation Configuration Proposal, use the host's decision UI when available; otherwise reply directly with `Revise:`, `Finalize`, or `Cancel`. When a workflow identifies any other handoff, invoke the named slash command in a new request.
 
 ## Working With Sparks
 
@@ -157,13 +157,19 @@ Evolve:
 
 No Spark Documents, realization state, source code, tests, contracts, profiles, or proposal-state files are changed during this phase.
 
-Respond to the latest proposal with:
+When the host provides a decision UI, choose:
+
+- `Revise` to open a prompt for revision comments and receive one complete replacement proposal;
+- `Finalize` to revalidate the current workspace and generate the proposed Spark Documents;
+- `Cancel` to stop without modifying files.
+
+If no suitable UI is available, respond to the latest proposal with:
 
 - `Revise: <comments>` to receive one complete replacement proposal;
 - `Finalize` to revalidate the current workspace and generate the proposed Spark Documents;
 - `Cancel` to stop without modifying files.
 
-The controls may also be invoked explicitly as `/spark-design Revise: ...`, `/spark-design Finalize`, and `/spark-design Cancel`. Ambiguous approval such as `looks good` does not finalize the proposal.
+The controls may also be invoked explicitly as `/spark-design Revise: ...`, `/spark-design Finalize`, and `/spark-design Cancel`. Dismissing the UI or giving ambiguous approval such as `looks good` does not finalize the proposal.
 
 If affected Sparks or proposed paths changed before finalization, the workflow presents a revised proposal instead of writing stale changes.
 
@@ -285,7 +291,7 @@ Before a new runtime realization, invoke the configuration workflow:
 
 It inspects existing profiles, guidance, and native artifacts, then presents an Implementation Configuration Proposal in chat. For an established implementation it proposes codifying the detected architecture without redesigning it. For a new implementation it asks about consequential choices rather than selecting them automatically.
 
-Reply `Revise: <comments>`, `Finalize`, or `Cancel`. Before `Finalize`, no profile, guidance, source, dependency, Spark, test, or realization file changes. Finalization may update only `.sparkwell/config.yaml` and the proposed guidance documents, then stops for review without generating product code.
+Choose `Revise`, `Finalize`, or `Cancel` in the host decision UI when available; choosing `Revise` opens a prompt for comments. Otherwise, reply `Revise: <comments>`, `Finalize`, or `Cancel`. Before `Finalize`, no profile, guidance, source, dependency, Spark, test, or realization file changes. Finalization may update only `.sparkwell/config.yaml` and the proposed guidance documents, then stops for review without generating product code.
 
 A finalized profile may look like:
 

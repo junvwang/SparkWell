@@ -102,7 +102,7 @@ SparkWell is opt-in. Ordinary questions, coding, debugging, refactoring, and tes
 
 Invoke `/spark-design` to clarify a requested change. It first presents a concise Spark Proposal in chat, listing the Sparks to create and their summaries plus existing Sparks to evolve and why. It does not modify files before confirmation.
 
-Reply `Revise: <comments>` to receive a complete replacement proposal, `Finalize` to generate the proposed Spark Documents, or `Cancel` to stop without changes. Finalized documents then receive a second human review before any implementation workflow begins.
+When the host provides a decision UI, choose `Revise`, `Finalize`, or `Cancel`; choosing `Revise` opens a prompt for comments. Otherwise, reply `Revise: <comments>`, `Finalize`, or `Cancel`. Finalized documents then receive a second human review before any implementation workflow begins.
 
 After review, invoke later workflows independently:
 
@@ -112,7 +112,7 @@ After review, invoke later workflows independently:
 | `/spark-impl` | Creates or updates target engineering artifacts, including runtime and Service Contract realizations | Spark design or test authoring |
 | `/spark-test` | Derives behavioral scenarios, creates or updates test artifacts, and reports verified and unverified intent | Spark design or production runtime changes |
 
-Each slash command activates only that workflow for the current request. Direct controls for the latest Spark or Implementation Configuration Proposal are the only limited continuations; any unrelated message ends that continuation. Workflows never activate automatically or chain into one another.
+Each slash command activates only that workflow for the current request. A decision collected by the host UI, or a direct fallback control for the latest Spark or Implementation Configuration Proposal, is the only limited continuation. Workflows never activate automatically or chain into one another.
 
 SparkWell provides the shared realization process, not a universal project architecture. Before generating a new runtime implementation, use `/spark-config` to confirm its profile and project guidance. Existing implementations preserve their established architecture. `/spark-impl` follows reviewed Sparks, profile constraints, project guidance, and native architecture; it does not choose MVC, MVVM, state management, persistence, synchronization, or module structure on the project's behalf.
 
@@ -137,7 +137,7 @@ Then explicitly invoke a workflow, for example:
 /spark-design Design a todo list where people can add todos and mark them complete.
 ```
 
-Review the Spark Proposal, reply `Finalize`, then review the generated Spark Documents before separately invoking `/spark-impl` or `/spark-test` as needed.
+Review the Spark Proposal, choose `Finalize` in the decision UI or reply `Finalize` when no UI is available, then review the generated Spark Documents before separately invoking `/spark-impl` or `/spark-test` as needed.
 
 Before the first new runtime realization, configure its architecture separately:
 

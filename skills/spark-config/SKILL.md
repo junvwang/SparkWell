@@ -83,25 +83,29 @@ Open questions:
 
 For an existing profile, list only changed fields and guidance plus the reason for each change. Surface removed profiles, renamed profiles, source-root changes, framework changes, and architecture migrations separately with their impact.
 
-End by asking the user to reply with `Revise: <comments>`, `Finalize`, or `Cancel`.
-
 During the proposal phase, do not modify `.sparkwell/config.yaml`, guidance, source code, native configuration, Sparks, tests, realization state, or any other project file. Keep proposal and approval state in chat only.
 
 When no configuration change is needed, explain that result briefly and stop without a confirmation cycle.
 
 ## Review and Revise
 
-Present the complete proposal and stop.
+Present the complete Implementation Configuration Proposal in chat before requesting a decision so the user can review it.
 
-Handle `Revise:`, `Finalize`, or `Cancel` only when the latest complete Implementation Configuration Proposal is unambiguously available. If none is available, do not modify files; ask the user to invoke `/spark-config` with the configuration request or sufficient proposal context.
+When the host exposes a user-question tool such as `vscode_askQuestions`, use it to open a decision UI offering exactly `Finalize`, `Revise`, and `Cancel`. Do not recommend or preselect `Finalize`. A decision returned by this UI is equivalent to the corresponding direct control.
+
+If the user selects `Revise`, collect revision comments through the UI before incorporating them and presenting one complete replacement proposal. Do not present only a delta. Request a new decision for the replacement proposal.
+
+If no suitable decision UI is available, ask the user to reply with `Revise: <comments>`, `Finalize`, or `Cancel`. If the UI is dismissed or returns no decision, stop without modifying files. The user may also explicitly invoke `/spark-config Revise: ...`, `/spark-config Finalize`, or `/spark-config Cancel`.
+
+Handle a UI decision or direct control only when the latest complete Implementation Configuration Proposal is unambiguously available. If none is available, do not modify files; ask the user to invoke `/spark-config` with the configuration request or sufficient proposal context.
 
 For `Revise: <comments>`, incorporate the comments and present one complete replacement proposal without modifying files. Do not present only a delta.
 
 For `Cancel`, end without modifying files.
 
-For `Finalize`, continue below. The user may also invoke `/spark-config Revise: ...`, `/spark-config Finalize`, or `/spark-config Cancel` explicitly.
+For `Finalize`, continue below. Do not modify configuration files until the user explicitly selects or replies with `Finalize`.
 
-Do not interpret silence, `yes`, `looks good`, or other ambiguous positive feedback as `Finalize`.
+Do not interpret a dismissed UI, silence, `yes`, `looks good`, or other ambiguous positive feedback as `Finalize`.
 
 ## Finalize Configuration
 

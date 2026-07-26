@@ -248,7 +248,7 @@ test('updates only the valid Sparkwell managed section', async (context) => {
 Keep this content before SparkWell.
 
 ${initialized.replace(
-  "SparkWell is opt-in. This file defines activation only; each command's Agent Skill defines its workflow.",
+  'SparkWell is opt-in through `/spark-design`, `/spark-config`, `/spark-impl`, and `/spark-test`. Each command runs only its named Agent Skill.',
   'Outdated managed content.',
 ).trim()}
 
@@ -262,7 +262,7 @@ Keep this content after SparkWell.
   assert.equal(result.updated, 1)
   assert.match(refreshed, /Keep this content before SparkWell\./)
   assert.match(refreshed, /Keep this content after SparkWell\./)
-  assert.match(refreshed, /SparkWell is opt-in\. This file defines activation only; each command's Agent Skill defines its workflow\./)
+  assert.match(refreshed, /SparkWell is opt-in through `\/spark-design`, `\/spark-config`, `\/spark-impl`, and `\/spark-test`\. Each command runs only its named Agent Skill\./)
   assert.doesNotMatch(refreshed, /Outdated managed content/)
   assert.equal(countOccurrences(refreshed, '<!-- sparkwell:start -->'), 1)
   assert.equal(countOccurrences(refreshed, '<!-- sparkwell:end -->'), 1)
@@ -676,29 +676,25 @@ test('core project templates preserve the methodology quality contract', async (
   assert.doesNotMatch(specification, /project default/)
   assert.doesNotMatch(specification, /`(?:application|feature|workflow|screen|function|reusable-element)`/)
   assert.match(projectInstructions, /## Activation/)
-  assert.match(projectInstructions, /current user message directly invokes one of these slash commands/)
-  assert.match(projectInstructions, /`\/spark-design`/)
-  assert.match(projectInstructions, /`\/spark-config`/)
-  assert.match(projectInstructions, /`\/spark-impl`/)
-  assert.match(projectInstructions, /`\/spark-test`/)
-  assert.match(projectInstructions, /use the normal coding-agent workflow/)
-  assert.match(projectInstructions, /do not load a SparkWell Skill/)
-  assert.match(projectInstructions, /Mentioning Sparks or changing software intent does not activate SparkWell/)
-  assert.match(projectInstructions, /A command activates only its named Skill/)
-  assert.match(projectInstructions, /never start another SparkWell workflow automatically/)
+  assert.match(projectInstructions, /SparkWell is opt-in through `\/spark-design`, `\/spark-config`, `\/spark-impl`, and `\/spark-test`/)
+  assert.match(projectInstructions, /Each command runs only its named Agent Skill/)
+  assert.doesNotMatch(projectInstructions, /use the normal coding-agent workflow/)
+  assert.doesNotMatch(projectInstructions, /Mentioning Sparks or changing software intent/)
+  assert.doesNotMatch(projectInstructions, /report the next slash command and stop/)
   assert.match(projectInstructions, /## Pending Proposals/)
-  assert.match(projectInstructions, /latest complete proposal produced by `\/spark-design` or `\/spark-config`/)
+  assert.match(projectInstructions, /use a host-provided decision UI when available/)
+  assert.match(projectInstructions, /continue the latest unambiguous proposal only from a direct/)
   assert.match(projectInstructions, /`Revise: <comments>`/)
   assert.match(projectInstructions, /`Finalize`/)
   assert.match(projectInstructions, /`Cancel`/)
-  assert.match(projectInstructions, /latest complete proposal is unambiguous/)
-  assert.match(projectInstructions, /Do not treat silence, `yes`, `looks good`/)
-  assert.match(projectInstructions, /Any other message ends implicit continuation/)
+  assert.match(projectInstructions, /UI dismissal, silence, and other feedback do not finalize a proposal/)
   assert.match(projectInstructions, /Keep proposal and approval state in chat only/)
   assert.doesNotMatch(projectInstructions, /For product development, follow the Spark-first workflow/)
   assert.doesNotMatch(projectInstructions, /# Working in a Sparkwell Project/)
   assert.doesNotMatch(projectInstructions, /# Guiding Principles/)
   assert.match(readme, /SparkWell is opt-in/)
+  assert.match(readme, /When the host provides a decision UI, choose `Revise`, `Finalize`, or `Cancel`/)
+  assert.match(readme, /choosing `Revise` opens a prompt for comments/)
   assert.match(readme, /Each slash command activates only that workflow for the current request/)
   assert.match(readme, /It first presents a concise Spark Proposal in chat/)
   assert.match(readme, /It does not modify files before confirmation/)
@@ -706,6 +702,8 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(readme, /SparkWell provides the shared realization process, not a universal project architecture/)
   assert.match(usage, /## Explicit Activation/)
   assert.match(usage, /SparkWell is inactive by default/)
+  assert.match(usage, /use the host's decision UI when available; otherwise reply directly/)
+  assert.match(usage, /Dismissing the UI or giving ambiguous approval/)
   assert.match(usage, /Propose a Spark map, then generate documents only after finalization/)
   assert.match(usage, /No Spark Documents, realization state, source code, tests, contracts, profiles, or proposal-state files are changed during this phase/)
   assert.match(usage, /`\/spark-config` \| Propose and finalize one implementation profile/)
@@ -751,7 +749,7 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(designSkill, /For each proposed evolution, provide only/)
   assert.match(designSkill, /do not modify Spark Documents, realization state, source code, tests, contracts, profiles, or any other project file/)
   assert.match(designSkill, /present one complete replacement proposal/)
-  assert.match(designSkill, /Handle `Revise:`, `Finalize`, or `Cancel` only when the latest complete proposal is unambiguously available/)
+  assert.match(designSkill, /Handle a UI decision or direct control only when the latest complete proposal is unambiguously available/)
   assert.match(designSkill, /### 8\. Finalize Spark Documents/)
   assert.match(designSkill, /Before writing, re-read every affected existing Spark/)
   assert.match(designSkill, /present a revised complete proposal and wait for confirmation again/)
@@ -836,7 +834,7 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(sparkConfigSkill, /name: spark-config/)
   assert.match(sparkConfigSkill, /## Prepare the Configuration Proposal/)
   assert.match(sparkConfigSkill, /During the proposal phase, do not modify `\.sparkwell\/config\.yaml`/)
-  assert.match(sparkConfigSkill, /Handle `Revise:`, `Finalize`, or `Cancel` only when the latest complete Implementation Configuration Proposal is unambiguously available/)
+  assert.match(sparkConfigSkill, /Handle a UI decision or direct control only when the latest complete Implementation Configuration Proposal is unambiguously available/)
   assert.match(sparkConfigSkill, /Before writing, re-read `\.sparkwell\/config\.yaml`/)
   assert.match(sparkConfigSkill, /Do not scaffold, compile, install, or generate product artifacts/)
   assert.match(sparkConfigSkill, /user must separately invoke `\/spark-impl`/)
@@ -845,6 +843,15 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(testSkill, /Do not invoke either workflow automatically/)
   assert.doesNotMatch(testSkill, /disabled placeholder/)
   assert.match(testSkill, /Do not modify production runtime artifacts/)
+
+  for (const proposalSkill of [designSkill, sparkConfigSkill]) {
+    assert.match(proposalSkill, /user-question tool such as `vscode_askQuestions`/)
+    assert.match(proposalSkill, /decision UI offering exactly `Finalize`, `Revise`, and `Cancel`/)
+    assert.match(proposalSkill, /Do not recommend or preselect `Finalize`/)
+    assert.match(proposalSkill, /collect revision comments through the UI/)
+    assert.match(proposalSkill, /If no suitable decision UI is available, ask the user to reply with `Revise: <comments>`, `Finalize`, or `Cancel`/)
+    assert.match(proposalSkill, /If the UI is dismissed or returns no decision, stop without modifying files/)
+  }
 })
 
 async function createTemporaryTarget(context) {

@@ -578,7 +578,7 @@ Proposal 阶段不修改项目文件。`Finalize` 后才生成 Spark Documents�
 
 这里有两个 **Human Stop Point**：先确认概念集合和边界，再评审生成后的完整 Spark Documents。
 
-软件意图发生变化本身不会激活 SparkWell。一次 slash command 只激活当前请求中的一个工作流；唯一的有限续接是对最新 Proposal 直接回复 `Revise:`、`Finalize` 或 `Cancel`。其他消息不会续接，也不会自动串联其他阶段。
+软件意图发生变化本身不会激活 SparkWell。一次 slash command 只激活当前请求中的一个工作流。Proposal 完成后，宿主支持决策 UI 时由用户直接选择 `Revise`、`Finalize` 或 `Cancel`；没有 UI 时才通过同名文本回复续接。关闭 UI 或含糊反馈不会完成确认，也不会自动串联其他阶段。
 
 人应有明确机会在实现前检查：
 

@@ -140,8 +140,6 @@ Open questions:
 - Should completed items be reopenable?
 ```
 
-End the proposal by asking the user to reply with `Revise: <comments>`, `Finalize`, or `Cancel`.
-
 During the proposal phase, do not modify Spark Documents, realization state, source code, tests, contracts, profiles, or any other project file. Keep the proposal in chat only. Do not write approval, proposal, draft, or workflow-state metadata into the repository.
 
 When the outcome is **No Spark change**, explain that result briefly and stop without a confirmation cycle. When the outcome is **Clarify**, ask the blocking questions and prepare a proposal only after they are resolved.
@@ -162,15 +160,21 @@ Consult [the worked examples](./references/examples.md) when the appropriate dec
 
 ### 7. Present and Revise the Proposal
 
-Present the complete Spark Proposal and stop. Do not generate Spark Documents in the same turn.
+Present the complete Spark Proposal in chat before requesting a decision so the user can review it.
 
-Handle `Revise:`, `Finalize`, or `Cancel` only when the latest complete proposal is unambiguously available in the conversation. If no pending proposal can be identified, do not modify files; ask the user to start `/spark-design` with the design request or explicitly provide enough proposal context.
+When the host exposes a user-question tool such as `vscode_askQuestions`, use it to open a decision UI offering exactly `Finalize`, `Revise`, and `Cancel`. Do not recommend or preselect `Finalize`. A decision returned by this UI is equivalent to the corresponding direct control.
+
+If the user selects `Revise`, collect revision comments through the UI before incorporating them, rechecking the design, presenting one complete replacement proposal, and requesting a new decision. Do not present only a delta.
+
+If no suitable decision UI is available, ask the user to reply with `Revise: <comments>`, `Finalize`, or `Cancel`. If the UI is dismissed or returns no decision, stop without modifying files. The user may also explicitly invoke `/spark-design Revise: ...`, `/spark-design Finalize`, or `/spark-design Cancel`.
+
+Handle a UI decision or direct control only when the latest complete proposal is unambiguously available in the conversation. If no pending proposal can be identified, do not modify files; ask the user to start `/spark-design` with the design request or explicitly provide enough proposal context.
 
 For a direct `Revise: <comments>` response to the pending proposal, incorporate the comments, recheck the design, present one complete replacement proposal, and stop again without modifying files. Do not present only a delta.
 
 For `Cancel`, end the pending design workflow without modifying files.
 
-For `Finalize`, continue to finalization below. The user may also explicitly invoke `/spark-design Revise: ...`, `/spark-design Finalize`, or `/spark-design Cancel`.
+For `Finalize`, continue to finalization below. Do not generate Spark Documents until the user explicitly selects or replies with `Finalize`.
 
 ### 8. Finalize Spark Documents
 
@@ -256,8 +260,8 @@ A successful Spark design should:
 - Do not repeat another Spark's owned behavior for local context; reference that Spark instead.
 - Do not add sections or boundary lists solely to make a document look complete.
 - Do not create, update, move, rename, or delete Spark Documents before the user finalizes the current proposal.
-- Do not accept `Revise:`, `Finalize`, or `Cancel` when no latest complete proposal is available.
-- Do not treat silence, approval of an earlier proposal, or ambiguous positive feedback as `Finalize`.
+- Do not accept a UI decision, `Revise:`, `Finalize`, or `Cancel` when no latest complete proposal is available.
+- Do not treat a dismissed UI, silence, approval of an earlier proposal, or ambiguous positive feedback as `Finalize`.
 - Do not persist proposal or approval state in project files.
 - Do not generate engineering artifacts as part of this skill.
 - Do not invent missing Spark semantics, storage conventions, or workflow metadata.
