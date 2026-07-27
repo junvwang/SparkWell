@@ -554,7 +554,6 @@ Review Spark Documents
 SparkWell 默认不介入普通问答、编码、调试、重构和测试。每个工作流都由用户单独显式调用：
 
 - `/spark-design`：先在 chat 中提出 Spark Proposal，经确认后生成或演进 Spark Documents，并停在文档评审点；
-- `/spark-config`：提出并确认 Implementation Configuration Proposal，只更新 Profile 与项目架构 Guidance；
 - `/spark-impl`：从 Sparks 生成一个目标的工程产物；
 - `/spark-test`：从 Sparks 创建、更新或执行测试。
 
@@ -612,7 +611,7 @@ SparkWell Core 提供通用 realization 流程，但不替项目选择 MVC、MVV
 
 Pack 需要先显式安装，再由具体 Profile 激活；安装本身不会让某项技术成为所有项目或所有 target 的默认选择。YAML 只负责确定性路由、引用和 Pack 必须机器校验的参数；framework、architecture、state ownership 和 persistence strategy 等描述性决策属于 Guidance 或既有 native project。协议、contract format、framework、generator 和 persistence provider 都不属于 Core 语义。
 
-新 runtime implementation 在生成代码前应通过 `/spark-config` 提出并确认 Implementation Configuration Proposal。已有系统应优先固化并保留现有架构，而不是借机重构。
+新 runtime implementation 在生成代码前应由项目维护好 Profile 与 Guidance。它们可以手工编写或在普通 Coding Agent 协助下逐步完善，但不是独立的 SparkWell workflow。已有系统应优先固化并保留现有架构，而不是借机重构。
 
 Sparks 拥有产品行为、用户可见状态、Service capabilities、同步和冲突语义；Profile 只负责 target、artifact routing 和 Pack 配置；Project Guidance 拥有项目架构、provider、repository、ORM、DI 和代码组织方式；Pack 提供可复用的 protocol、contract format、generator、realization 和 validation 规则；native files 记录实际依赖、版本、命令和既有结构。
 
@@ -943,7 +942,7 @@ Profile YAML 只保存 target、source-root、Pack 配置和 Guidance 引用；�
 
 > 某个具体任务应该如何执行？
 
-当前显式工作流包括 `/spark-design`、`/spark-config`、`/spark-impl` 和 `/spark-test`。
+当前显式工作流包括 `/spark-design`、`/spark-impl` 和 `/spark-test`。
 
 Skill 是可执行工作流程，不应重新定义 Spark 理论。
 

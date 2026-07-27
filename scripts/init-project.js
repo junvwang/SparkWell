@@ -22,7 +22,11 @@ import {
 } from './pack-registry.js'
 
 const packageRoot = fileURLToPath(new URL('../', import.meta.url))
-const requiredDirectories = ['sparks', '.sparkwell/state/realizations']
+const requiredDirectories = [
+  'sparks',
+  '.sparkwell/guidance',
+  '.sparkwell/state/realizations',
+]
 const projectOwnedSeeds = new Set([
   '.sparkwell/config.yaml',
   '.sparkwell/conventions.md',

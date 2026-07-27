@@ -75,7 +75,7 @@ Record consequential choices in guidance. Explicitly state `none` when the absen
 
 For an established implementation, existing native architecture may supply decisions not yet recorded in a profile. Preserve that architecture. If the profile or guidance conflicts with the existing project, stop as **Blocked** rather than silently migrating or replacing the architecture.
 
-Use `/spark-config` to create or revise profiles and project guidance. `/spark-impl` does not write implementation configuration or choose unresolved consequential architecture.
+Profiles and guidance are project-owned inputs maintained manually or with ordinary coding-agent assistance. `/spark-impl` reads but never edits them or chooses unresolved consequential architecture.
 
 ## Resolution and Conflicts
 
@@ -90,7 +90,7 @@ Apply compatible decisions in this order:
 5. Established native architecture and configuration.
 6. Optional target defaults.
 
-The order applies only to compatible decisions and does not authorize silent conflict resolution. Stop as **Blocked** when Spark intent, profile routing, pack configuration, guidance, selected packs, or established architecture contradict one another. A task-local request may choose only details not owned by these sources; consequential project changes require `/spark-config`. Target defaults apply only when compatible with every higher-authority source.
+The order applies only to compatible decisions and does not authorize silent conflict resolution. Stop as **Blocked** when Spark intent, profile routing, pack configuration, guidance, selected packs, or established architecture contradict one another. A task-local request may choose only details not owned by these sources; consequential project changes require updating the project-owned profile or guidance before retrying. Target defaults apply only when compatible with every higher-authority source.
 
 ## Example
 
@@ -111,4 +111,4 @@ implementations:
 
 - Select a named profile that matches the requested target. For exactly one match, select it automatically; for multiple matches, ask for a profile ID.
 - With no matching profile, use an unambiguous established implementation only when its architecture is clear and no new implementation surface is required.
-- A new runtime implementation requires a named profile and resolved consequential choices. Stop and direct the user to `/spark-config` when either is missing.
+- A new runtime implementation requires a named profile and resolved consequential choices. Stop and identify the profile fields or guidance decisions the project must add when either is missing.

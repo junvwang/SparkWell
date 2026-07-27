@@ -13,7 +13,7 @@ Use this optional reference when the effective target is `ios`. The selected pro
 
 - Resolve UI architecture, navigation ownership, state holders, persistence, dependency injection, and local or remote data flow from the selected profile, its guidance, and an established native project.
 - This target reference does not choose an architecture pattern, state container, repository pattern, persistence provider, synchronization strategy, or source layout.
-- Preserve an established iOS or cross-platform architecture. For a new implementation, mark unresolved consequential choices **Blocked** and direct the user to `/spark-config`.
+- Preserve an established iOS or cross-platform architecture. For a new implementation, mark unresolved consequential choices **Blocked**, identify them, and ask the user to document them in project guidance before retrying `/spark-impl`.
 
 ## UI Component Projection
 

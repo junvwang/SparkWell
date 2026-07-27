@@ -7,7 +7,6 @@
 ## 当前可用能力
 
 - `/spark-design`：Proposal、显式确认、Spark Document 生成和文档评审停点；
-- `/spark-config`：薄 YAML profile、项目 Guidance 和 Pack 配置 Proposal；
 - `/spark-impl`：按 profile、Guidance、Pack 和 native architecture 实现 Sparks；
 - `/spark-test`：独立的测试生成、执行和失败分类流程；
 - `specification.md`、项目自有 `conventions.md`、implementation profiles 和 realization provenance；
@@ -15,6 +14,8 @@
 - 显式安装、按 profile 激活的 optional implementation packs；
 - OpenAPI producer、server、client 和 test guidance pack；
 - 初始化、合并、冲突保护、Pack 投影和方法论契约的自动化测试。
+
+Profile 与 Guidance 是项目自有输入，通过初始化生成的可复制 placeholder 手工建立，并随项目逐步维护；它们不是独立的 SparkWell workflow。
 
 当前仓库中的 TodoApp 仅保留 SparkWell 项目投影，不再维护 Web 或 Windows runtime realization。因此，当前状态不声称已经具备一个持续验证的多平台端到端 Demo。
 

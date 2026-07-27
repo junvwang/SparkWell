@@ -37,7 +37,7 @@ Always inspect:
 5. Native manifests, build files, target artifacts, relevant existing tests, and established source architecture. Existing tests are regression evidence, not artifacts owned by this skill.
 6. After resolving the implementation ID, `.sparkwell/state/realizations/<implementation-id>.yaml` when that file exists.
 
-Installed packs are inactive unless the selected profile lists them. Resolve each selected pack ID to `.sparkwell/packs/<pack-id>/PACK.md`. Read all pack and guidance references before planning. Validate every pack-defined required field, value, and cross-profile reference before resolving artifacts. Mark the task **Blocked** when a required profile is absent or incompatible, or when a pack or guidance path is missing, unreadable, unsafe, or conflicts with the profile, reviewed Sparks, another selected source, or established native architecture.
+Installed packs are inactive unless the selected profile lists them. Resolve each selected pack ID to `.sparkwell/packs/<pack-id>/PACK.md`. Read all pack and guidance references before planning. Validate every pack-defined required field, value, and cross-profile reference before resolving artifacts. Mark the task **Blocked** when a required profile is absent or incompatible, or when a pack or guidance path is missing, unreadable, unsafe, or conflicts with the profile, Spark intent, another selected source, or established native architecture.
 
 Reject absolute paths, paths containing a `..` component after normalizing `/` and `\`, and paths that resolve outside the project root. Pack references must remain inside their installed pack directory.
 
@@ -60,7 +60,7 @@ A Spark is a required design contract for its concept, not an exhaustive impleme
 
 Use a named profile when it exists and, if a target was also requested, matches it. Otherwise select the only profile matching the requested target; ask when multiple profiles match.
 
-With no matching profile, use an unambiguous established implementation only when its architecture is clear and no new implementation surface is required. A new runtime implementation requires a named profile. If none exists, stop as **Blocked** and tell the user to invoke `/spark-config`.
+With no matching profile, use an unambiguous established implementation only when its architecture is clear and no new implementation surface is required. A new runtime implementation requires a named profile. If none exists, stop as **Blocked**, identify the required routing fields and guidance, and ask the user to add them before retrying `/spark-impl`.
 
 The **effective target** is the selected profile's `target`, otherwise the explicitly requested target, otherwise the existing implementation target. A requested target must match a selected profile.
 
@@ -91,7 +91,7 @@ For an established implementation, preserve its architecture and integration pat
 
 For a new implementation, resolve every consequential choice relevant to the target in project guidance before editing. These commonly include framework or project type, primary architecture and module boundaries, state ownership, persistence boundary, local and remote data flow, source root, and artifact ownership. Do not require irrelevant choices, and accept an explicit `none` where absence is intentional.
 
-Do not select MVC, MVVM, Clean Architecture, state libraries, repository patterns, ORMs, local databases, synchronization strategies, dependency-injection structure, or comparable project architecture from generic target defaults. If a consequential choice is unresolved, stop as **Blocked** and tell the user to invoke `/spark-config`.
+Do not select MVC, MVVM, Clean Architecture, state libraries, repository patterns, ORMs, local databases, synchronization strategies, dependency-injection structure, or comparable project architecture from generic target defaults. If a consequential choice is unresolved, stop as **Blocked**, identify the missing decision, and ask the user to document it in project guidance before retrying `/spark-impl`.
 
 `/spark-impl` reads but never creates or edits implementation profiles or project guidance.
 

@@ -39,7 +39,7 @@ The pack supports these profile roles:
 
 Every participating profile lists `openapi` in `packs`. A referenced contract profile must exist, use `target: openapi-contract`, activate this pack, and have a project-relative `source-root`. Keep service locations, credentials, and secrets in native secure configuration.
 
-Before `/spark-config` finalizes or `/spark-impl` and `/spark-test` plan work:
+Before `/spark-impl` or `/spark-test` plans work:
 
 - require `packs.openapi.version: '3.1'` on every producer profile;
 - resolve every `packs.openapi.contract-profile` to an existing producer profile satisfying the preceding contract;

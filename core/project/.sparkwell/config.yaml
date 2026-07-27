@@ -2,3 +2,13 @@ schema-version: 1
 
 implementations:
   profiles: {}
+
+# Copy this example and replace `profiles: {}` when adding an implementation:
+#
+#   profiles:
+#     web:
+#       target: web
+#       source-root: src/web
+#       packs: {}
+#       guidance:
+#         - .sparkwell/guidance/web.md

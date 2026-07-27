@@ -33,13 +33,21 @@ test('initializes core contracts and GitHub Copilot workflows by default', async
 
   assert.equal(result.agent, 'github-copilot')
   assert.deepEqual(result.packs, [])
-  assert.equal(result.created, 19)
+  assert.equal(result.created, 18)
   assert.equal(result.updated, 0)
   assert.match(
     await readFile(path.join(target, '.sparkwell', 'config.yaml'), 'utf8'),
     /profiles:\s*\{\}/,
   )
+  assert.match(
+    await readFile(path.join(target, '.sparkwell', 'config.yaml'), 'utf8'),
+    /#\s+web:\r?\n#\s+target: web\r?\n#\s+source-root: src\/web\r?\n#\s+packs: \{\}\r?\n#\s+guidance:/,
+  )
   await assertPathExists(path.join(target, 'sparks'), 'directory')
+  await assertPathExists(
+    path.join(target, '.sparkwell', 'guidance'),
+    'directory',
+  )
   await assertPathExists(
     path.join(target, '.sparkwell', 'state', 'realizations'),
     'directory',
@@ -65,9 +73,9 @@ test('initializes core contracts and GitHub Copilot workflows by default', async
     path.join(target, '.github', 'skills', 'spark-impl', 'SKILL.md'),
     'file',
   )
-  await assertPathExists(
-    path.join(target, '.github', 'skills', 'spark-config', 'SKILL.md'),
-    'file',
+  await assert.rejects(
+    access(path.join(target, '.github', 'skills', 'spark-config')),
+    { code: 'ENOENT' },
   )
   assert.equal(
     await readFile(
@@ -104,7 +112,7 @@ test('initializes Claude Code instructions and shared skills', async (context) =
 
   assert.equal(result.agent, 'claude-code')
   assert.deepEqual(result.agents, ['claude-code'])
-  assert.equal(result.created, 19)
+  assert.equal(result.created, 18)
   await assertPathExists(path.join(target, 'CLAUDE.md'), 'file')
   await assertPathExists(
     path.join(target, '.claude', 'skills', 'spark-design', 'SKILL.md'),
@@ -122,7 +130,7 @@ test('initializes AGENTS.md-compatible instructions and skills', async (context)
   })
 
   assert.equal(result.agent, 'agents-md')
-  assert.equal(result.created, 19)
+  assert.equal(result.created, 18)
   await assertPathExists(path.join(target, 'AGENTS.md'), 'file')
   await assertPathExists(
     path.join(target, '.agents', 'skills', 'spark-impl', 'SKILL.md'),
@@ -140,7 +148,7 @@ test('composes multiple selected agent adapters', async (context) => {
 
   assert.equal(result.agent, undefined)
   assert.deepEqual(result.agents, ['github-copilot', 'claude-code'])
-  assert.equal(result.created, 33)
+  assert.equal(result.created, 31)
   await assertPathExists(
     path.join(target, '.github', 'copilot-instructions.md'),
     'file',
@@ -257,7 +265,7 @@ test('is idempotent when managed files are unchanged', async (context) => {
 
   assert.equal(result.created, 0)
   assert.equal(result.updated, 0)
-  assert.equal(result.unchanged, 19)
+  assert.equal(result.unchanged, 18)
 })
 
 test('treats line-ending and final-newline differences as unchanged', async (context) => {
@@ -316,7 +324,7 @@ test('appends a managed section to existing Copilot instructions', async (contex
   const result = await initializeProject({ destination: target })
   const merged = await readFile(instructionsPath, 'utf8')
 
-  assert.equal(result.created, 18)
+  assert.equal(result.created, 17)
   assert.equal(result.updated, 1)
   assert.ok(merged.startsWith(projectInstructions))
   assert.match(merged, /# Sparkwell Project Instructions/)
@@ -325,7 +333,7 @@ test('appends a managed section to existing Copilot instructions', async (contex
 
   const repeated = await initializeProject({ destination: target })
   assert.equal(repeated.updated, 0)
-  assert.equal(repeated.unchanged, 19)
+  assert.equal(repeated.unchanged, 18)
 })
 
 test('updates only the valid Sparkwell managed section', async (context) => {
@@ -338,7 +346,7 @@ test('updates only the valid Sparkwell managed section', async (context) => {
 Keep this content before SparkWell.
 
 ${initialized.replace(
-  'SparkWell is opt-in through `/spark-design`, `/spark-config`, `/spark-impl`, and `/spark-test`. Each command runs only its named Agent Skill.',
+  'SparkWell is opt-in through `/spark-design`, `/spark-impl`, and `/spark-test`. Each command runs only its named Agent Skill.',
   'Outdated managed content.',
 ).trim()}
 
@@ -352,7 +360,7 @@ Keep this content after SparkWell.
   assert.equal(result.updated, 1)
   assert.match(refreshed, /Keep this content before SparkWell\./)
   assert.match(refreshed, /Keep this content after SparkWell\./)
-  assert.match(refreshed, /SparkWell is opt-in through `\/spark-design`, `\/spark-config`, `\/spark-impl`, and `\/spark-test`\. Each command runs only its named Agent Skill\./)
+  assert.match(refreshed, /SparkWell is opt-in through `\/spark-design`, `\/spark-impl`, and `\/spark-test`\. Each command runs only its named Agent Skill\./)
   assert.doesNotMatch(refreshed, /Outdated managed content/)
   assert.equal(countOccurrences(refreshed, '<!-- sparkwell:start -->'), 1)
   assert.equal(countOccurrences(refreshed, '<!-- sparkwell:end -->'), 1)
@@ -608,7 +616,7 @@ test('canonical Agent Skills have valid metadata and project unchanged', async (
   const projectedRoot = path.join(target, '.github', 'skills')
   const relativeFiles = await collectRelativeFiles(skillsRoot)
 
-  assert.ok(relativeFiles.includes('spark-config/SKILL.md'))
+  assert.ok(!relativeFiles.some((relativeFile) => relativeFile.startsWith('spark-config/')))
   assert.ok(relativeFiles.includes('spark-impl/references/android.md'))
   assert.ok(relativeFiles.includes('spark-impl/references/ios.md'))
   assert.ok(relativeFiles.includes('spark-test/references/web.md'))
@@ -685,10 +693,6 @@ test('core project templates preserve the methodology quality contract', async (
   )
   const implementationSkill = await readFile(
     path.join(repositoryRoot, 'skills', 'spark-impl', 'SKILL.md'),
-    'utf8',
-  )
-  const sparkConfigSkill = await readFile(
-    path.join(repositoryRoot, 'skills', 'spark-config', 'SKILL.md'),
     'utf8',
   )
   const openApiPack = await readFile(
@@ -819,14 +823,15 @@ test('core project templates preserve the methodology quality contract', async (
   assert.doesNotMatch(specification, /project default/)
   assert.doesNotMatch(specification, /`(?:application|feature|workflow|screen|function|reusable-element)`/)
   assert.match(projectInstructions, /## Activation/)
-  assert.match(projectInstructions, /SparkWell is opt-in through `\/spark-design`, `\/spark-config`, `\/spark-impl`, and `\/spark-test`/)
+  assert.match(projectInstructions, /SparkWell is opt-in through `\/spark-design`, `\/spark-impl`, and `\/spark-test`/)
+  assert.doesNotMatch(projectInstructions, /spark-config/)
   assert.match(projectInstructions, /Each command runs only its named Agent Skill/)
   assert.doesNotMatch(projectInstructions, /use the normal coding-agent workflow/)
   assert.doesNotMatch(projectInstructions, /Mentioning Sparks or changing software intent/)
   assert.doesNotMatch(projectInstructions, /report the next slash command and stop/)
-  assert.match(projectInstructions, /## Pending Proposals/)
+  assert.match(projectInstructions, /## Pending Design Proposal/)
   assert.match(projectInstructions, /use a host-provided decision UI when available/)
-  assert.match(projectInstructions, /continue the latest unambiguous proposal only from a direct/)
+  assert.match(projectInstructions, /continue the latest unambiguous Spark Proposal only from a direct/)
   assert.match(projectInstructions, /`Revise: <comments>`/)
   assert.match(projectInstructions, /`Finalize`/)
   assert.match(projectInstructions, /`Cancel`/)
@@ -851,7 +856,7 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(usage, /Dismissing the UI or giving ambiguous approval/)
   assert.match(usage, /Propose a Spark map, then generate documents only after finalization/)
   assert.match(usage, /No Spark Documents, realization state, source code, tests, contracts, profiles, or proposal-state files are changed during this phase/)
-  assert.match(usage, /`\/spark-config` \| Propose and finalize one implementation profile/)
+  assert.doesNotMatch(usage, /`\/spark-config`|Implementation Configuration Proposal/)
   assert.match(usage, /A missing selected pack, missing referenced guidance, unresolved consequential architecture, or conflict makes `\/spark-impl` \*\*Blocked\*\*/)
   assert.doesNotMatch(usage, /## Bypass SparkWell for a Task/)
   assert.match(contractReference, /A `service` Spark is applicable and produces one contract/)
@@ -923,6 +928,8 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(implementationProfiles, /Every referenced guidance file must be read before implementation planning/)
   assert.match(implementationProfiles, /## Architecture Readiness/)
   assert.match(implementationProfiles, /A new runtime implementation requires a named profile/)
+  assert.match(implementationProfiles, /Profiles and guidance are project-owned inputs maintained manually or with ordinary coding-agent assistance/)
+  assert.doesNotMatch(implementationProfiles, /spark-config/)
   assert.match(implementationProfiles, /## Resolution and Conflicts/)
   assert.match(implementationProfiles, /authoritative order for implementation decisions/)
   assert.match(implementationProfiles, /The order applies only to compatible decisions/)
@@ -966,7 +973,7 @@ test('core project templates preserve the methodology quality contract', async (
     iosReference,
   ]) {
     assert.match(runtimeReference, /## Architecture Boundary/)
-    assert.match(runtimeReference, /direct the user to `\/spark-config`/)
+    assert.match(runtimeReference, /document them in project guidance before retrying `\/spark-impl`/)
   }
   assert.match(apiServiceReference, /A `ui-component` Spark is \*\*Not applicable\*\*/)
   assert.match(apiServiceReference, /Implement every selected operation by `operationId`/)
@@ -999,7 +1006,6 @@ test('core project templates preserve the methodology quality contract', async (
   assert.doesNotMatch(designExamples, /service-exposure/)
   for (const explicitSkill of [
     designSkill,
-    sparkConfigSkill,
     implementationSkill,
     testSkill,
   ]) {
@@ -1007,19 +1013,6 @@ test('core project templates preserve the methodology quality contract', async (
     assert.match(explicitSkill, /disable-model-invocation: true/)
     assert.match(explicitSkill, /description: 'User-invoked SparkWell workflow/)
   }
-  assert.match(sparkConfigSkill, /name: spark-config/)
-  assert.match(sparkConfigSkill, /sparkwell init --pack <pack-id>/)
-  assert.match(sparkConfigSkill, /configures packs but does not install or edit them/)
-  assert.match(sparkConfigSkill, /Do not encode general architecture settings in YAML/)
-  assert.doesNotMatch(sparkConfigSkill, /^Constraints:|^Preferences:|`constraints` for|`preferences` for/m)
-  assert.match(sparkConfigSkill, /Validate every pack-defined required field, value, and cross-profile reference/)
-  assert.match(sparkConfigSkill, /Reject absolute paths, paths containing a `\.\.` component/)
-  assert.match(sparkConfigSkill, /## Prepare the Configuration Proposal/)
-  assert.match(sparkConfigSkill, /During the proposal phase, do not modify `\.sparkwell\/config\.yaml`/)
-  assert.match(sparkConfigSkill, /Handle a UI decision or direct control only when the latest complete Implementation Configuration Proposal is unambiguously available/)
-  assert.match(sparkConfigSkill, /Before writing, re-read `\.sparkwell\/config\.yaml`/)
-  assert.match(sparkConfigSkill, /Do not scaffold, compile, install, or generate product artifacts/)
-  assert.match(sparkConfigSkill, /user must separately invoke `\/spark-impl`/)
   assert.match(designSkill, /user must explicitly invoke `\/spark-impl` or `\/spark-test`/)
   assert.match(implementationSkill, /tell the user to invoke `\/spark-design`\. Do not invoke it automatically/)
   assert.match(testSkill, /Do not invoke either workflow automatically/)
@@ -1036,14 +1029,12 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(implementationPacks, /Replace Domain Model `service-exposure` with explicit Service capabilities/)
   assert.match(implementationPacks, /\| `create-todo` \|/)
 
-  for (const proposalSkill of [designSkill, sparkConfigSkill]) {
-    assert.match(proposalSkill, /user-question tool such as `vscode_askQuestions`/)
-    assert.match(proposalSkill, /decision UI offering exactly `Finalize`, `Revise`, and `Cancel`/)
-    assert.match(proposalSkill, /Do not recommend or preselect `Finalize`/)
-    assert.match(proposalSkill, /collect revision comments through the UI/)
-    assert.match(proposalSkill, /If no suitable decision UI is available, ask the user to reply with `Revise: <comments>`, `Finalize`, or `Cancel`/)
-    assert.match(proposalSkill, /If the UI is dismissed or returns no decision, stop without modifying files/)
-  }
+  assert.match(designSkill, /user-question tool such as `vscode_askQuestions`/)
+  assert.match(designSkill, /decision UI offering exactly `Finalize`, `Revise`, and `Cancel`/)
+  assert.match(designSkill, /Do not recommend or preselect `Finalize`/)
+  assert.match(designSkill, /collect revision comments through the UI/)
+  assert.match(designSkill, /If no suitable decision UI is available, ask the user to reply with `Revise: <comments>`, `Finalize`, or `Cancel`/)
+  assert.match(designSkill, /If the UI is dismissed or returns no decision, stop without modifying files/)
 })
 
 async function createTemporaryTarget(context) {

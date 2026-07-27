@@ -108,13 +108,12 @@ After review, invoke later workflows independently:
 
 | Workflow | Responsibility | Does not own |
 |----------|----------------|--------------|
-| `/spark-config` | Creates or revises one project implementation profile and its architecture guidance | Sparks, product code, tests, or dependencies |
 | `/spark-impl` | Creates or updates target engineering artifacts using the selected profile and implementation packs | Spark design or test authoring |
 | `/spark-test` | Derives behavioral scenarios, creates or updates test artifacts, and reports verified and unverified intent | Spark design or production runtime changes |
 
-Each slash command activates only that workflow for the current request. A decision collected by the host UI, or a direct fallback control for the latest Spark or Implementation Configuration Proposal, is the only limited continuation. Workflows never activate automatically or chain into one another.
+Each slash command activates only that workflow for the current request. A decision collected by the host UI, or a direct fallback control for the latest Spark Proposal, is the only limited continuation. Workflows never activate automatically or chain into one another.
 
-SparkWell provides the shared realization process, not a universal project architecture or interface format. Before generating a new implementation, use `/spark-config` to confirm its profile, optional implementation packs, and project guidance. Existing implementations preserve their established architecture. `/spark-impl` follows reviewed Sparks, profile routing and pack configuration, project guidance, selected packs, and native architecture; it does not choose MVC, MVVM, state management, persistence, synchronization, module structure, or a wire protocol on the project's behalf.
+SparkWell provides the shared realization process, not a universal project architecture or interface format. Profiles and guidance are project-owned inputs maintained manually or with ordinary coding-agent assistance. `/spark-impl` follows Sparks, profile routing and Pack configuration, project guidance, selected Packs, and native architecture; it does not choose MVC, MVVM, state management, persistence, synchronization, module structure, or a wire protocol on the project's behalf.
 
 Reusable technology behavior is distributed as optional implementation packs. Install a bundled pack explicitly, then activate it only in profiles that need it. For example, `sparkwell init --pack openapi` installs OpenAPI 3.1 producer, server, client, and test guidance without making OpenAPI part of SparkWell Core or enabling it for every profile.
 
@@ -147,13 +146,7 @@ Then explicitly invoke a workflow, for example:
 
 Review the Spark Proposal, choose `Finalize` in the decision UI or reply `Finalize` when no UI is available, then review the generated Spark Documents before separately invoking `/spark-impl` or `/spark-test` as needed.
 
-Before the first new runtime realization, configure its architecture separately:
-
-```text
-/spark-config Configure a React Web implementation in src/web.
-```
-
-Review and finalize the configuration proposal before invoking `/spark-impl`.
+Before the first new runtime realization, copy the profile placeholder from `.sparkwell/config.yaml` and maintain its referenced file under `.sparkwell/guidance/`. Complete the consequential architecture decisions there before invoking `/spark-impl`.
 
 GitHub Copilot is the default adapter. SparkWell also supports Claude Code, `AGENTS.md`-compatible agents, multi-agent projects, and an agent-neutral initialization mode.
 

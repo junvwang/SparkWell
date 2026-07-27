@@ -10,13 +10,13 @@ disable-model-invocation: true
 
 ## Purpose
 
-Create or improve focused test artifacts that verify selected reviewed Sparks for one configured implementation target.
+Create or improve focused test artifacts that verify selected Sparks for one configured implementation target.
 
 This skill owns test scenarios, test source, test-only configuration, and behavioral coverage reporting. It does not generate or modify production runtime artifacts.
 
 ## Preconditions
 
-Use reviewed Sparks as the durable concept design and coverage source for this workflow.
+Use Sparks as the durable concept design and coverage source for this workflow.
 
 If testing exposes missing or contradictory product intent, stop and tell the user to invoke `/spark-design`. If it exposes a runtime implementation defect, report it and tell the user to invoke `/spark-impl`. Do not invoke either workflow automatically, and do not change Spark or runtime artifacts merely to make a test pass.
 
@@ -41,7 +41,7 @@ Load supporting documents only when needed:
 - `.sparkwell/realization-state.md` before creating or repairing test-artifact provenance.
 - `./references/<target>.md`, when present, for target-specific test guidance.
 
-Reviewed Spark intent defines required observable coverage. Pack configuration, project guidance, and established native test conventions govern target and test implementation choices. If these sources conflict materially, stop and surface the inconsistency rather than encoding one interpretation in a test.
+Spark intent defines required observable coverage. Pack configuration, project guidance, and established native test conventions govern target and test implementation choices. If these sources conflict materially, stop and surface the inconsistency rather than encoding one interpretation in a test.
 
 ## Resolve Target and Scope
 

@@ -103,13 +103,12 @@ For GitHub Copilot, it also receives:
 ├── copilot-instructions.md
 └── skills/
     ├── spark-design/
-    ├── spark-config/
     ├── spark-impl/
     ├── spark-test/
     └── visualize-sparks/
 ```
 
-Design, implementation configuration, implementation, and testing are user-invoked, separate workflows. Visualization is currently a disabled placeholder.
+Design, implementation, and testing are user-invoked, separate workflows. Visualization is currently a disabled placeholder. Profiles and guidance are project-owned files rather than a separate SparkWell workflow.
 
 Initialization does not generate product Sparks, source code, framework projects, implementation profiles, or tests.
 
@@ -122,16 +121,14 @@ Activate one workflow for the current request by invoking its slash command:
 | Command | Purpose |
 |---|---|
 | `/spark-design` | Propose a Spark map, then generate documents only after finalization |
-| `/spark-config` | Propose and finalize one implementation profile and its architecture guidance |
 | `/spark-impl` | Realize Sparks for one target or profile |
 | `/spark-test` | Create, update, or execute tests derived from Sparks |
 
-Changing software intent does not activate SparkWell automatically. Each command activates only its named workflow and does not invoke the next phase. For a pending Spark or Implementation Configuration Proposal, use the host's decision UI when available; otherwise reply directly with `Revise:`, `Finalize`, or `Cancel`. When a workflow identifies any other handoff, invoke the named slash command in a new request.
+Changing software intent does not activate SparkWell automatically. Each command activates only its named workflow and does not invoke the next phase. For a pending Spark Proposal, use the host's decision UI when available; otherwise reply directly with `Revise:`, `Finalize`, or `Cancel`. When a workflow identifies any other handoff, invoke the named slash command in a new request.
 
 Detailed executable rules live in the Agent Skills:
 
 - [`/spark-design`](../skills/spark-design/SKILL.md)
-- [`/spark-config`](../skills/spark-config/SKILL.md)
 - [`/spark-impl`](../skills/spark-impl/SKILL.md)
 - [`/spark-test`](../skills/spark-test/SKILL.md)
 
@@ -207,26 +204,7 @@ Project-defined kinds require explicit semantics, document rules, design rules, 
 
 ### 2. Configure an implementation
 
-Initialization creates an empty profile map in `.sparkwell/config.yaml`:
-
-```yaml
-schema-version: 1
-
-implementations:
-  profiles: {}
-```
-
-Before a new runtime realization, invoke the configuration workflow:
-
-```text
-/spark-config Configure a React Web implementation in src/web.
-```
-
-It inspects existing profiles, guidance, and native artifacts, then presents an Implementation Configuration Proposal in chat. For an established implementation it proposes codifying the detected architecture without redesigning it. For a new implementation it asks about consequential choices rather than selecting them automatically.
-
-Choose `Revise`, `Finalize`, or `Cancel` in the host decision UI when available; choosing `Revise` opens a prompt for comments. Otherwise, reply `Revise: <comments>`, `Finalize`, or `Cancel`. Before `Finalize`, no profile, guidance, source, dependency, Spark, test, or realization file changes. Finalization may update only `.sparkwell/config.yaml` and the proposed guidance documents, then stops for review without generating product code.
-
-A finalized profile may look like:
+Initialization creates `.sparkwell/guidance/` and a valid empty profile map with a copyable commented example in `.sparkwell/config.yaml`. Copy that example and replace `profiles: {}` when adding an implementation:
 
 ```yaml
 schema-version: 1
@@ -239,14 +217,13 @@ implementations:
       packs: {}
       guidance:
         - .sparkwell/guidance/web-react.md
-
 ```
 
-Profile YAML is intentionally limited to target routing, pack-owned machine configuration, and guidance references. `guidance` describes project architecture such as framework choice, module boundaries, state ownership, data flow, model mappings, persistence patterns, and artifact ownership. The recommended path is `.sparkwell/guidance/<profile-id>.md`.
+Profiles and guidance are project-owned inputs. Maintain them manually or with ordinary coding-agent assistance and improve guidance as the project evolves. Profile YAML is limited to target routing, pack-owned machine configuration, and guidance references. Guidance describes project architecture such as framework choice, module boundaries, state ownership, data flow, model mappings, persistence patterns, and artifact ownership.
 
 Native project files remain authoritative for dependencies, versions, commands, formatting, linting, build configuration, and actual existing structure. Packs, guidance, and native architecture must agree. A missing selected pack, missing referenced guidance, unresolved consequential architecture, or conflict makes `/spark-impl` **Blocked**.
 
-Resolution order is: Spark intent, profile routing and pack configuration, profile guidance, selected packs, established native architecture, then optional target defaults. This order never silently resolves contradictions. Consequential project changes require `/spark-config` rather than a task-local override.
+Resolution order is: Spark intent, profile routing and pack configuration, profile guidance, selected packs, established native architecture, then optional target defaults. This order never silently resolves contradictions. Update the project-owned profile or guidance before retrying `/spark-impl` when a consequential decision is missing or changes.
 
 ### 3. Use optional implementation packs
 
@@ -258,7 +235,7 @@ Install the bundled OpenAPI pack:
 sparkwell init --pack openapi
 ```
 
-Then use `/spark-config` to create profiles like these:
+Then edit `.sparkwell/config.yaml` to activate the Pack in the participating profiles:
 
 ```yaml
 implementations:

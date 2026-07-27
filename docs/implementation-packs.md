@@ -52,7 +52,7 @@ implementations:
 
 Before planning, `/spark-impl` and `/spark-test` read every selected `PACK.md` and the references it requires. A missing pack, incompatible profile, or conflict is **Blocked**. Pack declaration order never resolves conflicts.
 
-`/spark-config` may add or remove a pack ID in a proposal, but it does not install or edit packs. When a requested bundled pack is absent, install it with the CLI first.
+Activate or configure a Pack by editing the project-owned profile. When a requested bundled pack is absent, install it with the CLI first.
 
 ## OpenAPI Pack
 

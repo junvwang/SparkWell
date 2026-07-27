@@ -15,7 +15,7 @@ Do not reconstruct a public interface from Sparks when its contract is absent.
 
 ## Contract Boundary
 
-Treat reviewed Sparks as authoritative for domain and service behavior and OpenAPI as authoritative for paths, methods, parameters, request bodies, security requirements, responses, and boundary schemas.
+Treat Sparks as authoritative for domain and service behavior and OpenAPI as authoritative for paths, methods, parameters, request bodies, security requirements, responses, and boundary schemas.
 
 - Implement every selected operation by `operationId` without adding or removing public operations.
 - Mark incompatible duplicate path and HTTP method pairs **Blocked**.
@@ -28,7 +28,7 @@ Inspect native manifests, framework configuration, route registration, dependenc
 
 Prefer established OpenAPI server-generation tooling when compatible. Run the artifact-owning generator and do not hand-edit generated files. Otherwise implement the smallest compatible handlers and adapters.
 
-Resolve module boundaries, domain/boundary mappings, persistence access, dependency injection, transactions, and dependencies from the selected profile, guidance, and established project. This pack does not choose an architecture, ORM, provider, synchronization strategy, or source layout. For a new implementation, unresolved consequential choices are **Blocked** and require `/spark-config`.
+Resolve module boundaries, domain/boundary mappings, persistence access, dependency injection, transactions, and dependencies from the selected profile, guidance, and established project. This pack does not choose an architecture, ORM, provider, synchronization strategy, or source layout. For a new implementation, unresolved consequential choices are **Blocked**; identify them and ask the user to document them in project guidance before retrying `/spark-impl`.
 
 Keep connection details and secrets in native secure configuration. Map internal and persistence representations without exposing persistence shapes through the API. An independently managed persistence service requires its own explicit contract.
 
@@ -37,7 +37,7 @@ Keep connection details and secrets in native secure configuration. Map internal
 - Bind all inputs exactly as the selected operation defines them.
 - Enforce contract validation, content types, and security through established framework mechanisms.
 - Map boundary schemas to internal domain representations; do not assume public, create, update, and persistence projections share one type.
-- Implement reviewed invariants and Service behavior without changing the wire interface.
+- Implement Spark-defined invariants and Service behavior without changing the wire interface.
 - Return declared success and failure responses with conformant status codes, headers, content types, and schemas.
 
 Run the owning generator when applicable, then restore or install, compile, type-check, lint, and format through the native toolchain. Validate route and schema conformance and exercise the smallest safe material operation set when the environment permits it. Report unavailable tooling, dependencies, endpoints, credentials, and runtime checks precisely.
