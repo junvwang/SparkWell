@@ -79,6 +79,19 @@ sparkwell init ../MyProject \
 
 All adapters project the same canonical instructions and Agent Skills into their native discovery locations. SparkWell does not maintain agent-specific skill forks.
 
+## Project Setup Flow
+
+Set up a SparkWell project in this order:
+
+1. Run `sparkwell init` with the required coding-agent adapters and optional Packs.
+2. Review `.sparkwell/design-context.md` and record durable project-wide facts that may affect Spark boundaries, such as system shape, responsibility and data ownership, communication or trust boundaries, synchronization context, and platform roles. Maintain it gradually as the project becomes better understood.
+3. Invoke `/spark-design` when software intent needs to be created or evolved. Design can begin before implementation profiles exist.
+4. Before the first `/spark-impl` for a target, copy the commented profile example in `.sparkwell/config.yaml`, replace `profiles: {}`, and create its referenced `.sparkwell/guidance/<profile-id>.md` files. Record target-specific architecture decisions there and refine them over time.
+5. Invoke `/spark-impl` for one profile and Spark scope. If required routing or architecture context is missing, update the project-owned profile, Design Context, or Guidance named by the blocker, then retry.
+6. Invoke `/spark-test` separately when test authoring or broader verification is needed.
+
+The initializer supplies placeholders and directories, not project decisions. `design-context.md`, profile entries, and Guidance are project-owned and may be maintained manually or with ordinary coding-agent assistance. Normal reinitialization preserves them.
+
 ## Generated Project Structure
 
 Every initialized project receives:

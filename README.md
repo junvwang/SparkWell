@@ -150,6 +150,8 @@ Review the Spark Proposal, choose `Finalize` in the decision UI or reply `Finali
 
 Before the first new runtime realization, copy the profile placeholder from `.sparkwell/config.yaml` and maintain its referenced file under `.sparkwell/guidance/`. Complete the consequential architecture decisions there before invoking `/spark-impl`.
 
+See the [Project Setup Flow](docs/usage.md#project-setup-flow) for the complete order and ownership of these files.
+
 GitHub Copilot is the default adapter. SparkWell also supports Claude Code, `AGENTS.md`-compatible agents, multi-agent projects, and an agent-neutral initialization mode.
 
 See the **[detailed usage guide](docs/usage.md)** for installation, adapters, configuration, workflow usage, safety behavior, and the complete CLI reference.
