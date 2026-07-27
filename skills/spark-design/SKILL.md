@@ -10,24 +10,24 @@ disable-model-invocation: true
 
 ## Purpose
 
-Turn requirements and software-intent changes into the smallest coherent set of new or evolved Sparks, obtain confirmation of that Spark map, and then create the reviewed Spark Documents.
+Turn a software-intent change into the smallest coherent set of new or evolved Sparks. Before writing any Spark Document, present a Spark Proposal and obtain explicit confirmation.
 
-This skill designs Sparks. It does not generate or modify engineering artifacts such as source code, tests, API specifications, or implementation documentation.
+This Skill owns Spark design and Spark Document changes only. It does not generate or modify source code, tests, contracts, implementation documentation, profiles, guidance, or realization state.
 
 ## Sources of Authority
 
-Before designing Sparks:
+Read:
 
-1. Read `.sparkwell/specification.md` for Spark concepts, semantics, identities, kinds, and relationships.
-2. Read `.sparkwell/conventions.md` and other project guidance for storage, naming, serialization, and kind-specific document format.
-3. Read the relevant existing Sparks.
-4. In an established implementation, inspect enough nearby engineering artifacts and architecture guidance to understand integration constraints that could affect concept boundaries. Do not treat accidental implementation details as product intent.
+1. `.sparkwell/specification.md` for Spark semantics, identities, kinds, and relationships.
+2. `.sparkwell/conventions.md` and applicable project kind guidance for storage and document format.
+3. Relevant existing Sparks.
+4. Only enough architecture guidance and nearby engineering artifacts to understand established boundaries that may affect the design.
 
-Do not duplicate or override the Spark Specification in this skill. If project guidance conflicts with the specification, identify the conflict and ask for clarification.
+The Specification owns semantics; Conventions own representation. Surface conflicts instead of resolving them silently, and never treat incidental implementation structure as product intent.
 
-## Possible Outcomes
+## Classify the Request
 
-Classify the request as one of these outcomes:
+Choose one outcome:
 
 - No Spark change: the request changes only engineering artifacts and leaves the software intent represented by existing Sparks unchanged.
 - Evolve existing Sparks: existing concepts own the changed intent.
@@ -35,235 +35,58 @@ Classify the request as one of these outcomes:
 - Create and evolve: the change affects existing concepts and introduces new ones.
 - Clarify: unresolved ambiguity prevents a defensible concept boundary or behavior definition.
 
-Do not assume that every requirement creates a Spark.
+If the outcome is **No Spark change**, explain why and stop. If it is **Clarify**, ask only the questions that materially affect intent or boundaries, then classify again.
 
-## Design Mindset
+## Design
 
-Spark design is an exercise in software design, not document generation.
+1. Extract every requested outcome, actor, behavior, constraint, boundary, and material relationship. Distinguish explicit requirements from assumptions.
+2. Map each outcome to the existing Spark that owns it or to a new candidate. Prefer evolving an existing owner over creating an overlapping Spark, and surface Spark/artifact inconsistencies.
+3. Group new candidates by enduring purpose rather than requirement wording or anticipated files. Use the [granularity guide](./references/granularity.md), comparable existing Sparks, and [worked examples](./references/examples.md).
+4. Assign a supported kind according to the Specification. Do not turn DTOs, endpoints, framework components, controls, tables, or other implementation shapes into Sparks merely because they exist in code.
+5. Use `composes` for direct conceptual ownership and `uses` for interaction with an independently owned Spark. Model only relationships needed to understand the design.
 
-The goal is not to maximize the number of Sparks, nor to minimize them.
+Produce the smallest cohesive concept set that preserves every requested outcome. Each body contains the minimum sufficient intent: include a statement when omitting it would force a reader to guess material behavior, ownership, an invariant, a constraint, or a relationship. State each decision once in its owner and avoid boilerplate or repeated content.
 
-The goal is to produce the smallest cohesive set of independently meaningful software concepts that best represents the intended design.
+## Proposal Checkpoint
 
-### Minimum Sufficient Intent
+Before modifying any file, present one complete, concise Spark Proposal in chat:
 
-Write the shortest Spark body that preserves correct design decisions. A statement belongs when removing it would force a reviewer or implementer to guess observable behavior, ownership, an invariant, a material constraint, or a relationship.
+- new Sparks: ID, kind, and one-sentence `summary`;
+- evolved Sparks: ID and one-sentence reason;
+- renames, kind changes, and removals: reason and impact;
+- material open questions.
 
-State each decision once in the Spark that owns it. Reference composed and used Sparks rather than restating their behavior. Omit content already established by frontmatter, standardized kind representations, project guidance, or ordinary engineering practice.
+Omit unchanged or contextual Sparks unless needed to explain a boundary. Before presenting, verify that every requested outcome has an owner, candidates do not duplicate existing responsibility, relationships are defensible, destructive changes are explicit, and no file has changed.
 
-Do not add a Purpose section that only repeats `summary`, exhaustive lists of behavior the concept does not support, generic accessibility or quality expectations, repeated implementation-freedom disclaimers, empty sections, or prose that merely expands a table row. Keep such content only when it captures material software intent or resolves a plausible ambiguity.
+Request a decision through a host user-question tool such as `vscode_askQuestions` when available, offering exactly `Finalize`, `Revise`, and `Cancel`. Do not recommend or preselect `Finalize`.
 
-Concision must not weaken or omit requested outcomes and implementation-critical product decisions. There is no target line count; optimize for information density and clear ownership.
+- `Finalize` approves the latest Proposal and permits applying it to Spark Documents. It does not approve the generated documents or start implementation.
+- `Revise` collects comments and returns one rechecked, complete replacement Proposal without writing files.
+- `Cancel` ends the workflow without writing files.
 
-## Procedure
+If no suitable UI is available, accept a direct `Revise: <comments>`, `Finalize`, or `Cancel` reply. Also accept the explicit forms `/spark-design Revise: ...`, `/spark-design Finalize`, and `/spark-design Cancel`.
 
-### 1. Understand the Requirement
+Act only when the latest complete Proposal is unambiguous. UI dismissal, silence, generic approval, or a control without a pending Proposal changes nothing. Keep Proposal and approval state in chat only.
 
-Extract the desired outcomes, actors, observable behavior, responsibilities, constraints, boundaries, and relevant relationships.
+## Apply the Proposal
 
-Preserve each distinct requested outcome and constraint through the design. A Spark may clarify and add concept-level detail, but must not compress away requested behavior.
+After `Finalize`, re-read affected Sparks and verify that IDs, paths, and relevant project state still match the Proposal. If not, present a revised complete Proposal and require confirmation again.
 
-Separate explicit requirements from assumptions. Ask focused questions only when an ambiguity would materially change software intent or Spark boundaries. Otherwise, capture the assumption in a durable Spark when implementation depends on it and also state it in the review summary.
+Apply only the confirmed create, evolve, rename, kind-change, and removal scope. Follow the Specification and project Conventions for semantics, relationships, storage, frontmatter, and kind-specific format. Do not invent missing semantics or formats; stop for clarification instead.
 
-### 2. Inspect Existing Sparks
+Write software intent rather than incidental implementation. Preserve requested behavior and material product decisions, remove repetition, and keep ordinary framework, language, package, and file choices outside Sparks. Do not modify engineering artifacts, profiles, guidance, or realization state.
 
-Find the Sparks that currently own related responsibilities or behavior.
+## Validate and Report
 
-For each requirement outcome, determine whether it is already represented, changes an existing Spark, or introduces a new concept. Prefer evolving an existing Spark over creating an overlapping Spark.
+Before reporting, verify that:
 
-If a Spark and its engineering artifacts disagree, surface the inconsistency instead of silently treating either as authoritative.
+- every requested outcome and constraint remains represented;
+- every Spark has one meaningful purpose and no duplicate owner;
+- relationships, IDs, paths, frontmatter, and kind-specific formats are valid;
+- bodies contain enough behavior, state, failure, validation, lifecycle, interaction, and ownership detail without implementation-driven or boilerplate content;
+- assumptions, conflicts, destructive changes, and unresolved questions are explicit;
+- the written changes match the confirmed Proposal.
 
-### 3. Identify Candidate Software Concepts
+Summarize Spark Documents created, evolved, renamed, moved, or removed; requested-outcome coverage; important decisions; and remaining questions. Then stop for human review of the generated Spark Documents.
 
-Group related outcomes by enduring purpose and responsibility, not by wording, acceptance criterion, or anticipated implementation structure.
-
-Prefer stable conceptual boundaries over anticipated implementation boundaries. Narrower conceptual scope must not reduce the behavioral detail needed to understand, review, and implement that concept.
-
-Use [the granularity guide](./references/granularity.md) to decide whether each candidate should be an independent Spark, remain part of another Spark, or be represented as a relationship.
-
-Use existing Sparks of similar kinds as the primary calibration for vocabulary and granularity.
-
-Use the standardized `domain-model`, `service`, and `ui-component` kinds. A project-defined kind requires guidance for its concept semantics, document representation, design rules, and target applicability. Classify each candidate with a supported kind or stop for clarification.
-
-When a candidate primarily owns domain data semantics, consider `domain-model` only when the concept is independently meaningful and owns fields, invariants, relationships, lifecycle, or model-level behavior worth reviewing and evolving separately. Do not classify an implementation data shape as a Domain Model merely because it has fields.
-
-When a candidate owns independently meaningful capabilities across a conceptual boundary, consider `service`. Create a Service Spark for behavior such as cross-model coordination, specialized queries, authorization, batching, orchestration, or distinct failure semantics. Do not create one merely because an implementation will contain a service class, endpoint, or automatic standard CRUD surface.
-
-For user-facing software, identify a root `ui-component` that owns the overall interface purpose and cross-component coordination. Decompose it into composed child UI Components when modularity is intended and each child has a meaningful user-facing role, conceptual inputs, interactions, state, behavior, constraints, or reason to evolve independently. Define the parent-child interface and state ownership rather than copying a rendered component tree. Native controls, layout containers, styling fragments, and framework-only components remain engineering artifacts. UI Components use Domain Model and Service Sparks rather than duplicating their fields, invariants, or capabilities.
-
-### 4. Model Relationships
-
-Use `composes` when a Spark directly owns another Spark as part of the larger concept.
-
-Use `uses` when a Spark depends on or interacts with another independently owned Spark.
-
-Model only relationships needed to understand the design. Do not create Sparks solely to make a relationship graph more detailed.
-
-Relationships should reflect conceptual ownership, dependency, or interaction rather than incidental implementation dependencies.
-
-### 5. Prepare the Spark Proposal
-
-Prepare a concise proposal in chat before creating, updating, moving, renaming, or deleting any Spark Document.
-
-For each proposed new Spark, provide only:
-
-- proposed Spark ID;
-- kind;
-- one-sentence `summary` describing what the concept is for.
-
-For each proposed evolution, provide only:
-
-- existing Spark ID;
-- one-sentence reason it must change.
-
-List a rename, kind change, or removal separately as an identity or destructive change with its reason and impact. Omit contextual and unchanged Sparks unless they are necessary to explain a boundary decision. Mention relationships only when they materially explain the proposed decomposition.
-
-Use this compact shape, omitting empty sections:
-
-```markdown
-**Spark Proposal**
-
-Create:
-
-| Spark | Kind | Summary |
-|---|---|---|
-| `todo-item-model` | `domain-model` | Represents one tracked piece of work and its completion state. |
-
-Evolve:
-
-| Spark | Why |
-|---|---|
-| `todo-app-ui` | Coordinate the proposed entry and list components. |
-
-Open questions:
-
-- Should completed items be reopenable?
-```
-
-During the proposal phase, do not modify Spark Documents, realization state, source code, tests, contracts, profiles, or any other project file. Keep the proposal in chat only. Do not write approval, proposal, draft, or workflow-state metadata into the repository.
-
-When the outcome is **No Spark change**, explain that result briefly and stop without a confirmation cycle. When the outcome is **Clarify**, ask the blocking questions and prepare a proposal only after they are resolved.
-
-### 6. Check the Proposal
-
-Before presenting the proposal, verify that:
-
-- every proposed Spark represents one meaningful concept;
-- every requested outcome and constraint maps to a proposed or existing owner;
-- no proposed Spark duplicates an existing responsibility;
-- each proposed boundary and relationship has a defensible owner;
-- the proposal uses the smallest cohesive set of Sparks that covers the intent;
-- assumptions, inconsistencies, destructive changes, and blocking questions are explicit;
-- no project file has been modified.
-
-Consult [the worked examples](./references/examples.md) when the appropriate decomposition is uncertain.
-
-### 7. Present and Revise the Proposal
-
-Present the complete Spark Proposal in chat before requesting a decision so the user can review it.
-
-When the host exposes a user-question tool such as `vscode_askQuestions`, use it to open a decision UI offering exactly `Finalize`, `Revise`, and `Cancel`. Do not recommend or preselect `Finalize`. A decision returned by this UI is equivalent to the corresponding direct control.
-
-If the user selects `Revise`, collect revision comments through the UI before incorporating them, rechecking the design, presenting one complete replacement proposal, and requesting a new decision. Do not present only a delta.
-
-If no suitable decision UI is available, ask the user to reply with `Revise: <comments>`, `Finalize`, or `Cancel`. If the UI is dismissed or returns no decision, stop without modifying files. The user may also explicitly invoke `/spark-design Revise: ...`, `/spark-design Finalize`, or `/spark-design Cancel`.
-
-Handle a UI decision or direct control only when the latest complete proposal is unambiguously available in the conversation. If no pending proposal can be identified, do not modify files; ask the user to start `/spark-design` with the design request or explicitly provide enough proposal context.
-
-For a direct `Revise: <comments>` response to the pending proposal, incorporate the comments, recheck the design, present one complete replacement proposal, and stop again without modifying files. Do not present only a delta.
-
-For `Cancel`, end the pending design workflow without modifying files.
-
-For `Finalize`, continue to finalization below. Do not generate Spark Documents until the user explicitly selects or replies with `Finalize`.
-
-### 8. Finalize Spark Documents
-
-Before writing, re-read every affected existing Spark and verify the proposed IDs and paths are still available. Inspect relevant worktree changes when available. If the repository changed in a way that invalidates the proposal, do not write files; present a revised complete proposal and wait for confirmation again.
-
-Create or update Spark Documents using the project's storage, naming, identifier, frontmatter, and body conventions.
-
-When it improves readability, consider `-model` for `domain-model`, `-service` for `service`, and `-ui` for `ui-component`. This is optional naming guidance. Keep the human-readable name natural and always use the `kind` field, not the suffix, to classify the Spark.
-
-Describe software intent rather than incidental implementation. Include enough behavior, responsibilities, constraints, boundaries, and interactions for humans to review the concept and for later artifact generation to be grounded in it.
-
-Where applicable, describe success, failure, empty, loading, transitional, validation, lifecycle, persistence, and concurrency behavior. Include only topics that matter to the concept; do not add boilerplate sections with no useful intent.
-
-After drafting, remove statements duplicated by frontmatter or another Spark, collapse repeated rules into their authoritative owner, and delete generic quality or implementation-choice prose already supplied by project guidance.
-
-Place enduring platform-specific observable behavior or constraints in the relevant Spark when they are part of product intent. Keep framework, language, library, packaging, and ordinary platform implementation choices in implementation profiles, project guidance, or native artifacts unless those choices are themselves essential software intent.
-
-For `domain-model`, follow the standardized kind semantics in the Spark Specification and the field-table, type, and relationship representation in project conventions. Preserve stable logical field identities, distinguish field rules from cross-field invariants, and model referenced domain concepts through `composes` or `uses`. State any product-level restriction on crossing a Service boundary in the Domain Model body.
-
-For `service`, follow the standardized kind semantics and `## Capabilities` table in project conventions. Give each capability a stable logical identifier, describe concept-level inputs and outputs, capture observable failure behavior, and include every independently owned referenced concept in `uses`. Do not duplicate Domain Model fields or prescribe transport routes, DTOs, controllers, or framework service types.
-
-For `ui-component`, follow the standardized kind semantics and body conventions in project guidance. Organize the body for clarity rather than filling a fixed template. Describe information received from owners, reported user intent, observable states, transitions, behavior, constraints, boundaries, and accessibility intent when material. When the component composes children, capture material child roles, information flow, interaction handling, parent coordination, and layout relationships without repeating child definitions. Do not prescribe framework props, callbacks, events, commands, bindings, classes, files, or native controls.
-
-When no storage or document convention exists and existing Sparks do not establish one, do not invent a format. Report the missing convention and stop without writing.
-
-Spark Documents should optimize for human review and conceptual understanding rather than implementation completeness.
-
-### 9. Check the Finalized Design
-
-Before reporting the written documents, verify that:
-
-- every Spark represents one meaningful concept;
-- every requested outcome and constraint is represented by one or more Sparks;
-- no required outcome or constraint was weakened, generalized away, or lost during Spark decomposition;
-- new Sparks do not duplicate existing responsibilities;
-- each boundary and responsibility has a clear owner;
-- composition and usage relationships are consistent with conceptual ownership;
-- bodies contain enough applicable behavioral, state, failure, validation, lifecycle, and interaction detail for implementation to proceed without inventing product behavior;
-- bodies describe intent without unnecessary implementation detail;
-- each decision appears once in its authoritative Spark and related Sparks do not restate it;
-- summaries, tables, and prose do not duplicate one another without adding material meaning;
-- bodies contain no generic quality, implementation-freedom, empty-section, or exhaustive negative-list boilerplate;
-- every Domain Model has a valid `## Data` table, stable field identities, technology-independent types, and applicable invariants, relationships, and public-boundary restrictions;
-- every Service has a valid `## Capabilities` table, stable capability identities, concept-level inputs and outputs, applicable failure behavior, and consistent `uses` relationships;
-- every UI Component clearly communicates its purpose and boundary, applicable information and interaction flow, material states and ownership, child composition responsibilities, and consistent `uses` relationships;
-- proposed design remains compatible with relevant established architecture, or any intentional architectural conflict is surfaced;
-- assumptions and unresolved questions are explicit;
-- every implementation-critical decision learned during the design conversation is captured in durable artifacts;
-- the design uses the smallest cohesive set of Sparks that covers the intent.
-
-### 10. Present Spark Documents for Review
-
-Summarize the Sparks created, evolved, renamed, or removed; requested-outcome coverage; important design decisions; and remaining assumptions or questions.
-
-Then stop so a human can review the generated Spark Documents. Do not add approval status or other review metadata.
-
-After document review, the user must explicitly invoke `/spark-impl` or `/spark-test` for a later phase. Do not invoke either workflow automatically.
-
-Invite reviewers to remove repetition as well as fill gaps. A longer document is not more complete when its extra text repeats another owner or project-wide guidance.
-
-Implementation wording supplied to `/spark-design` does not bypass either review checkpoint or activate `/spark-impl`.
-
-## Success Criteria
-
-A successful Spark design should:
-
-- faithfully represent the intended software design;
-- preserve all relevant requested outcomes and constraints;
-- add the clarification and concept-level detail needed for implementation rather than merely summarizing requirements;
-- be understandable without reading engineering artifacts;
-- be reviewable by humans;
-- support future engineering-artifact generation;
-- avoid implementation-driven decomposition.
-
-## Guardrails
-
-- Do not create one Spark per requirement by default.
-- Do not model files, classes, endpoints, tables, framework components, or implementation layers as Sparks unless they represent independently meaningful software concepts.
-- Do not create Domain Model Sparks for DTOs, API payloads, ORM entities, database rows, or target-language types unless they independently satisfy the Domain Model semantics.
-- Do not create Service Sparks for controllers, endpoints, framework service classes, generated clients, or automatic standard CRUD unless they independently satisfy the Service semantics.
-- Do not create unsupported Spark kinds unless project guidance defines their semantics, document representation, design rules, and target applicability.
-- Do not create a UI Component Spark for a native control, layout container, style fragment, or framework-only component.
-- Do not repeat another Spark's owned behavior for local context; reference that Spark instead.
-- Do not add sections or boundary lists solely to make a document look complete.
-- Do not create, update, move, rename, or delete Spark Documents before the user finalizes the current proposal.
-- Do not accept a UI decision, `Revise:`, `Finalize`, or `Cancel` when no latest complete proposal is available.
-- Do not treat a dismissed UI, silence, approval of an earlier proposal, or ambiguous positive feedback as `Finalize`.
-- Do not persist proposal or approval state in project files.
-- Do not generate engineering artifacts as part of this skill.
-- Do not invent missing Spark semantics, storage conventions, or workflow metadata.
-- Do not silently resolve unclear ownership or contradictions between Sparks and engineering artifacts.
-- Do not introduce implementation terminology into a Spark unless it represents the software concept itself.
+Do not add approval metadata or automatically invoke another workflow. The user must explicitly invoke `/spark-impl` or `/spark-test`. An implementation request in the original prompt does not bypass either review checkpoint.
