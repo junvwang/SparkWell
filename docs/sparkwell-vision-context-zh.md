@@ -604,6 +604,7 @@ SparkWell Core 提供通用 realization 流程，但不替项目选择 MVC、MVV
 
 项目实现配置分为：
 
+- `.sparkwell/design-context.md` 中可能影响 Spark 边界的系统形态、责任与数据 ownership、通信与信任边界、同步上下文和平台角色；
 - `.sparkwell/config.yaml` 中的 target、source-root、guidance references，以及按 Pack ID 分组的机器可读配置；
 - Profile 显式选择的 optional implementation packs，用于复用特定技术的 realization 与测试规则；
 - Profile 引用的 `.sparkwell/guidance/*.md` 项目架构指导；

@@ -20,10 +20,11 @@ Read:
 
 1. `.sparkwell/specification.md` for Spark semantics, identities, kinds, and relationships.
 2. `.sparkwell/conventions.md` and applicable project kind guidance for storage and document format.
-3. Relevant existing Sparks.
-4. Only enough architecture guidance and nearby engineering artifacts to understand established boundaries that may affect the design.
+3. `.sparkwell/design-context.md`, when present, for durable system shape, responsibility, data ownership, communication, trust, synchronization, and platform-role context.
+4. Relevant existing Sparks.
+5. Only enough profiles, implementation guidance, and nearby engineering artifacts to understand established boundaries that may affect the design.
 
-The Specification owns semantics; Conventions own representation. Surface conflicts instead of resolving them silently, and never treat incidental implementation structure as product intent.
+The Specification owns semantics; Conventions own representation; Design Context owns cross-Spark project facts. Surface conflicts instead of resolving them silently. Do not derive Sparks from frameworks, deployment structure, files, or other incidental implementation shapes alone. If durable context is missing and would materially change intent or boundaries, ask before proposing Sparks.
 
 ## Classify the Request
 

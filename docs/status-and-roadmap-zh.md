@@ -9,7 +9,7 @@
 - `/spark-design`：Proposal、显式确认、Spark Document 生成和文档评审停点；
 - `/spark-impl`：按 profile、Guidance、Pack 和 native architecture 实现 Sparks；
 - `/spark-test`：独立的测试生成、执行和失败分类流程；
-- `specification.md`、项目自有 `conventions.md`、implementation profiles 和 realization provenance；
+- `specification.md`、项目自有 `conventions.md` 与 `design-context.md`、implementation profiles 和 realization provenance；
 - GitHub Copilot、Claude Code、`AGENTS.md` 适配器；
 - 显式安装、按 profile 激活的 optional implementation packs；
 - OpenAPI producer、server、client 和 test guidance pack；

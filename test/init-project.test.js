@@ -33,7 +33,7 @@ test('initializes core contracts and GitHub Copilot workflows by default', async
 
   assert.equal(result.agent, 'github-copilot')
   assert.deepEqual(result.packs, [])
-  assert.equal(result.created, 14)
+  assert.equal(result.created, 15)
   assert.equal(result.updated, 0)
   assert.match(
     await readFile(path.join(target, '.sparkwell', 'config.yaml'), 'utf8'),
@@ -44,6 +44,14 @@ test('initializes core contracts and GitHub Copilot workflows by default', async
     /#\s+web:\r?\n#\s+target: web\r?\n#\s+source-root: src\/web\r?\n#\s+packs: \{\}\r?\n#\s+guidance:/,
   )
   await assertPathExists(path.join(target, 'sparks'), 'directory')
+  await assertPathExists(
+    path.join(target, '.sparkwell', 'design-context.md'),
+    'file',
+  )
+  assert.match(
+    await readFile(path.join(target, '.sparkwell', 'design-context.md'), 'utf8'),
+    /# Project Design Context[\s\S]+## System Shape[\s\S]+## Responsibility and Data Ownership[\s\S]+## Communication and Trust Boundaries/,
+  )
   await assertPathExists(
     path.join(target, '.sparkwell', 'guidance'),
     'directory',
@@ -97,7 +105,7 @@ test('supports an agent-neutral core-only initialization', async (context) => {
     agent: 'none',
   })
 
-  assert.equal(result.created, 5)
+  assert.equal(result.created, 6)
   await assertPathExists(path.join(target, '.sparkwell', 'specification.md'), 'file')
   await assert.rejects(access(path.join(target, '.github')), { code: 'ENOENT' })
 })
@@ -112,7 +120,7 @@ test('initializes Claude Code instructions and shared skills', async (context) =
 
   assert.equal(result.agent, 'claude-code')
   assert.deepEqual(result.agents, ['claude-code'])
-  assert.equal(result.created, 14)
+  assert.equal(result.created, 15)
   await assertPathExists(path.join(target, 'CLAUDE.md'), 'file')
   await assertPathExists(
     path.join(target, '.claude', 'skills', 'spark-design', 'SKILL.md'),
@@ -130,7 +138,7 @@ test('initializes AGENTS.md-compatible instructions and skills', async (context)
   })
 
   assert.equal(result.agent, 'agents-md')
-  assert.equal(result.created, 14)
+  assert.equal(result.created, 15)
   await assertPathExists(path.join(target, 'AGENTS.md'), 'file')
   await assertPathExists(
     path.join(target, '.agents', 'skills', 'spark-impl', 'SKILL.md'),
@@ -148,7 +156,7 @@ test('composes multiple selected agent adapters', async (context) => {
 
   assert.equal(result.agent, undefined)
   assert.deepEqual(result.agents, ['github-copilot', 'claude-code'])
-  assert.equal(result.created, 23)
+  assert.equal(result.created, 24)
   await assertPathExists(
     path.join(target, '.github', 'copilot-instructions.md'),
     'file',
@@ -196,7 +204,7 @@ test('installs only explicitly selected implementation packs', async (context) =
   })
 
   assert.deepEqual(first.packs, ['openapi'])
-  assert.equal(first.created, 5 + packFileCount)
+  assert.equal(first.created, 6 + packFileCount)
   for (const relativeFile of packFiles) {
     assert.equal(
       await readFile(
@@ -215,7 +223,7 @@ test('installs only explicitly selected implementation packs', async (context) =
   })
   assert.equal(second.created, 0)
   assert.equal(second.updated, 0)
-  assert.equal(second.unchanged, 5 + packFileCount)
+  assert.equal(second.unchanged, 6 + packFileCount)
 })
 
 test('discovers implementation packs and rejects unknown ids', () => {
@@ -265,7 +273,7 @@ test('is idempotent when managed files are unchanged', async (context) => {
 
   assert.equal(result.created, 0)
   assert.equal(result.updated, 0)
-  assert.equal(result.unchanged, 14)
+  assert.equal(result.unchanged, 15)
 })
 
 test('treats line-ending and final-newline differences as unchanged', async (context) => {
@@ -284,14 +292,15 @@ test('treats line-ending and final-newline differences as unchanged', async (con
   const result = await initializeProject({ destination: target, agent: 'none' })
 
   assert.equal(result.updated, 0)
-  assert.equal(result.unchanged, 5)
+  assert.equal(result.unchanged, 6)
 })
 
-test('preserves project-owned configuration and conventions on reinitialization', async (context) => {
+test('preserves project-owned configuration, conventions, and design context on reinitialization', async (context) => {
   const target = await createTemporaryTarget(context)
   await initializeProject({ destination: target, agent: 'none' })
   const configPath = path.join(target, '.sparkwell', 'config.yaml')
   const conventionsPath = path.join(target, '.sparkwell', 'conventions.md')
+  const designContextPath = path.join(target, '.sparkwell', 'design-context.md')
   const configuredProfiles = `schema-version: 1
 
 implementations:
@@ -302,15 +311,20 @@ implementations:
 `
   await writeFile(configPath, configuredProfiles)
   await writeFile(conventionsPath, '# Project Spark Document Conventions\n')
+  await writeFile(designContextPath, '# My Project Context\n\nClient-server.\n')
 
   const result = await initializeProject({ destination: target, agent: 'none' })
 
   assert.equal(result.updated, 0)
-  assert.equal(result.unchanged, 5)
+  assert.equal(result.unchanged, 6)
   assert.equal(await readFile(configPath, 'utf8'), configuredProfiles)
   assert.equal(
     await readFile(conventionsPath, 'utf8'),
     '# Project Spark Document Conventions\n',
+  )
+  assert.equal(
+    await readFile(designContextPath, 'utf8'),
+    '# My Project Context\n\nClient-server.\n',
   )
 })
 
@@ -324,7 +338,7 @@ test('appends a managed section to existing Copilot instructions', async (contex
   const result = await initializeProject({ destination: target })
   const merged = await readFile(instructionsPath, 'utf8')
 
-  assert.equal(result.created, 13)
+  assert.equal(result.created, 14)
   assert.equal(result.updated, 1)
   assert.ok(merged.startsWith(projectInstructions))
   assert.match(merged, /# Sparkwell Project Instructions/)
@@ -333,7 +347,7 @@ test('appends a managed section to existing Copilot instructions', async (contex
 
   const repeated = await initializeProject({ destination: target })
   assert.equal(repeated.updated, 0)
-  assert.equal(repeated.unchanged, 14)
+  assert.equal(repeated.unchanged, 15)
 })
 
 test('updates only the valid Sparkwell managed section', async (context) => {
@@ -503,7 +517,7 @@ test('dry-run reports changes without creating the destination', async (context)
   })
 
   assert.equal(result.dryRun, true)
-  assert.equal(result.created, 5)
+  assert.equal(result.created, 6)
   await assert.rejects(access(target), { code: 'ENOENT' })
 })
 
@@ -649,6 +663,7 @@ test('core project templates preserve the methodology quality contract', async (
   assert.deepEqual(files, [
     'config.yaml',
     'conventions.md',
+    'design-context.md',
     'implementation-profiles.md',
     'realization-state.md',
     'specification.md',
@@ -680,6 +695,10 @@ test('core project templates preserve the methodology quality contract', async (
   )
   const conventions = await readFile(
     path.join(coreRoot, 'conventions.md'),
+    'utf8',
+  )
+  const designContext = await readFile(
+    path.join(coreRoot, 'design-context.md'),
     'utf8',
   )
   const implementationProfiles = await readFile(
@@ -845,7 +864,20 @@ test('core project templates preserve the methodology quality contract', async (
   assert.doesNotMatch(conventions, /service-exposure|OpenAPI|contracts\.root/)
   assert.doesNotMatch(conventions, /project defaults/)
   assert.doesNotMatch(conventions, /`data-model`\s*$/m)
+  assert.match(designContext, /# Project Design Context/)
+  assert.match(designContext, /durable, project-wide facts that may affect Spark boundaries/)
+  assert.match(designContext, /## System Shape/)
+  assert.match(designContext, /## Responsibility and Data Ownership/)
+  assert.match(designContext, /## Communication and Trust Boundaries/)
+  assert.match(designContext, /## Persistence and Synchronization/)
+  assert.match(designContext, /## Platform Roles/)
+  assert.match(designContext, /Do not repeat behavior owned by individual Sparks or implementation details owned by profiles, guidance, or native files/)
   assert.match(designSkill, /The Specification owns semantics; Conventions own representation/)
+  assert.match(designSkill, /Design Context owns cross-Spark project facts/)
+  assert.match(designSkill, /\.sparkwell\/design-context\.md/)
+  assert.match(designSkill, /system shape, responsibility, data ownership, communication, trust, synchronization, and platform-role context/)
+  assert.match(designSkill, /Do not derive Sparks from frameworks, deployment structure, files, or other incidental implementation shapes alone/)
+  assert.match(designSkill, /If durable context is missing and would materially change intent or boundaries, ask before proposing Sparks/)
   assert.match(designSkill, /## Classify the Request/)
   assert.match(designSkill, /No Spark change/)
   assert.match(designSkill, /Clarify/)
@@ -902,16 +934,21 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(implementationProfiles, /Profile-referenced project guidance/)
   assert.match(implementationProfiles, /## Decision Boundaries/)
   assert.match(implementationProfiles, /\| Sparks \| Product behavior, domain rules, observable states and failures/)
+  assert.match(implementationProfiles, /\| Project design context \| Cross-Spark system shape, responsibility and data ownership/)
   assert.match(implementationProfiles, /\| Profile \| Target and artifact routing, Pack activation/)
   assert.match(implementationProfiles, /\| Project guidance \| Architecture, mappings, data flow/)
   assert.match(implementationProfiles, /\| Implementation packs \| Reusable technology-specific realization and validation rules/)
   assert.doesNotMatch(implementationProfiles, /Reviewed Sparks|SQLite[^\n]+profile or guidance/)
   assert.match(implementationProfiles, /Packs own technology-specific realization and validation, not observable product behavior/)
+  assert.match(implementationProfiles, /Use `\.sparkwell\/design-context\.md` for project-wide topology and ownership facts/)
+  assert.match(implementationProfiles, /2\. Project design context\./)
   assert.doesNotMatch(implementationProfiles, /contracts\.root|openapi-3\.1|Contract target/)
   assert.doesNotMatch(implementationProfiles, /`contract-root`/)
   assert.doesNotMatch(implementationProfiles, /`contract-source`/)
   assert.doesNotMatch(implementationSkill, /`contract-root`/)
   assert.match(implementationSkill, /\.sparkwell\/packs\/<pack-id>\/PACK\.md/)
+  assert.match(implementationSkill, /\.sparkwell\/design-context\.md/)
+  assert.match(implementationSkill, /Design Context informs cross-Spark system boundaries but does not replace target-specific project guidance or native configuration/)
   assert.match(implementationSkill, /Apply the authoritative \*\*Resolution and Conflicts\*\* order from `\.sparkwell\/implementation-profiles\.md`/)
   assert.doesNotMatch(implementationSkill, /Apply decisions in this order/)
   assert.match(implementationSkill, /Installed Packs are inactive unless selected by the profile/)

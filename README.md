@@ -115,6 +115,8 @@ Each slash command activates only that workflow for the current request. A decis
 
 SparkWell provides the shared realization process, not a universal project architecture or interface format. Profiles and guidance are project-owned inputs maintained manually or with ordinary coding-agent assistance. `/spark-impl` follows Sparks, profile routing and Pack configuration, project guidance, selected Packs, and native architecture; it does not choose MVC, MVVM, state management, persistence, synchronization, module structure, or a wire protocol on the project's behalf.
 
+Project-wide system shape and ownership context that may affect Spark boundaries belongs in the project-owned `.sparkwell/design-context.md`. `/spark-design` reads it before proposing concepts; profile guidance remains responsible for target-specific implementation architecture.
+
 Reusable technology behavior is distributed as optional implementation packs. Install a bundled pack explicitly, then activate it only in profiles that need it. For example, `sparkwell init --pack openapi` installs OpenAPI 3.1 producer, server, client, and test guidance without making OpenAPI part of SparkWell Core or enabling it for every profile.
 
 When implementation or testing reveals missing or contradictory intent, the workflow stops and identifies `/spark-design` as the explicit next command. It does not invoke that workflow, invent product behavior in code, or weaken a test.

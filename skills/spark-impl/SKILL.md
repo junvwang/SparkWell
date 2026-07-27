@@ -21,11 +21,14 @@ Do not modify Sparks, profiles, guidance, Packs, tests, test infrastructure, or 
 Read:
 
 1. Requested Sparks, transitively composed descendants, and related Sparks needed for context.
-2. `.sparkwell/config.yaml` and `.sparkwell/implementation-profiles.md`.
-3. Every selected `.sparkwell/packs/<pack-id>/PACK.md` and its applicable references.
-4. Every guidance file referenced by the profile.
-5. Native manifests, build files, source, target artifacts, and relevant existing tests.
-6. `.sparkwell/state/realizations/<implementation-id>.yaml` when it exists.
+2. `.sparkwell/design-context.md`, when present, for project-wide system topology and ownership boundaries relevant to the target.
+3. `.sparkwell/config.yaml` and `.sparkwell/implementation-profiles.md`.
+4. Every selected `.sparkwell/packs/<pack-id>/PACK.md` and its applicable references.
+5. Every guidance file referenced by the profile.
+6. Native manifests, build files, source, target artifacts, and relevant existing tests.
+7. `.sparkwell/state/realizations/<implementation-id>.yaml` when it exists.
+
+Design Context informs cross-Spark system boundaries but does not replace target-specific project guidance or native configuration.
 
 Installed Packs are inactive unless selected by the profile. Validate every selected Pack's required fields and cross-profile references. Reject absolute paths, `..` components, paths outside the project root, and Pack references outside their installed Pack directory. Missing, unreadable, incompatible, unsafe, or contradictory input is **Blocked**.
 

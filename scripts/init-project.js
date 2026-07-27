@@ -30,6 +30,7 @@ const requiredDirectories = [
 const projectOwnedSeeds = new Set([
   '.sparkwell/config.yaml',
   '.sparkwell/conventions.md',
+  '.sparkwell/design-context.md',
 ])
 
 export {

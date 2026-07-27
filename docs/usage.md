@@ -87,6 +87,7 @@ Every initialized project receives:
 .sparkwell/
 ├── config.yaml
 ├── conventions.md
+├── design-context.md
 ├── implementation-profiles.md
 ├── packs/                  # only when explicitly installed
 ├── realization-state.md
@@ -111,6 +112,8 @@ For GitHub Copilot, it also receives:
 Design, implementation, and testing are user-invoked, separate workflows. Visualization is currently a disabled placeholder. Profiles and guidance are project-owned files rather than a separate SparkWell workflow.
 
 Initialization does not generate product Sparks, source code, framework projects, implementation profiles, or tests.
+
+`.sparkwell/design-context.md` is a project-owned, optional source of durable system context for Spark design. Maintain system shape, responsibility and data ownership, communication and trust boundaries, synchronization context, platform roles, and other cross-Spark constraints there. Do not duplicate individual Spark behavior or target-specific framework architecture.
 
 ## Explicit Activation
 
@@ -319,7 +322,7 @@ Initialization is preflighted before writing files.
 
 - Existing unrelated project files are never changed.
 - Matching SparkWell files are left unchanged.
-- Customized `.sparkwell/config.yaml` and project-owned `.sparkwell/conventions.md` are preserved on normal reinitialization.
+- Customized `.sparkwell/config.yaml`, `.sparkwell/conventions.md`, and `.sparkwell/design-context.md` are preserved on normal reinitialization.
 - Existing instruction files are preserved outside this managed section:
 
   ```markdown

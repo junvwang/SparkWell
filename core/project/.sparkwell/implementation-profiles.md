@@ -36,6 +36,7 @@ Keep each decision in its owning source:
 | Source | Owns |
 |---|---|
 | Sparks | Product behavior, domain rules, observable states and failures, lifecycle, and observable platform requirements |
+| Project design context | Cross-Spark system shape, responsibility and data ownership, communication and trust boundaries, synchronization context, and platform roles |
 | Profile | Target and artifact routing, Pack activation, and Pack-owned machine-readable configuration |
 | Project guidance | Architecture, mappings, data flow, artifact ownership, and implementation rules |
 | Implementation packs | Reusable technology-specific realization and validation rules |
@@ -71,7 +72,7 @@ For a new runtime implementation, use a named profile and resolve consequential 
 - local and remote data flow when applicable;
 - source root and artifact ownership.
 
-Record consequential choices in guidance. Explicitly state `none` when the absence of persistence, remote data, or shared state is deliberate. Do not require irrelevant choices for a target or duplicate facts already established by native project files.
+Use `.sparkwell/design-context.md` for project-wide topology and ownership facts, and record target-specific consequential choices in guidance. Explicitly state `none` when the absence of persistence, remote data, or shared state is deliberate. Do not require irrelevant choices for a target or duplicate facts already established by native project files.
 
 For an established implementation, existing native architecture may supply decisions not yet recorded in a profile. Preserve that architecture. If the profile or guidance conflicts with the existing project, stop as **Blocked** rather than silently migrating or replacing the architecture.
 
@@ -84,12 +85,13 @@ This section is the authoritative order for implementation decisions. Implementa
 Apply compatible decisions in this order:
 
 1. Spark intent.
-2. Profile routing and pack configuration.
-3. Profile-referenced project guidance.
-4. Selected implementation packs.
-5. Established native architecture and configuration.
+2. Project design context.
+3. Profile routing and pack configuration.
+4. Profile-referenced project guidance.
+5. Selected implementation packs.
+6. Established native architecture and configuration.
 
-The order applies only to compatible decisions and does not authorize silent conflict resolution. Stop as **Blocked** when Spark intent, profile routing, pack configuration, guidance, selected packs, or established architecture contradict one another. A task-local request may choose only ordinary details not owned by these sources; consequential project changes require updating the project-owned profile or guidance before retrying.
+The order applies only to compatible decisions and does not authorize silent conflict resolution. Stop as **Blocked** when Spark intent, design context, profile routing, pack configuration, guidance, selected packs, or established architecture contradict one another. A task-local request may choose only ordinary details not owned by these sources; consequential project changes require updating the owning project file before retrying.
 
 ## Example
 
