@@ -45,24 +45,14 @@ For runtime persistence, resolve provider and access choices from the selected p
 
 Load supporting documents only when needed:
 
-- `.sparkwell/specification.md` and `.sparkwell/conventions.md` to resolve unclear or invalid Spark structure or relationships.
+- `.sparkwell/specification.md` to resolve unclear Spark semantics or relationships.
+- `.sparkwell/conventions.md` to resolve invalid Spark Document storage or format.
 - `.sparkwell/realization-state.md` before creating or repairing realization state.
 - `./references/<target>.md`, when present, for general target defaults.
 
-Apply decisions in this order:
-
-1. Reviewed Spark intent for owned behavior, states, validation rules, responsibilities, interactions, and conceptual boundaries.
-2. Implementation-profile constraints.
-3. Profile-referenced project guidance.
-4. Selected implementation packs.
-5. Compatible explicit user choices.
-6. The established native project and its configuration.
-7. Profile preferences.
-8. Optional target-guide defaults.
+Apply compatible decisions in the authoritative order defined by `.sparkwell/implementation-profiles.md` under **Resolution and Conflicts**. Do not redefine or reorder that precedence in this workflow. Mark contradictions among its authoritative sources **Blocked**.
 
 Native files remain authoritative for artifact content, dependencies, versions, and build state. Realization state is only an index.
-
-Precedence does not authorize silent conflict resolution. Stop as **Blocked** when Spark intent, constraints, guidance, selected packs, explicit choices, or established architecture contradict one another. Preferences and target defaults apply only when compatible with all higher-authority sources.
 
 A Spark is a required design contract for its concept, not an exhaustive implementation checklist or a ceiling on quality. Preserve compatible established architecture, security, accessibility, reliability, maintainability, performance, platform conventions, and normal engineering quality expectations even when they are not repeated in every Spark. Do not use quality improvements as a reason to invent observable product behavior or contradict reviewed intent.
 
@@ -97,9 +87,9 @@ Classify the selected target as:
 - **Established implementation**: substantive native artifacts define a coherent architecture that can be extended without choosing a new project structure.
 - **New implementation**: the source root is missing, contains only a generic scaffold, or lacks enough architecture to place the selected realization safely.
 
-For an established implementation, preserve its architecture and integration patterns. Profile constraints and guidance must agree with the native project. Do not use SparkWell implementation as an opportunity to migrate frameworks, architecture, state ownership, persistence patterns, or module structure.
+For an established implementation, preserve its architecture and integration patterns. Profile guidance and selected packs must agree with the native project. Do not use SparkWell implementation as an opportunity to migrate frameworks, architecture, state ownership, persistence patterns, or module structure.
 
-For a new implementation, resolve every consequential choice relevant to the target before editing. These commonly include framework or project type, primary architecture and module boundaries, state ownership, persistence boundary, local and remote data flow, source root, and artifact ownership. Do not require irrelevant choices, and accept an explicit `none` where absence is intentional.
+For a new implementation, resolve every consequential choice relevant to the target in project guidance before editing. These commonly include framework or project type, primary architecture and module boundaries, state ownership, persistence boundary, local and remote data flow, source root, and artifact ownership. Do not require irrelevant choices, and accept an explicit `none` where absence is intentional.
 
 Do not select MVC, MVVM, Clean Architecture, state libraries, repository patterns, ORMs, local databases, synchronization strategies, dependency-injection structure, or comparable project architecture from generic target defaults. If a consequential choice is unresolved, stop as **Blocked** and tell the user to invoke `/spark-config`.
 
@@ -111,7 +101,7 @@ Before editing:
 
 1. Verify the manifest's implementation ID, Spark IDs, and paths; compare mapped paths with the configured or inferred source root when available.
 2. Confirm whether this is an established or new implementation and summarize the evidence.
-3. Summarize the selected profile, source root, selected packs, constraints, preferences, guidance files read, and effective project architecture.
+3. Summarize the selected profile, source root, pack configuration, guidance files read, and effective project architecture.
 4. Inspect mapped target artifacts, relevant unmapped source, nearby existing tests, and native configuration. Missing or incomplete state does not prove that no realization exists.
 5. Verify that candidate Sparks define the product decisions needed for their behavior, states, boundaries, validation, interactions, failures, lifecycle, and applicable platform constraints.
 6. Mark unresolved product intent, architecture, target configuration, required dependencies, or artifact ownership as **Blocked** rather than guessing.
@@ -162,7 +152,7 @@ If the configured source root does not exist, initialize the smallest project st
 
 During implementation:
 
-1. Follow profile constraints and guidance, and reuse established project patterns, architecture, quality practices, and native framework capabilities.
+1. Follow selected pack rules and project guidance, and reuse established project patterns, architecture, quality practices, and native framework capabilities.
 2. Modify only target artifacts required by **Create** and **Update**; preserve compatible **Validate only** artifacts.
 3. Do not create, update, delete, or rename test files; install test-only dependencies; create test projects; or redesign test infrastructure. Record missing, stale, or desirable coverage for a later `spark-test` task.
 4. Validate a new scaffold before adding the Spark-derived implementation.

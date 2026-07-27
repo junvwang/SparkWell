@@ -38,17 +38,18 @@ For an established implementation, summarize and preserve the detected architect
 
 For a new implementation, identify consequential choices relevant to the target, including framework or project type, architecture and module boundaries, state ownership, persistence boundary, local and remote data flow, source root, and artifact ownership. Do not require irrelevant choices. Ask focused questions when the answer would materially change the architecture.
 
-Separate product intent from implementation decisions. User-visible offline behavior, synchronization semantics, conflict behavior, and failure outcomes belong in Sparks. Providers, repositories, ORMs, adapters, mappings, and module layout belong in the profile or guidance.
+Separate product intent from implementation decisions. User-visible offline behavior, synchronization semantics, conflict behavior, and failure outcomes belong in Sparks. Framework, provider, repository, ORM, adapter, mapping, and module-layout decisions belong in project guidance or established native files.
 
 ## Choose the Configuration Layer
 
 Use:
 
-- `packs` for explicitly installed reusable realization guidance activated by this profile;
-- `constraints` for structured choices `/spark-impl` must not override;
-- `preferences` for structured defaults that compatible explicit requests may override;
-- `guidance` for nuanced architecture and code-generation rules;
+- `target` and `source-root` for deterministic artifact routing;
+- `packs` as a map from activated pack IDs to pack-owned machine-readable configuration;
+- `guidance` for project architecture and code-generation decisions;
 - native project files for dependencies, versions, commands, and actual build configuration.
+
+Do not encode general architecture settings in YAML. If a choice needs explanation or is not required for deterministic pack routing, put it in guidance. Use `{}` for a pack that requires no configuration.
 
 Recommend `.sparkwell/guidance/<profile-id>.md` for a profile's primary guidance. Use more than one guidance file only when they have distinct scopes and equal authority. Never encode secrets.
 
@@ -77,16 +78,8 @@ Classification: New implementation
 Packs:
 - None
 
-Constraints:
-- Framework: React
-- Architecture: feature modules
-- Persistence: IndexedDB
-
-Preferences:
-- State management: Zustand
-
 Guidance:
-- `.sparkwell/guidance/web-react.md` — Defines module boundaries, state ownership, persistence adapters, and artifact placement.
+- `.sparkwell/guidance/web-react.md` — Defines React, feature modules, state ownership, IndexedDB repository mapping, and artifact placement.
 
 Open questions:
 - Should shared state be limited to cross-feature data?
@@ -129,7 +122,7 @@ On finalization:
 3. Create or update exactly the proposed guidance documents.
 4. Keep paths project-relative and inside the project root; reject absolute paths and `..` components.
 5. Keep native dependencies, versions, commands, and secrets out of Sparkwell configuration.
-6. Validate YAML structure, profile ID uniqueness, required fields, pack IDs, pack-defined cross-profile references, guidance paths, and agreement among packs, constraints, and guidance.
+6. Validate YAML structure, profile ID uniqueness, required routing fields, pack-owned configuration, cross-profile references, guidance paths, and agreement among packs and guidance.
 7. Compare packs and guidance with established native architecture and report any unresolved conflict as **Blocked** rather than writing a migration implicitly.
 
 Do not scaffold, compile, install, or generate product artifacts as part of this workflow.

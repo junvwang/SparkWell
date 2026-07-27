@@ -2,7 +2,7 @@
 
 > Status: Draft
 
-This normative specification defines what a **Spark** is, including its concepts, semantics, and document structure. Workflows and project conventions define how Sparks are created, reviewed, stored, and transformed into engineering artifacts.
+This specification is authoritative for Spark concepts, semantics, identities, kinds, and relationships. Project conventions define Spark Document storage, naming, serialization, and kind-specific format. Agent Skills define creation, review, and realization workflows.
 
 # Spark
 
@@ -42,8 +42,6 @@ Every Spark Document defines the following core fields:
 Every Spark has an `id` that is unique within its Sparkwell project.
 
 The identifier remains stable for the lifetime of the represented concept. Changing a Spark's human-readable name does not change its identity.
-
-IDs may use a kind suffix to make references easier to read: `-model` for `domain-model`, `-service` for `service`, and `-ui` for `ui-component`. This is a naming suggestion only. The `kind` field is authoritative, and workflows must not infer kind, validity, applicability, or behavior from an ID suffix.
 
 Changing a Spark's kind does not by itself change its stable ID. An intentional ID rename is a separate identity migration that updates every relationship and realization-state reference.
 
@@ -151,20 +149,6 @@ State each decision once in the Spark that owns it. Other Sparks should referenc
 | Human and AI readable | Be understandable with significantly less effort than reconstructing intent from engineering artifacts. |
 | Long-lived | Evolve when represented software intent changes; engineering-artifact changes alone do not necessarily require Spark changes. |
 | Composable | Directly compose conceptually owned Sparks; use shared or independently owned Sparks. |
-
-# Recommended Body Organization
-
-Projects should organize each body in the clearest way for its concept rather than follow a universal template. Typical topics include:
-
-Typical examples include:
-
-| Spark Kind | Typical Topics |
-|------------|----------------|
-| UI Component | Behavior, States, Layout, Interaction, Boundaries |
-| Service | Purpose, Capabilities, Inputs, Outputs, Rules, Failure Behavior |
-| Domain Model | Domain Meaning, Data, Validation, Invariants, Lifecycle, Relationships |
-
-These topics are recommendations, not requirements.
 
 # Requirements
 

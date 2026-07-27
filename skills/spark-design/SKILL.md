@@ -18,8 +18,8 @@ This skill designs Sparks. It does not generate or modify engineering artifacts 
 
 Before designing Sparks:
 
-1. Read `.sparkwell/specification.md` for Spark concepts, semantics, and document structure.
-2. Read `.sparkwell/conventions.md` and other project guidance for storage, naming, review, and workflow conventions.
+1. Read `.sparkwell/specification.md` for Spark concepts, semantics, identities, kinds, and relationships.
+2. Read `.sparkwell/conventions.md` and other project guidance for storage, naming, serialization, and kind-specific document format.
 3. Read the relevant existing Sparks.
 4. In an established implementation, inspect enough nearby engineering artifacts and architecture guidance to understand integration constraints that could affect concept boundaries. Do not treat accidental implementation details as product intent.
 

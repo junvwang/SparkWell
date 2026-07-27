@@ -1,6 +1,8 @@
-# Sparkwell Project Conventions
+# Spark Document Conventions
 
-This document defines how this project stores and maintains Spark Documents. It complements `.sparkwell/specification.md`, which remains the authority for Spark concepts, semantics, and document structure.
+This project-owned document defines Spark Document storage, naming, serialization, and kind-specific format. `.sparkwell/specification.md` remains authoritative for Spark concepts, semantics, identities, kinds, and relationships. The `/spark-design` Skill owns proposal, finalization, and review workflow.
+
+Projects may extend these conventions without redefining Spark semantics.
 
 ---
 
@@ -69,30 +71,6 @@ Keep the human-readable `name` natural and omit suffix wording unless it is part
 
 ---
 
-# Supported Kinds
-
-Serialize kind names in lowercase kebab-case.
-
-Bundled SparkWell workflows support exactly these kinds:
-
-- `domain-model`
-- `service`
-- `ui-component`
-
-A project may use another kind only when it defines that kind's concept semantics, document rules, design rules, and target applicability. Without all four, treat the kind as unsupported and stop for clarification instead of inferring behavior from its name.
-
----
-
-# Shared Sparks
-
-Do not create a `shared` storage category solely because multiple Sparks use a concept.
-
-Sharedness is derived from relationships rather than encoded in a path. Store a shared Spark under its actual `kind`, and let each consumer reference its stable ID through `uses`.
-
-A Spark does not change kind merely because it has multiple consumers. Reuse is represented by relationships and the concept's own intent.
-
----
-
 # Body
 
 Begin the body with a level-one heading matching the Spark's `name`.
@@ -110,9 +88,7 @@ Write the remaining body according to the Spark Specification using the minimum 
 
 # Domain Model Documents
 
-Use `kind: domain-model` only for a domain concept that satisfies the Domain Model semantics in the Spark Specification. Do not use it for a DTO, API payload, ORM entity, database row, or target-language type whose boundary exists only in implementation.
-
-Every Domain Model Spark body contains a `## Data` table with these columns in this order:
+Serialize every standardized `domain-model` body with a `## Data` table containing these columns in this order:
 
 ```markdown
 | Field | Meaning | Type | Required | Default | Constraints | Mutability |
@@ -148,43 +124,11 @@ A `reference(<spark-id>)` type must resolve to an existing Spark that the Domain
 
 Describe model-wide validation and cross-field invariants outside the table. Include lifecycle, state transitions, concurrency, and persistence behavior only where they are part of the model's software intent.
 
-Example:
-
-```markdown
----
-id: todo-item-model
-name: Todo Item
-kind: domain-model
-summary: Represents one piece of work a person wants to track.
-composes: []
-uses: []
----
-
-# Todo Item
-
-## Data
-
-| Field | Meaning | Type | Required | Default | Constraints | Mutability |
-|---|---|---|---|---|---|---|
-| `id` | Stable identity of the Todo Item | identifier | Yes | Generated | Unique and non-empty | Immutable |
-| `title` | Work the person wants to remember | string | Yes | None | Trimmed; 1-200 characters | Mutable |
-| `completed` | Whether the work is complete | boolean | Yes | `false` | None | Mutable |
-
-## Invariants
-
-- The title remains non-empty after trimming.
-- Changing completion does not change identity.
-```
-
-An existing `data-model` Spark may move to `domain-model` only when it represents the same domain concept and is updated to satisfy these semantics and conventions. Preserve its stable Spark ID while moving its directory to `sparks/domain-model/<id>/`.
-
 ---
 
 # Service Documents
 
-Use `kind: service` only for a concept that satisfies the Service semantics in the Spark Specification. Do not use it merely for an API endpoint, controller, framework service, client class, or automatic CRUD surface.
-
-Every Service Spark body contains a `## Capabilities` table with these columns in this order:
+Serialize every standardized `service` body with a `## Capabilities` table containing these columns in this order:
 
 ```markdown
 | Capability | Purpose | Inputs | Output | Failure Behavior |
@@ -204,112 +148,23 @@ Describe permissions, ordering, idempotency, concurrency, transactional behavior
 
 Do not put HTTP routes, verbs, status codes, DTO names, framework types, controller names, or generated client method names in the capabilities table unless they are enduring compatibility requirements of the software concept.
 
-Represent every capability offered across the Service boundary explicitly, including familiar create, retrieve, update, and delete behavior. Do not infer public capabilities from a Domain Model.
-
-Example:
-
-```markdown
----
-id: todo-management-service
-name: Todo Management
-kind: service
-summary: Provides operations that coordinate changes across Todo Items.
-composes: []
-uses:
-  - todo-item-model
----
-
-# Todo Management
-
-## Capabilities
-
-| Capability | Purpose | Inputs | Output | Failure Behavior |
-|---|---|---|---|---|
-| `complete-all` | Mark every active Todo Item complete | None | Number of `todo-item-model` models changed | Fails without partial completion if the operation cannot complete |
-
-## Rules
-
-- Already completed Todo Items remain unchanged.
-- The result counts only Todo Items changed by this operation.
-```
+List every Service capability explicitly. Never infer capability rows from a Domain Model.
 
 ---
 
 # UI Component Documents
 
-Use `kind: ui-component` only for a modular user-interface concept that satisfies the UI Component semantics in the Spark Specification. Do not use it merely for a native control, framework component, source file, style fragment, or incidental node in a rendered tree.
-
-Describe enough applicable intent to understand and implement the component's user-facing purpose, owned behavior and state, interactions, composition responsibilities, constraints, accessibility requirements, and boundaries. Organize the body with whatever prose, lists, tables, or sections communicate that intent most clearly. Omit topics that do not apply.
+Standardized `ui-component` bodies have no fixed section template. Use whatever prose, lists, tables, or sections communicate the applicable intent from the Spark Specification most clearly. Omit topics that do not apply.
 
 When `composes` is non-empty, explain any parent-child responsibilities that are not already clear from the child Sparks, such as supplied information, reported user intent, state ownership, cross-child coordination, ordering, or conditional presence. Do not repeat the complete child definitions in the parent.
-
-Keep Domain Model invariants in Domain Model Sparks and Service capabilities in Service Sparks. Reference independently owned concepts through `uses` rather than duplicating their semantics.
 
 Keep framework properties, callbacks, events, commands, bindings, files, classes, controls, styling mechanics, and layout implementation in engineering artifacts.
 
 ---
 
-# Example
+# Validation
 
-This UI Component composition:
-
-```text
-todo-app-ui
-├── todo-entry-ui
-└── todo-list-ui
-```
-
-is stored as:
-
-```text
-sparks/
-└── ui-component/
-    ├── todo-app-ui/
-    │   └── todo-app-ui.spark.md
-    ├── todo-entry-ui/
-    │   └── todo-entry-ui.spark.md
-    └── todo-list-ui/
-      └── todo-list-ui.spark.md
-```
-
-The `sparks/ui-component/todo-app-ui/todo-app-ui.spark.md` document begins:
-
-```markdown
----
-id: todo-app-ui
-name: Todo App UI
-kind: ui-component
-summary: Coordinates entry and list components for a Todo application.
-composes:
-  - todo-entry-ui
-  - todo-list-ui
-uses:
-  - todo-item-model
----
-
-# Todo App UI
-
-The Todo App UI provides the root user interface and owns the ordered Todo Item collection. It coordinates collection changes reported by its child components.
-
-It composes:
-
-- `todo-entry-ui`, which collects a new Todo Item title and reports add intent;
-- `todo-list-ui`, which receives the ordered collection and reports completion intent.
-
-When the collection is empty, the list presents its empty state. Otherwise, it presents items in their established order. Focus moves logically between entry and list content, and collection changes are communicated without relying on color alone.
-
-The children own their internal presentation and interactions. `todo-item-model` owns Todo Item data and invariants.
-```
-
----
-
-# Proposal, Creation, and Review
-
-Before modifying Spark Documents, present a concise Spark Proposal in chat and wait for explicit finalization. The proposal lists new Spark IDs, kinds, and summaries; existing Sparks to evolve and why; and any identity or destructive changes. Do not persist the proposal or approval state.
-
-After finalization, revalidate the affected Sparks and proposed paths, then create or update Spark Documents as normal working-tree changes. If relevant project state changed, revise the proposal and obtain confirmation again before writing.
-
-Before presenting them for review, verify that:
+Validate every Spark Document against these project conventions:
 
 - every Spark is stored at `sparks/<kind>/<id>/<id>.spark.md`;
 - each kind category matches the Spark's serialized `kind`;
@@ -317,8 +172,6 @@ Before presenting them for review, verify that:
 - no Spark directory is nested inside another Spark directory;
 - core fields are present and correctly serialized;
 - IDs and relationships satisfy the Spark Specification;
-- bodies satisfy the Spark Specification and begin with the expected heading.
-
-Present the generated Spark Documents and their requirement mapping for human review, then stop before generating or modifying engineering artifacts. Proposal review and generated-document review are separate checkpoints; neither requires approval status, review files, or other workflow metadata.
-
-Review must evaluate substance, not document length or structure. Verify that relevant requested outcomes and constraints were preserved; material behavior, failure, state, validation, lifecycle, persistence, interaction, and platform intent is clear; ownership and boundaries are coherent; each decision has one authoritative owner; and implementation can proceed without inventing product decisions. Remove repetition and boilerplate before review while retaining every implementation-critical clarification.
+- the body begins with the expected heading;
+- each standardized Domain Model has the required `## Data` table;
+- each standardized Service has the required `## Capabilities` table.

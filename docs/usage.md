@@ -296,24 +296,17 @@ implementations:
     web-react:
       target: web
       source-root: src/web
-      packs: []
-      constraints:
-        framework: react
-        architecture: feature-modules
-        persistence:
-          provider: indexeddb
-      preferences:
-        state-management: zustand
+      packs: {}
       guidance:
         - .sparkwell/guidance/web-react.md
 
 ```
 
-Profile `packs` activate explicitly installed reusable guidance; `constraints` are mandatory structured choices; `preferences` are overridable defaults; `guidance` contains nuanced project architecture such as module boundaries, state ownership, data flow, model mappings, persistence patterns, and artifact ownership. The recommended guidance path is `.sparkwell/guidance/<profile-id>.md`.
+Profile YAML is intentionally limited to target routing, pack-owned machine configuration, and guidance references. `guidance` describes project architecture such as framework choice, module boundaries, state ownership, data flow, model mappings, persistence patterns, and artifact ownership. The recommended path is `.sparkwell/guidance/<profile-id>.md`.
 
 Native project files remain authoritative for dependencies, versions, commands, formatting, linting, build configuration, and actual existing structure. Packs, guidance, and native architecture must agree. A missing selected pack, missing referenced guidance, unresolved consequential architecture, or conflict makes `/spark-impl` **Blocked**.
 
-Resolution order is: reviewed Spark intent, profile constraints, profile guidance, selected packs, compatible explicit choices, established native architecture, profile preferences, then optional target defaults. This order never silently resolves contradictions.
+Resolution order is: reviewed Spark intent, profile routing and pack configuration, profile guidance, selected packs, established native architecture, then optional target defaults. This order never silently resolves contradictions. Consequential project changes require `/spark-config` rather than a task-local override.
 
 ### 3. Use optional implementation packs
 
@@ -334,27 +327,20 @@ implementations:
       target: openapi-contract
       source-root: src/contracts
       packs:
-        - openapi
-      constraints:
-        openapi-version: '3.1'
+        openapi:
+          version: '3.1'
 
     todo-api:
       target: api-service
       source-root: src/todo-api
       packs:
-        - openapi
-      constraints:
-        contract-profile: public-api-contract
-        runtime: dotnet
-        framework: aspnet-core
-        architecture: clean-architecture
-        persistence:
-          provider: sqlite
+        openapi:
+          contract-profile: public-api-contract
       guidance:
         - .sparkwell/guidance/todo-api.md
 ```
 
-Installation alone does not activate OpenAPI. Each participating profile lists `openapi`, and consumers identify the producer through `constraints.contract-profile`.
+Installation alone does not activate OpenAPI. Each participating profile has an `openapi` key in its `packs` map, and consumers identify the producer through `packs.openapi.contract-profile`. Runtime, framework, architecture, and persistence choices belong in `todo-api.md` or the established native project.
 
 #### OpenAPI example
 
@@ -416,7 +402,7 @@ Initialization is preflighted before writing files.
 
 - Existing unrelated project files are never changed.
 - Matching SparkWell files are left unchanged.
-- Customized `.sparkwell/config.yaml` is preserved on normal reinitialization.
+- Customized `.sparkwell/config.yaml` and project-owned `.sparkwell/conventions.md` are preserved on normal reinitialization.
 - Existing instruction files are preserved outside this managed section:
 
   ```markdown

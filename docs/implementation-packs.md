@@ -46,9 +46,8 @@ implementations:
       target: openapi-contract
       source-root: src/contracts
       packs:
-        - openapi
-      constraints:
-        openapi-version: '3.1'
+        openapi:
+          version: '3.1'
 ```
 
 Before planning, `/spark-impl` and `/spark-test` read every selected `PACK.md` and the references it requires. A missing pack, incompatible profile, or conflict is **Blocked**. Pack list order never resolves conflicts.
@@ -72,21 +71,21 @@ implementations:
     public-api-contract:
       target: openapi-contract
       source-root: src/contracts
-      packs: [openapi]
-      constraints:
-        openapi-version: '3.1'
+      packs:
+        openapi:
+          version: '3.1'
 
     todo-api:
       target: api-service
       source-root: src/todo-api
-      packs: [openapi]
-      constraints:
-        contract-profile: public-api-contract
-        runtime: dotnet
-        framework: aspnet-core
+      packs:
+        openapi:
+          contract-profile: public-api-contract
+      guidance:
+        - .sparkwell/guidance/todo-api.md
 ```
 
-The producer's `source-root` owns contract artifacts. Consumers resolve `constraints.contract-profile`, then use that profile's source root and realization state. Core has no global contract root or contract format.
+The producer's `source-root` owns contract artifacts. Consumers resolve `packs.openapi.contract-profile`, then use that profile's source root and realization state. Runtime and architecture choices remain in guidance or native files. Core has no global contract root or contract format.
 
 ## Service Intent
 
@@ -102,9 +101,9 @@ Projects using the former root-level `contracts` configuration should:
 
 1. Install the OpenAPI pack.
 2. Replace `contracts.root` with an `openapi-contract` profile whose `source-root` is the old contract root.
-3. Replace `contracts.service-format` with `constraints.openapi-version: '3.1'` on that profile.
-4. Add `packs: [openapi]` to producer and consumer profiles.
-5. Add `constraints.contract-profile` to each consumer.
+3. Replace `contracts.service-format` with `packs.openapi.version: '3.1'` on that profile.
+4. Add an `openapi` key to each participating profile's `packs` map.
+5. Add `packs.openapi.contract-profile` to each consumer.
 6. Replace Domain Model `service-exposure` with explicit Service capabilities.
 7. Move contract provenance to the producer profile's realization manifest.
 

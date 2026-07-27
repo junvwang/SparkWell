@@ -33,14 +33,15 @@ Always inspect:
 
 Installed packs are inactive unless the selected profile lists them. Validate every pack-defined required field, value, and cross-profile reference before resolving test artifacts. Reject absolute paths, `..` components, paths outside the project root, and pack references outside their installed pack directory. A missing or unreadable selected pack, incompatible reference or pack/profile combination, or conflict among Spark intent, profile configuration, pack guidance, and established test architecture makes the task **Blocked**.
 
-Load supporting contracts only when needed:
+Load supporting documents only when needed:
 
-- `.sparkwell/specification.md` and `.sparkwell/conventions.md` to resolve Spark structure or relationships.
-- `.sparkwell/implementation-profiles.md` to interpret profile configuration.
+- `.sparkwell/specification.md` to resolve Spark semantics or relationships.
+- `.sparkwell/conventions.md` to resolve Spark Document storage or format.
+- `.sparkwell/implementation-profiles.md` to interpret profile configuration and apply its authoritative **Resolution and Conflicts** order.
 - `.sparkwell/realization-state.md` before creating or repairing test-artifact provenance.
 - `./references/<target>.md`, when present, for target-specific test guidance.
 
-Reviewed Spark intent defines required observable coverage. Profile constraints and established native test conventions govern target and test implementation choices. If these sources conflict materially, stop and surface the inconsistency rather than encoding one interpretation in a test.
+Reviewed Spark intent defines required observable coverage. Pack configuration, project guidance, and established native test conventions govern target and test implementation choices. If these sources conflict materially, stop and surface the inconsistency rather than encoding one interpretation in a test.
 
 ## Resolve Target and Scope
 
@@ -61,7 +62,7 @@ For each candidate Spark, derive only applicable scenarios from:
 - validation and boundary rules;
 - interactions with composed and used Sparks;
 - lifecycle, persistence, concurrency, and recovery behavior;
-- applicable platform-specific intent and profile constraints.
+- applicable platform-specific intent, selected pack rules, and project guidance.
 
 Do not manufacture scenarios for topics the concept does not own.
 

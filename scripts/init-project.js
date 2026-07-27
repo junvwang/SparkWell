@@ -23,7 +23,10 @@ import {
 
 const packageRoot = fileURLToPath(new URL('../', import.meta.url))
 const requiredDirectories = ['sparks', '.sparkwell/state/realizations']
-const projectOwnedSeeds = new Set(['.sparkwell/config.yaml'])
+const projectOwnedSeeds = new Set([
+  '.sparkwell/config.yaml',
+  '.sparkwell/conventions.md',
+])
 
 export {
   normalizeAgent,

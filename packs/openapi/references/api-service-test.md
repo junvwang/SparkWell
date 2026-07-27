@@ -2,7 +2,7 @@
 
 Use this reference for `/spark-test` when the effective target is `api-service` and its profile activates the OpenAPI pack.
 
-Resolve contracts through `constraints.contract-profile` as defined by `PACK.md`. Match operations by `operationId`; mark missing or ambiguous correspondence **Blocked** rather than reconstructing an interface from Sparks. Detect duplicate path and method pairs across contracts implemented by the service.
+Resolve contracts through `packs.openapi.contract-profile` as defined by `PACK.md`. Match operations by `operationId`; mark missing or ambiguous correspondence **Blocked** rather than reconstructing an interface from Sparks. Detect duplicate path and method pairs across contracts implemented by the service.
 
 ## Coverage
 

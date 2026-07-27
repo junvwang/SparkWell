@@ -1,6 +1,6 @@
 # Sparkwell Implementation Profiles
 
-Implementation profiles hold project-specific target, framework, source-layout, and architecture choices outside Spark Documents. SparkWell supplies the shared realization workflow; each project supplies the implementation decisions that workflow must follow.
+Implementation profiles route a realization to its target, artifact root, optional implementation packs, and project guidance. YAML is limited to information that workflows must parse deterministically. Architecture and code-generation decisions belong in guidance or established native project files.
 
 ## Configuration
 
@@ -12,12 +12,8 @@ Implementation profiles hold project-specific target, framework, source-layout, 
 |-------|----------|---------|
 | `target` | yes | Implementation target |
 | `source-root` | yes | Project-relative artifact root |
-| `packs` | no | Implementation pack IDs activated for this profile |
-| `constraints` | no | Mandatory implementation choices |
-| `preferences` | no | Overridable defaults |
-| `guidance` | no | Ordered list of project-relative implementation-guidance documents |
-
-Constraint and preference keys are extensible. Constraints are mandatory implementation decisions. Preferences are defaults that a compatible explicit request may override.
+| `packs` | no | Map of activated pack IDs to pack-owned configuration |
+| `guidance` | no | Project-relative implementation-guidance documents, read in listed order |
 
 Paths use `/` and are relative to the project root. Guidance paths must resolve to readable files and must not escape the project root. The recommended location is `.sparkwell/guidance/<profile-id>.md`.
 
@@ -27,9 +23,11 @@ Profiles do not inherit and must not contain secrets.
 
 An implementation pack is reusable, technology-specific guidance installed at `.sparkwell/packs/<pack-id>/PACK.md`. Install bundled packs explicitly with `sparkwell init --pack <pack-id>`.
 
-A profile activates only the pack IDs listed in its `packs` field. Installation alone does not activate a pack. Before planning implementation or tests, read every selected `PACK.md` and the references it requires for the effective target and workflow. Pack references must remain inside that pack's directory. A missing pack, unreadable or escaping reference, or incompatible pack/profile combination makes the task **Blocked**.
+A profile activates only the pack IDs used as keys in its `packs` map. Use `{}` when no packs apply or when a selected pack requires no configuration. Installation alone does not activate a pack. Before planning implementation or tests, read every selected `PACK.md` and the references it requires for the effective target and workflow. Pack references must remain inside that pack's directory. A missing pack, unreadable or escaping reference, or incompatible pack/profile combination makes the task **Blocked**.
 
-Packs may define target applicability, required profile keys and values, cross-profile references, artifact mapping, generation rules, validation, and test guidance. Pack requirements are not defaults and cannot be overridden by profile constraints or guidance; contradictions are **Blocked**. Packs do not own product behavior and must not introduce capabilities absent from reviewed Sparks. Multiple packs have equal authority; list order is for reading only and never resolves conflicts.
+Each pack defines the schema and semantics of the value under its own key. Pack configuration is limited to machine-required routing, references, and validation inputs; do not use it as a second architecture document. Packs may define target applicability, cross-profile references, artifact mapping, generation rules, validation, and test guidance. Pack requirements cannot be overridden by project guidance; contradictions are **Blocked**.
+
+Packs own technology-specific realization and validation, not observable product behavior, Domain Model semantics, Service capabilities, or UI Component interaction boundaries. They may add compatible non-observable engineering quality and platform integration, but must not introduce or weaken reviewed product intent. Multiple packs have equal authority; list order is for reading only and never resolves conflicts.
 
 ## Decision Ownership
 
@@ -38,8 +36,8 @@ Keep each decision in its owning layer:
 | Layer | Owns |
 |---|---|
 | Reviewed Sparks | Product behavior, domain rules, user-visible states, failures, lifecycle, and platform intent |
-| Profile `constraints` | Structured choices the implementation workflow must not change |
-| Profile `preferences` | Structured defaults that may be overridden compatibly |
+| Profile `target` and `source-root` | Deterministic target selection and artifact routing |
+| Profile `packs` | Pack activation and pack-owned machine-readable configuration |
 | Profile `guidance` | Nuanced project architecture and code-generation rules |
 | Selected implementation packs | Reusable technology-specific realization and validation rules |
 | Native project files and source | Actual dependencies, versions, commands, build state, and existing implementation structure |
@@ -74,7 +72,7 @@ For a new runtime implementation, use a named profile and resolve consequential 
 - local and remote data flow when applicable;
 - source root and artifact ownership.
 
-Record structured choices in `constraints` or `preferences` and nuanced choices in guidance. Explicitly record `none` when the absence of persistence, remote data, or shared state is a deliberate decision. Do not require irrelevant choices for a target.
+Record consequential choices in guidance. Explicitly state `none` when the absence of persistence, remote data, or shared state is deliberate. Do not require irrelevant choices for a target or duplicate facts already established by native project files.
 
 For an established implementation, existing native architecture may supply decisions not yet recorded in a profile. Preserve that architecture. If the profile or guidance conflicts with the existing project, stop as **Blocked** rather than silently migrating or replacing the architecture.
 
@@ -82,18 +80,18 @@ Use `/spark-config` to create or revise profiles and project guidance. `/spark-i
 
 ## Resolution and Conflicts
 
+This section is the authoritative order for implementation decisions. Implementation-related Skills apply it rather than defining another order.
+
 Apply compatible decisions in this order:
 
 1. Reviewed Spark intent.
-2. Profile `constraints`.
+2. Profile routing and pack configuration.
 3. Profile-referenced project guidance.
 4. Selected implementation packs.
-5. Compatible explicit user choices.
-6. Established native architecture and configuration.
-7. Profile `preferences`.
-8. Optional target defaults.
+5. Established native architecture and configuration.
+6. Optional target defaults.
 
-This order does not authorize silent conflict resolution. Stop as **Blocked** when Spark intent, constraints, guidance, selected packs, explicit choices, or established architecture contradict one another. Preferences and target defaults apply only when they are compatible with all higher-authority sources.
+The order applies only to compatible decisions and does not authorize silent conflict resolution. Stop as **Blocked** when Spark intent, profile routing, pack configuration, guidance, selected packs, or established architecture contradict one another. A task-local request may choose only details not owned by these sources; consequential project changes require `/spark-config`. Target defaults apply only when compatible with every higher-authority source.
 
 ## Example
 
@@ -105,14 +103,7 @@ implementations:
     web-react:
       target: web
       source-root: src/web
-      packs: []
-      constraints:
-        framework: react
-        architecture: feature-modules
-        persistence:
-          provider: indexeddb
-      preferences:
-        state-management: zustand
+      packs: {}
       guidance:
         - .sparkwell/guidance/web-react.md
 ```

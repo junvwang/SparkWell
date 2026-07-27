@@ -31,7 +31,7 @@ Use the selected producer profile's `source-root` as the contract root. Unless p
     └── <service-spark-id>.openapi.yaml
 ```
 
-Do not configure per-Spark output paths. Require `constraints.openapi-version: '3.1'` and a project-relative source root.
+Do not configure per-Spark output paths. Require `packs.openapi.version: '3.1'` and a project-relative source root.
 
 ## Operations and Schemas
 

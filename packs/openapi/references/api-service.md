@@ -4,7 +4,7 @@ Use this reference when the effective target is `api-service` and its profile ac
 
 ## Contract Resolution and Scope
 
-Resolve `constraints.contract-profile`, then verify that profile exists, targets `openapi-contract`, activates `openapi`, and has a project-relative `source-root`. Locate contracts through that profile's realization state and source root. Mark missing or ambiguous Spark-to-contract correspondence **Blocked**.
+Resolve `packs.openapi.contract-profile`, then verify that profile exists, targets `openapi-contract`, activates `openapi`, and has a project-relative `source-root`. Locate contracts through that profile's realization state and source root. Mark missing or ambiguous Spark-to-contract correspondence **Blocked**.
 
 - A `service` Spark with a matching contract is applicable.
 - A Domain Model is contextual or an internal domain artifact when a selected operation uses it; it does not independently create a public endpoint.

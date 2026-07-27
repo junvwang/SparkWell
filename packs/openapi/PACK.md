@@ -9,9 +9,8 @@ implementations:
       target: openapi-contract
       source-root: src/contracts
       packs:
-        - openapi
-      constraints:
-        openapi-version: '3.1'
+        openapi:
+          version: '3.1'
 ```
 
 Installation makes the pack available; only a profile whose `packs` list contains `openapi` activates it. The profile, project guidance, and native project configure the pack. Conflicts remain **Blocked** rather than being resolved by list order.
@@ -28,19 +27,19 @@ The pack supports these profile roles:
 
 | Role | Profile configuration |
 |---|---|
-| Contract producer | `target: openapi-contract`; `source-root` is the contract artifact root; `constraints.openapi-version` is `'3.1'` |
-| API implementation | `target: api-service`; `constraints.contract-profile` names one contract-producer profile |
-| Runtime client | Any runtime target; `constraints.contract-profile` names one contract-producer profile |
+| Contract producer | `target: openapi-contract`; `source-root` is the contract artifact root; `packs.openapi.version` is `'3.1'` |
+| API implementation | `target: api-service`; `packs.openapi.contract-profile` names one contract-producer profile |
+| Runtime client | Any runtime target; `packs.openapi.contract-profile` names one contract-producer profile |
 
 Every participating profile lists `openapi` in `packs`. A referenced contract profile must exist, use `target: openapi-contract`, activate this pack, and have a project-relative `source-root`. Keep service locations, credentials, and secrets in native secure configuration.
 
 Before `/spark-config` finalizes or `/spark-impl` and `/spark-test` plan work:
 
-- require `constraints.openapi-version: '3.1'` on every producer profile;
-- resolve every `constraints.contract-profile` to an existing producer profile satisfying the preceding contract;
+- require `packs.openapi.version: '3.1'` on every producer profile;
+- resolve every `packs.openapi.contract-profile` to an existing producer profile satisfying the preceding contract;
 - mark a missing reference, wrong target, missing pack activation, incompatible version, or unsafe source root **Blocked**.
 
-These are pack requirements, not overridable defaults. A conflicting profile constraint is **Blocked**.
+These are pack-owned configuration requirements. Project guidance cannot override them; contradictions are **Blocked**.
 
 ## Workflow Guidance
 
