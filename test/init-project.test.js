@@ -33,7 +33,7 @@ test('initializes core contracts and GitHub Copilot workflows by default', async
 
   assert.equal(result.agent, 'github-copilot')
   assert.deepEqual(result.packs, [])
-  assert.equal(result.created, 18)
+  assert.equal(result.created, 14)
   assert.equal(result.updated, 0)
   assert.match(
     await readFile(path.join(target, '.sparkwell', 'config.yaml'), 'utf8'),
@@ -112,7 +112,7 @@ test('initializes Claude Code instructions and shared skills', async (context) =
 
   assert.equal(result.agent, 'claude-code')
   assert.deepEqual(result.agents, ['claude-code'])
-  assert.equal(result.created, 18)
+  assert.equal(result.created, 14)
   await assertPathExists(path.join(target, 'CLAUDE.md'), 'file')
   await assertPathExists(
     path.join(target, '.claude', 'skills', 'spark-design', 'SKILL.md'),
@@ -130,7 +130,7 @@ test('initializes AGENTS.md-compatible instructions and skills', async (context)
   })
 
   assert.equal(result.agent, 'agents-md')
-  assert.equal(result.created, 18)
+  assert.equal(result.created, 14)
   await assertPathExists(path.join(target, 'AGENTS.md'), 'file')
   await assertPathExists(
     path.join(target, '.agents', 'skills', 'spark-impl', 'SKILL.md'),
@@ -148,7 +148,7 @@ test('composes multiple selected agent adapters', async (context) => {
 
   assert.equal(result.agent, undefined)
   assert.deepEqual(result.agents, ['github-copilot', 'claude-code'])
-  assert.equal(result.created, 31)
+  assert.equal(result.created, 23)
   await assertPathExists(
     path.join(target, '.github', 'copilot-instructions.md'),
     'file',
@@ -265,7 +265,7 @@ test('is idempotent when managed files are unchanged', async (context) => {
 
   assert.equal(result.created, 0)
   assert.equal(result.updated, 0)
-  assert.equal(result.unchanged, 18)
+  assert.equal(result.unchanged, 14)
 })
 
 test('treats line-ending and final-newline differences as unchanged', async (context) => {
@@ -324,7 +324,7 @@ test('appends a managed section to existing Copilot instructions', async (contex
   const result = await initializeProject({ destination: target })
   const merged = await readFile(instructionsPath, 'utf8')
 
-  assert.equal(result.created, 17)
+  assert.equal(result.created, 13)
   assert.equal(result.updated, 1)
   assert.ok(merged.startsWith(projectInstructions))
   assert.match(merged, /# Sparkwell Project Instructions/)
@@ -333,7 +333,7 @@ test('appends a managed section to existing Copilot instructions', async (contex
 
   const repeated = await initializeProject({ destination: target })
   assert.equal(repeated.updated, 0)
-  assert.equal(repeated.unchanged, 18)
+  assert.equal(repeated.unchanged, 14)
 })
 
 test('updates only the valid Sparkwell managed section', async (context) => {
@@ -617,8 +617,7 @@ test('canonical Agent Skills have valid metadata and project unchanged', async (
   const relativeFiles = await collectRelativeFiles(skillsRoot)
 
   assert.ok(!relativeFiles.some((relativeFile) => relativeFile.startsWith('spark-config/')))
-  assert.ok(relativeFiles.includes('spark-impl/references/android.md'))
-  assert.ok(relativeFiles.includes('spark-impl/references/ios.md'))
+  assert.ok(!relativeFiles.some((relativeFile) => relativeFile.startsWith('spark-impl/references/')))
   assert.ok(relativeFiles.includes('spark-test/references/web.md'))
   assert.ok(relativeFiles.includes('spark-test/references/windows.md'))
   assert.ok(!relativeFiles.some((relativeFile) => /contract|openapi|api-service/.test(relativeFile)))
@@ -726,46 +725,6 @@ test('core project templates preserve the methodology quality contract', async (
       'openapi',
       'references',
       'openapi-client.md',
-    ),
-    'utf8',
-  )
-  const webReference = await readFile(
-    path.join(
-      repositoryRoot,
-      'skills',
-      'spark-impl',
-      'references',
-      'web.md',
-    ),
-    'utf8',
-  )
-  const windowsReference = await readFile(
-    path.join(
-      repositoryRoot,
-      'skills',
-      'spark-impl',
-      'references',
-      'windows.md',
-    ),
-    'utf8',
-  )
-  const androidReference = await readFile(
-    path.join(
-      repositoryRoot,
-      'skills',
-      'spark-impl',
-      'references',
-      'android.md',
-    ),
-    'utf8',
-  )
-  const iosReference = await readFile(
-    path.join(
-      repositoryRoot,
-      'skills',
-      'spark-impl',
-      'references',
-      'ios.md',
     ),
     'utf8',
   )
@@ -953,42 +912,29 @@ test('core project templates preserve the methodology quality contract', async (
   assert.doesNotMatch(implementationProfiles, /`contract-source`/)
   assert.doesNotMatch(implementationSkill, /`contract-root`/)
   assert.match(implementationSkill, /\.sparkwell\/packs\/<pack-id>\/PACK\.md/)
-  assert.match(implementationSkill, /authoritative order defined by `\.sparkwell\/implementation-profiles\.md` under \*\*Resolution and Conflicts\*\*/)
+  assert.match(implementationSkill, /Apply the authoritative \*\*Resolution and Conflicts\*\* order from `\.sparkwell\/implementation-profiles\.md`/)
   assert.doesNotMatch(implementationSkill, /Apply decisions in this order/)
-  assert.match(implementationSkill, /Installed packs are inactive unless the selected profile lists them/)
+  assert.match(implementationSkill, /Installed Packs are inactive unless selected by the profile/)
   assert.doesNotMatch(implementationSkill, /Profile constraints|constraints, preferences|profile constraints and guidance/i)
-  assert.match(implementationSkill, /Validate every pack-defined required field, value, and cross-profile reference/)
-  assert.match(implementationSkill, /Reject absolute paths, paths containing a `\.\.` component/)
-  assert.doesNotMatch(implementationSkill, /OpenAPI|contracts\.root|references\/api-service/)
-  assert.match(implementationSkill, /must have an identifiable runtime component boundary/)
-  assert.match(implementationSkill, /Have children report user intent or other outcomes to their owner/)
-  assert.match(implementationSkill, /Every guidance file referenced by the selected profile/)
-  assert.match(implementationSkill, /## Resolve Project Architecture/)
-  assert.match(implementationSkill, /Established implementation/)
-  assert.match(implementationSkill, /New implementation/)
-  assert.match(implementationSkill, /Do not select MVC, MVVM, Clean Architecture/)
-  assert.match(implementationSkill, /A new runtime implementation requires a named profile/)
-  assert.match(implementationSkill, /`\/spark-impl` reads but never creates or edits implementation profiles or project guidance/)
-  assert.match(implementationSkill, /present a concise Implementation Plan/)
+  assert.match(implementationSkill, /Validate every selected Pack's required fields and cross-profile references/)
+  assert.match(implementationSkill, /Reject absolute paths, `\.\.` components, paths outside the project root/)
+  assert.doesNotMatch(implementationSkill, /OpenAPI|contracts\.root|\.\/references\/<target>\.md|Bundled target guidance/)
+  assert.match(implementationSkill, /one identifiable runtime boundary for each applicable root and composed child/)
+  assert.match(implementationSkill, /owner supplies child information, handles child outcomes, and owns cross-child coordination/)
+  assert.match(implementationSkill, /Every guidance file referenced by the profile/)
+  assert.match(implementationSkill, /A new implementation requires a named profile and complete project guidance/)
+  assert.match(implementationSkill, /Do not choose or migrate architecture, framework, state ownership, persistence, synchronization, dependency injection, or module structure/)
+  assert.match(implementationSkill, /Treat material platform-specific quality, lifecycle, permission, packaging, and validation rules as Spark intent, project guidance, Pack rules, or established native configuration/)
+  assert.match(implementationSkill, /Do not modify Sparks, profiles, guidance, Packs, tests, test infrastructure, or diagrams/)
+  assert.match(implementationSkill, /Before editing, present a concise Implementation Plan/)
   assert.doesNotMatch(implementationSkill, /suffix/i)
-  assert.match(webReference, /framework-native component boundary/)
-  assert.match(windowsReference, /framework-native view boundary/)
-  for (const runtimeReference of [
-    webReference,
-    windowsReference,
-    androidReference,
-    iosReference,
-  ]) {
-    assert.match(runtimeReference, /## Architecture Boundary/)
-    assert.match(runtimeReference, /document them in project guidance before retrying `\/spark-impl`/)
-  }
   assert.match(apiServiceReference, /A `ui-component` Spark is \*\*Not applicable\*\*/)
   assert.match(apiServiceReference, /Implement every selected operation by `operationId`/)
   assert.match(apiServiceReference, /duplicate path and HTTP method pairs/)
   assert.match(apiServiceReference, /Do not reconstruct a public interface from Sparks/)
   assert.match(apiServiceReference, /packs\.openapi\.contract-profile/)
-  assert.match(implementationSkill, /Keep persistence access and provider-specific artifacts in the current target/)
-  assert.match(implementationSkill, /Mark an independently managed persistence boundary \*\*Blocked\*\*/)
+  assert.match(implementationSkill, /Maintain `\.sparkwell\/state\/realizations\/<implementation-id>\.yaml`/)
+  assert.match(implementationSkill, /treat mappings as provenance, not ownership or overwrite permission/)
   assert.match(openApiClientReference, /Select one unique `operationId`/)
   assert.match(openApiClientReference, /Prefer established client-generation tooling/)
   assert.match(apiServiceTestReference, /Verify method, path, parameter location/)
@@ -1021,7 +967,7 @@ test('core project templates preserve the methodology quality contract', async (
     assert.match(explicitSkill, /description: 'User-invoked SparkWell workflow/)
   }
   assert.match(designSkill, /user must explicitly invoke `\/spark-impl` or `\/spark-test`/)
-  assert.match(implementationSkill, /tell the user to invoke `\/spark-design`\. Do not invoke it automatically/)
+  assert.match(implementationSkill, /tell the user to invoke `\/spark-design`; never invoke it automatically/)
   assert.match(testSkill, /Do not invoke either workflow automatically/)
   assert.doesNotMatch(testSkill, /disabled placeholder/)
   assert.match(testSkill, /Do not modify production runtime artifacts/)

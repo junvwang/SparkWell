@@ -88,9 +88,8 @@ Apply compatible decisions in this order:
 3. Profile-referenced project guidance.
 4. Selected implementation packs.
 5. Established native architecture and configuration.
-6. Optional target defaults.
 
-The order applies only to compatible decisions and does not authorize silent conflict resolution. Stop as **Blocked** when Spark intent, profile routing, pack configuration, guidance, selected packs, or established architecture contradict one another. A task-local request may choose only details not owned by these sources; consequential project changes require updating the project-owned profile or guidance before retrying. Target defaults apply only when compatible with every higher-authority source.
+The order applies only to compatible decisions and does not authorize silent conflict resolution. Stop as **Blocked** when Spark intent, profile routing, pack configuration, guidance, selected packs, or established architecture contradict one another. A task-local request may choose only ordinary details not owned by these sources; consequential project changes require updating the project-owned profile or guidance before retrying.
 
 ## Example
 

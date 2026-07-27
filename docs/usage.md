@@ -223,7 +223,7 @@ Profiles and guidance are project-owned inputs. Maintain them manually or with o
 
 Native project files remain authoritative for dependencies, versions, commands, formatting, linting, build configuration, and actual existing structure. Packs, guidance, and native architecture must agree. A missing selected pack, missing referenced guidance, unresolved consequential architecture, or conflict makes `/spark-impl` **Blocked**.
 
-Resolution order is: Spark intent, profile routing and pack configuration, profile guidance, selected packs, established native architecture, then optional target defaults. This order never silently resolves contradictions. Update the project-owned profile or guidance before retrying `/spark-impl` when a consequential decision is missing or changes.
+Resolution order is: Spark intent, profile routing and pack configuration, profile guidance, selected packs, then established native architecture. This order never silently resolves contradictions. Update the project-owned profile or guidance before retrying `/spark-impl` when a consequential decision is missing or changes.
 
 ### 3. Use optional implementation packs
 
