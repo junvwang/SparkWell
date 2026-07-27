@@ -7,18 +7,17 @@ Implementation packs provide reusable technology-specific realization and test g
 SparkWell Core owns:
 
 - Spark concepts, kinds, relationships, and document semantics;
-- project implementation profiles and guidance;
+- profile, guidance, and pack extension contracts;
 - generic design, configuration, implementation, and testing workflows;
 - realization provenance.
 
-Projects and optional packs own:
+Projects own:
 
-- frameworks, protocols, interface formats, persistence providers, and generators;
-- target applicability and artifact mapping;
-- technology-specific implementation and validation rules;
-- generated versus human-maintained boundaries.
+- profile entries and project guidance;
+- architecture, framework, persistence, and artifact-ownership decisions;
+- native dependencies, versions, commands, and existing implementation structure.
 
-A pack never owns product behavior. Reviewed Sparks remain authoritative for capabilities, domain rules, user-visible behavior, failures, and lifecycle.
+Packs own reusable technology-specific target applicability, artifact mapping, generation, validation, and testing rules. They never own product behavior. Sparks remain authoritative for capabilities, domain rules, user-visible behavior, failures, and lifecycle.
 
 ## Install and Activate
 
@@ -32,10 +31,11 @@ The initializer projects it to:
 
 ```text
 .sparkwell/packs/openapi/
-├── pack.json
 ├── PACK.md
 └── references/
 ```
+
+`PACK.md` frontmatter is the pack manifest; no separate JSON manifest is used.
 
 Installation only makes the pack available. Activate it per profile:
 
@@ -50,7 +50,7 @@ implementations:
           version: '3.1'
 ```
 
-Before planning, `/spark-impl` and `/spark-test` read every selected `PACK.md` and the references it requires. A missing pack, incompatible profile, or conflict is **Blocked**. Pack list order never resolves conflicts.
+Before planning, `/spark-impl` and `/spark-test` read every selected `PACK.md` and the references it requires. A missing pack, incompatible profile, or conflict is **Blocked**. Pack declaration order never resolves conflicts.
 
 `/spark-config` may add or remove a pack ID in a proposal, but it does not install or edit packs. When a requested bundled pack is absent, install it with the CLI first.
 
@@ -114,7 +114,7 @@ service-exposure:
   standard-operations: [create, get, list, update, delete]
 ```
 
-with a reviewed Service Spark whose capability table states the intended boundary explicitly:
+with a Service Spark whose capability table states the intended boundary explicitly:
 
 ```markdown
 ---

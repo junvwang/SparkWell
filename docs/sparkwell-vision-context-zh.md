@@ -1,4 +1,4 @@
-# SparkWell：问题、方法、近期目标与长期愿景
+# SparkWell：问题、方法与长期愿景
 
 ## 一页总结
 
@@ -15,7 +15,7 @@ SparkWell 提出的核心假设是：
 5. 这些假设需要通过真实项目持续验证，而不是预先假定正确。
 
 ---
-> 本文档用于保存截至目前围绕 SparkWell 形成的完整思想背景，避免后续的人或 Coding Agent 因上下文缺失，只看到零散文件、当前实现或局部术语，而无法理解 SparkWell 为什么存在、希望解决什么问题、核心方法是什么、近期应验证什么，以及长期可能发展成什么。
+> 本文档保存 SparkWell 的稳定思想背景，帮助后续的人或 Coding Agent 理解它为什么存在、希望解决什么问题、核心方法和长期方向是什么。可变的实现状态与近期验证重点维护在 [当前状态与 Roadmap](status-and-roadmap-zh.md) 中。
 >
 > 本文档不是实现架构，不定义具体文件格式、CLI、插件结构、数据结构或代码组织方式。它描述的是：**问题、目标、方法、边界、工作流、关键能力、产品方向、阶段性任务和仍待验证的问题。**
 
@@ -555,8 +555,8 @@ SparkWell 默认不介入普通问答、编码、调试、重构和测试。每�
 
 - `/spark-design`：先在 chat 中提出 Spark Proposal，经确认后生成或演进 Spark Documents，并停在文档评审点；
 - `/spark-config`：提出并确认 Implementation Configuration Proposal，只更新 Profile 与项目架构 Guidance；
-- `/spark-impl`：从已评审 Sparks 生成一个目标的工程产物；
-- `/spark-test`：从已评审 Sparks 创建、更新或执行测试。
+- `/spark-impl`：从 Sparks 生成一个目标的工程产物；
+- `/spark-test`：从 Sparks 创建、更新或执行测试。
 
 `/spark-design` 的工作流是：
 
@@ -614,7 +614,7 @@ Pack 需要先显式安装，再由具体 Profile 激活；安装本身不会让
 
 新 runtime implementation 在生成代码前应通过 `/spark-config` 提出并确认 Implementation Configuration Proposal。已有系统应优先固化并保留现有架构，而不是借机重构。
 
-Sparks 继续拥有产品行为、用户可见状态、Service capabilities、同步和冲突语义；Profile、Pack 与 Guidance 拥有 protocol、contract format、provider、adapter、repository、ORM、DI、generator 和代码组织方式。
+Sparks 拥有产品行为、用户可见状态、Service capabilities、同步和冲突语义；Profile 只负责 target、artifact routing 和 Pack 配置；Project Guidance 拥有项目架构、provider、repository、ORM、DI 和代码组织方式；Pack 提供可复用的 protocol、contract format、generator、realization 和 validation 规则；native files 记录实际依赖、版本、命令和既有结构。
 
 ## 7.4 Offline Review 是核心能力
 
@@ -644,7 +644,7 @@ SparkWell 的目标不是取消代码审查，而是改变审查层次：
 
 ## 8.1 第一次生成只是起点
 
-当前 Todo Demo 已经证明基本链路可以运行：
+一次初始生成最多只能说明工具能够执行一条链路：
 
 ```text
 Requirements
@@ -653,12 +653,10 @@ Sparks
     ↓
 Offline review
     ↓
-Web implementation
-    ↓
-Windows implementation
+Engineering artifacts
 ```
 
-但下一阶段最重要的不是继续增加更多平台，而是验证演化。
+真正需要验证的是后续演化能否保持意图、边界和未受影响 artifacts 的稳定。
 
 ## 8.2 典型演化场景
 
@@ -905,7 +903,7 @@ SparkWell 的目标不是移除人，而是让人的判断发生在更有价值�
 
 ---
 
-# 16. Specification、Instructions 与 Skills 的分工
+# 16. Core Artifacts 与 Skills 的分工
 
 ## Specification
 
@@ -915,13 +913,29 @@ SparkWell 的目标不是移除人，而是让人的判断发生在更有价值�
 
 定义核心概念、基本语义和不随某个 Agent 工作流改变的规则。
 
+## Conventions
+
+回答：
+
+> Spark Documents 在这个项目中如何存储和表示？
+
+定义项目自有的路径、命名、frontmatter 序列化和 kind-specific 文档格式。
+
+## Implementation Profiles 与 Guidance
+
+回答：
+
+> 一个 realization 路由到哪里，并遵循什么项目架构？
+
+Profile YAML 只保存 target、source-root、Pack 配置和 Guidance 引用；描述性的架构决策保存在项目 Guidance 或 native project 中。
+
 ## Instructions
 
 回答：
 
 > Agent 在这个项目中应如何工作？
 
-定义显式激活边界、默认普通工作模式、设计与生成分离、何时停止、何时澄清等。
+只定义 SparkWell 的显式激活边界和 Pending Proposal 的有限续接。具体流程属于相应 Skill。
 
 ## Skills
 
@@ -929,123 +943,29 @@ SparkWell 的目标不是移除人，而是让人的判断发生在更有价值�
 
 > 某个具体任务应该如何执行？
 
-例如：
-
-- Design Sparks；
-- Generate Artifacts；
-- Evolve Sparks；
-- Reconcile；
-- Analyze Impact；
-- Visualize；
-- Extract Sparks from Legacy Code。
+当前显式工作流包括 `/spark-design`、`/spark-config`、`/spark-impl` 和 `/spark-test`。
 
 Skill 是可执行工作流程，不应重新定义 Spark 理论。
+
+## Implementation Packs
+
+回答：
+
+> 某项技术如何 realization 和 validation？
+
+Pack 提供可复用的技术规则，由 Profile 显式激活，但不能拥有或改变产品意图。
 
 ---
 
 # 17. 当前 Demo 已经证明了什么
 
-当前 Todo Demo 已具备：
-
-- 通过 `/spark-design` 分析需求并提出 Spark Proposal；
-- 在 Proposal 确认后生成 Sparks，并让人评审完整文档；
-- 文档评审后通过 `/spark-impl` 从 Sparks 生成代码；
-- 从同一设计生成 Web；
-- 从同一设计生成 Windows。
-
-这已经证明：
-
-- Spark workflow 可以被实现；
-- Spark 可以作为 requirements 与 code 之间的明确阶段；
-- Human Stop Point 可以实际存在；
-- 同一 Spark 集合可以服务多个平台。
-
-但它还没有充分证明：
-
-- 长期维护成本更低；
-- Spark 比 Design Doc 更有效；
-- 真实项目中的粒度判断稳定；
-- 多轮需求演化能够保持局部修改；
-- 手工代码修改后的 reconciliation 有效；
-- 大项目中 Spark graph 仍然可理解；
-- 开发者愿意长期采用。
+当前实现状态不属于稳定愿景。可验证能力、Demo 状态和仍未证明的假设维护在 [当前状态与 Roadmap](status-and-roadmap-zh.md) 中。
 
 ---
 
 # 18. 近期应快速完成和验证的事情
 
-## 18.1 稳定 Spark 定义
-
-- 完成并收敛 Spark Specification；
-- 保持 Specification 简洁；
-- 明确关键词汇；
-- 避免过早引入过多正式概念；
-- 通过真实 Demo 反向修正规范。
-
-## 18.2 完成 Design Sparks 能力
-
-- 从 requirement 分析软件意图；
-- 先阅读已有 Sparks；
-- 判断 no change、evolve、create 或 clarify；
-- 选择合理粒度；
-- 建立正确关系；
-- 在 chat 中提出只包含概念集合、summary 和修改原因的 Spark Proposal；
-- 支持 `Revise:`、`Finalize` 和 `Cancel`；
-- `Finalize` 前不修改任何项目文件；
-- `Finalize` 后重新校验工作区并生成可 review 的 Spark Documents；
-- 显式列出假设和开放问题；
-- 分别停止在 Proposal review 和 Spark Document review 两个 checkpoint。
-
-## 18.3 完成 Artifact Generation 能力
-
-- 从已 review 的 Sparks 生成指定 artifact；
-- 支持不同平台的 realization；
-- 不在生成阶段擅自修改软件意图；
-- 在 Spark 信息不足时返回设计问题；
-- 记录 Spark 与 artifacts 的映射。
-
-## 18.4 制作 Evolution Demo
-
-这是近期最重要的下一步。
-
-建议在现有 Todo Demo 上增加一个明确的新需求，例如 Add due date 或 Add priority。
-
-演示：
-
-1. 新 requirement；
-2. 识别受影响 Sparks；
-3. Spark diff；
-4. 人工 review；
-5. Web 更新；
-6. Windows 更新；
-7. 未受影响部分保持稳定。
-
-这个 Demo 比增加第三个平台更能证明 Spark 的长期价值。
-
-## 18.5 展示 Design Review 的价值
-
-需要让观察者清楚看到：
-
-- 直接看 requirement 容易遗漏什么；
-- Spark 如何暴露概念边界和责任；
-- Spark review 能在代码生成前发现什么问题；
-- 一次设计变化如何影响多个平台；
-- 人为什么不需要先阅读所有生成代码。
-
-## 18.6 收集真实开发者反馈
-
-找少量真正使用 Claude Code、Codex、Cursor、Copilot Agent 等工具的开发者，让他们亲自完成一个小任务。
-
-重点询问：
-
-- 哪一步最有价值；
-- 哪一步最困惑；
-- 哪一步像额外 ceremony；
-- Spark 是否比直接 prompt 更容易 review；
-- 他们是否愿意把 Spark 保留在真实项目；
-- 哪些内容应该更少；
-- 哪些信息仍然缺失；
-- 什么时候他们仍然需要直接看代码。
+近期验证重点和可变任务列表维护在 [当前状态与 Roadmap](status-and-roadmap-zh.md) 中，避免愿景文档因实现进展而持续过期。
 
 ---
 
@@ -1338,7 +1258,7 @@ SparkWell 解决的是另一层问题：
 ---
 
 
-# 23. SparkWell 的核心假设
+# 24. SparkWell 的核心假设
 
 SparkWell 并不预设自己的方法一定正确。
 
@@ -1438,7 +1358,7 @@ Artifact Evolution
 
 SparkWell 当前最重要的工作，不是证明它们一定正确，而是通过真实项目、真实开发流程和真实开发者反馈，不断验证、修正甚至推翻它们。
 
-# 24. 对外定位
+# 25. 对外定位
 
 在当前阶段，不应把 SparkWell 宣称为已经被证明的新软件工程范式。
 
@@ -1456,7 +1376,7 @@ SparkWell 当前最重要的工作，不是证明它们一定正确，而是通�
 
 ---
 
-# 25. 成功标准
+# 26. 成功标准
 
 SparkWell 是否成功，不应只看它能否生成代码。
 
@@ -1475,23 +1395,13 @@ SparkWell 是否成功，不应只看它能否生成代码。
 
 ---
 
-# 26. 当前最重要的行动顺序
+# 27. 当前最重要的行动顺序
 
-1. 保持 Spark Specification 简洁并可用；
-2. 稳定 Design Sparks Skill；
-3. 稳定 Artifact Generation Skill；
-4. 完成 Todo 的 Evolution Demo；
-5. 展示 Spark diff 与两个平台的同步更新；
-6. 建立最小 traceability；
-7. 找真实开发者体验；
-8. 收集并分析负面和正面反馈；
-9. 根据反馈修正方法，而不是先扩展功能；
-10. 在基本价值被验证后，再构建 Browser、Graph、Reconciliation 和 Visual Review；
-11. 最后逐步向 Iron Man Interface 演进。
+当前行动顺序维护在 [当前状态与 Roadmap](status-and-roadmap-zh.md) 中。本愿景只保留稳定的成功标准和长期方向。
 
 ---
 
-# 27. 最终愿景
+# 28. 最终愿景
 
 SparkWell 最终想探索的，不只是一个新的文件格式、Prompt Framework 或 AI Coding Tool。
 

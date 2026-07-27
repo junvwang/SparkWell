@@ -14,6 +14,7 @@ import path from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { runCli } from '../scripts/cli.js'
+import { parsePackDefinition } from '../scripts/pack-registry.js'
 import {
   InitConflictError,
   initializeProject,
@@ -174,7 +175,11 @@ test('discovers adapter ids and aliases from manifests', () => {
 test('installs only explicitly selected implementation packs', async (context) => {
   const target = await createTemporaryTarget(context)
   const packRoot = path.join(repositoryRoot, 'packs', 'openapi')
-  const packFileCount = (await collectRelativeFiles(packRoot)).length
+  const packFiles = await collectRelativeFiles(packRoot)
+  const packFileCount = packFiles.length
+
+  assert.ok(packFiles.includes('PACK.md'))
+  assert.ok(!packFiles.includes('pack.json'))
 
   const first = await initializeProject({
     destination: target,
@@ -184,7 +189,7 @@ test('installs only explicitly selected implementation packs', async (context) =
 
   assert.deepEqual(first.packs, ['openapi'])
   assert.equal(first.created, 5 + packFileCount)
-  for (const relativeFile of await collectRelativeFiles(packRoot)) {
+  for (const relativeFile of packFiles) {
     assert.equal(
       await readFile(
         path.join(target, '.sparkwell', 'packs', 'openapi', relativeFile),
@@ -209,6 +214,39 @@ test('discovers implementation packs and rejects unknown ids', () => {
   assert.deepEqual(SUPPORTED_PACKS, ['openapi'])
   assert.deepEqual(normalizePacks(['openapi', 'openapi']), ['openapi'])
   assert.throws(() => normalizePacks(['unknown']), /Unsupported implementation pack/)
+})
+
+test('parses and validates implementation pack frontmatter', () => {
+  const valid = `---
+id: example-pack
+description: 'Example implementation pack.'
+schema-version: 1
+---
+
+# Example Pack
+`
+
+  assert.deepEqual(parsePackDefinition(valid, 'example-pack'), {
+    id: 'example-pack',
+    description: 'Example implementation pack.',
+    schemaVersion: 1,
+  })
+  assert.throws(
+    () => parsePackDefinition('# Missing frontmatter\n', 'example-pack'),
+    /must begin with YAML frontmatter/,
+  )
+  assert.throws(
+    () => parsePackDefinition(valid.replace('id: example-pack', 'id: other'), 'example-pack'),
+    /id must match/,
+  )
+  assert.throws(
+    () => parsePackDefinition(valid.replace('schema-version: 1', 'schema-version: 2'), 'example-pack'),
+    /unsupported schema-version/,
+  )
+  assert.throws(
+    () => parsePackDefinition(valid.replace('description:', 'id: example-pack\ndescription:'), 'example-pack'),
+    /duplicate id/,
+  )
 })
 
 test('is idempotent when managed files are unchanged', async (context) => {
@@ -807,6 +845,8 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(readme, /SparkWell provides the shared realization process, not a universal project architecture/)
   assert.match(usage, /## Explicit Activation/)
   assert.match(usage, /SparkWell is inactive by default/)
+  assert.match(usage, /agent-neutral SparkWell Core files/)
+  assert.doesNotMatch(usage, /reviewed Sparks|reviewed Spark intent/i)
   assert.match(usage, /use the host's decision UI when available; otherwise reply directly/)
   assert.match(usage, /Dismissing the UI or giving ambiguous approval/)
   assert.match(usage, /Propose a Spark map, then generate documents only after finalization/)
@@ -887,7 +927,12 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(implementationProfiles, /authoritative order for implementation decisions/)
   assert.match(implementationProfiles, /The order applies only to compatible decisions/)
   assert.match(implementationProfiles, /Profile-referenced project guidance/)
-  assert.match(implementationProfiles, /Selected implementation packs/)
+  assert.match(implementationProfiles, /## Decision Boundaries/)
+  assert.match(implementationProfiles, /\| Sparks \| Product behavior, domain rules, observable states and failures/)
+  assert.match(implementationProfiles, /\| Profile \| Target and artifact routing, Pack activation/)
+  assert.match(implementationProfiles, /\| Project guidance \| Architecture, mappings, data flow/)
+  assert.match(implementationProfiles, /\| Implementation packs \| Reusable technology-specific realization and validation rules/)
+  assert.doesNotMatch(implementationProfiles, /Reviewed Sparks|SQLite[^\n]+profile or guidance/)
   assert.match(implementationProfiles, /Packs own technology-specific realization and validation, not observable product behavior/)
   assert.doesNotMatch(implementationProfiles, /contracts\.root|openapi-3\.1|Contract target/)
   assert.doesNotMatch(implementationProfiles, /`contract-root`/)
@@ -939,6 +984,7 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(contractReference, /Record every generated or materially updated file in `\.sparkwell\/state\/realizations\/<implementation-id>\.yaml`/)
   assert.match(contractReference, /selected producer profile's `source-root`/)
   assert.match(openApiPack, /never publishes a Domain Model or derives CRUD operations merely because a model exists/)
+  assert.match(openApiPack, /^---\r?\nid: openapi\r?\ndescription: .+\r?\nschema-version: 1\r?\n---/)
   assert.match(openApiPack, /target: openapi-contract/)
   assert.match(openApiPack, /packs\.openapi\.contract-profile/)
   assert.match(openApiPack, /require `packs\.openapi\.version: '3\.1'`/)
@@ -984,6 +1030,9 @@ test('core project templates preserve the methodology quality contract', async (
   assert.match(testSkill, /Validate every pack-defined required field, value, and cross-profile reference/)
   assert.match(testSkill, /Reject absolute paths, `\.\.` components/)
   assert.match(implementationPacks, /## Migration From the Former Contract Model/)
+  assert.match(implementationPacks, /Projects own:/)
+  assert.match(implementationPacks, /Packs own reusable technology-specific/)
+  assert.doesNotMatch(implementationPacks, /Reviewed Sparks|reviewed Service Spark/)
   assert.match(implementationPacks, /Replace Domain Model `service-exposure` with explicit Service capabilities/)
   assert.match(implementationPacks, /\| `create-todo` \|/)
 

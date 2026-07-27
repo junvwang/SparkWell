@@ -45,9 +45,9 @@ Install an optional implementation pack by repeating `--pack` as needed:
 sparkwell init ../MyProject --pack openapi
 ```
 
-Installation makes pack guidance available under `.sparkwell/packs/`; only profiles that list a pack activate it.
+Installation makes pack guidance available under `.sparkwell/packs/`; a profile activates a pack only when its `packs` map contains that pack ID.
 
-Create only the agent-neutral SparkWell contract:
+Create only the agent-neutral SparkWell Core files:
 
 ```sh
 sparkwell init ../MyProject --agent none
@@ -123,10 +123,17 @@ Activate one workflow for the current request by invoking its slash command:
 |---|---|
 | `/spark-design` | Propose a Spark map, then generate documents only after finalization |
 | `/spark-config` | Propose and finalize one implementation profile and its architecture guidance |
-| `/spark-impl` | Realize reviewed Sparks for one target or profile |
-| `/spark-test` | Create, update, or execute tests derived from reviewed Sparks |
+| `/spark-impl` | Realize Sparks for one target or profile |
+| `/spark-test` | Create, update, or execute tests derived from Sparks |
 
 Changing software intent does not activate SparkWell automatically. Each command activates only its named workflow and does not invoke the next phase. For a pending Spark or Implementation Configuration Proposal, use the host's decision UI when available; otherwise reply directly with `Revise:`, `Finalize`, or `Cancel`. When a workflow identifies any other handoff, invoke the named slash command in a new request.
+
+Detailed executable rules live in the Agent Skills:
+
+- [`/spark-design`](../skills/spark-design/SKILL.md)
+- [`/spark-config`](../skills/spark-config/SKILL.md)
+- [`/spark-impl`](../skills/spark-impl/SKILL.md)
+- [`/spark-test`](../skills/spark-test/SKILL.md)
 
 ## Working With Sparks
 
@@ -188,82 +195,15 @@ Review the proposal for the correct concept set, granularity, and ownership. Aft
 
 The workflow stops at both checkpoints. Implementation-critical information must be durable in the finalized Sparks rather than existing only in chat.
 
-Keep each body to the minimum sufficient intent. Include a statement when deleting it would force a reviewer or implementer to guess material behavior, ownership, an invariant, a constraint, or a relationship. State each decision once in its owning Spark and reference related Sparks instead of repeating their behavior. Omit repeated summaries, generic quality expectations, implementation-freedom disclaimers, exhaustive negative boundaries, and empty sections.
+SparkWell currently standardizes three kinds:
 
-Bundled SparkWell workflows support exactly these standardized kinds:
+| Kind | Represents |
+|---|---|
+| `domain-model` | Durable domain data semantics, invariants, lifecycle, and relationships |
+| `service` | Explicit capabilities offered across a conceptual boundary |
+| `ui-component` | A modular user-interface interaction and composition boundary |
 
-- `domain-model`
-- `service`
-- `ui-component`
-
-A project-defined kind requires guidance for its concept semantics, document rules, design rules, and target applicability. When that guidance is incomplete, the agent stops for clarification.
-
-Spark IDs may use these suggested suffixes when they improve readability:
-
-| Kind | Suggested suffix | Example |
-|---|---|---|
-| `domain-model` | `-model` | `todo-item-model` |
-| `service` | `-service` | `todo-management-service` |
-| `ui-component` | `-ui` | `todo-entry-ui` |
-
-Suffixes can make `composes`, `uses`, and realization provenance readable without opening every referenced document. They are optional naming hints: the `kind` field is authoritative, workflows do not infer behavior or applicability from suffixes, and human-readable names omit mechanical suffix wording.
-
-#### UI Component Sparks
-
-Use `kind: ui-component` for a modular user-interface concept with an identifiable purpose and boundary. Describe its information flow, user interactions, state, behavior, constraints, composition, and accessibility intent when those topics are material. A root UI Component owns the overall interface and may be realized by an application shell, window, page, route, or equivalent target entry surface.
-
-A parent UI Component uses `composes` for child UI Components it owns. Information flows from parent to child, while children report user intent or outcomes to the parent. The parent owns child presence, supplied information, handling of reported intent, and cross-child coordination. The child owns its internal presentation and local state.
-
-Do not create UI Component Sparks for every button, input, layout container, framework component, hook, view model, or rendered node. Create a child Spark when modularity is intended and its purpose, behavior, state, interactions, or constraints form an independently reviewable boundary.
-
-For example:
-
-```text
-todo-app-ui
-├── todo-entry-ui
-└── todo-list-ui
-  └── todo-item-ui
-```
-
-Web may realize these as framework components; Windows may use a root window plus user controls, views, or templates. Android and iOS use their established native component boundaries. The exact files, classes, props, events, commands, and bindings remain engineering choices. Every composed child must nevertheless retain an identifiable runtime component boundary, and one Spark does not imply exactly one source file.
-
-#### Domain Model Sparks
-
-Use `kind: domain-model` for an independently meaningful domain concept that owns durable field semantics, invariants, relationships, lifecycle, or model-level behavior. Do not create Domain Model Sparks mechanically for DTOs, API payloads, ORM entities, database rows, or target-language classes.
-
-Each Domain Model uses a technology-independent `## Data` table:
-
-```markdown
-## Data
-
-| Field | Meaning | Type | Required | Default | Constraints | Mutability |
-|---|---|---|---|---|---|---|
-| `id` | Stable identity of the Todo Item | identifier | Yes | Generated | Unique and non-empty | Immutable |
-| `title` | Work the person wants to remember | string | Yes | None | Trimmed; 1-200 characters | Mutable |
-| `completed` | Whether the work is complete | boolean | Yes | `false` | None | Mutable |
-```
-
-Use stable logical field identifiers and domain types rather than language, transport, ORM, or database types. Put cross-field rules under `## Invariants` and describe material model relationships through `composes` or `uses`. A Domain Model does not automatically publish operations. If it must not cross any Service boundary, state that product restriction in its body.
-
-The projected `.sparkwell/specification.md` defines Domain Model semantics. `.sparkwell/conventions.md` defines the exact field-table, type, and relationship representation.
-
-#### Service Sparks
-
-Use `kind: service` for independently meaningful capabilities across a conceptual boundary. Public create, retrieve, update, and delete behavior is explicit Service intent just like specialized queries, authorization, batching, orchestration, or distinct failures. Do not create Service Sparks mechanically for controllers, endpoints, framework classes, or generated clients.
-
-Each Service Spark uses a lightweight capabilities table:
-
-```markdown
-## Capabilities
-
-| Capability | Purpose | Inputs | Output | Failure Behavior |
-|---|---|---|---|---|
-| `complete-all` | Mark every active Todo Item complete | None | Number of `todo-item-model` models changed | Fails without partial completion if the operation cannot complete |
-```
-
-Capability IDs are stable lowercase kebab-case identities. Reference independently owned models and concepts through `uses`, keep inputs and outputs at the concept level, and describe only observable service failure behavior. Transport routes, HTTP verbs, status codes, DTOs, and framework types remain engineering-artifact choices unless they are enduring compatibility requirements.
-
-The projected `.sparkwell/specification.md` defines Service semantics. `.sparkwell/conventions.md` defines the exact capabilities-table representation.
+Project-defined kinds require explicit semantics, document rules, design rules, and target applicability. For authoritative details, see the [Spark Specification](../core/project/.sparkwell/specification.md), project-owned [Spark Document Conventions](../core/project/.sparkwell/conventions.md), [granularity guide](../skills/spark-design/references/granularity.md), and [worked examples](../skills/spark-design/references/examples.md).
 
 ### 2. Configure an implementation
 
@@ -306,7 +246,7 @@ Profile YAML is intentionally limited to target routing, pack-owned machine conf
 
 Native project files remain authoritative for dependencies, versions, commands, formatting, linting, build configuration, and actual existing structure. Packs, guidance, and native architecture must agree. A missing selected pack, missing referenced guidance, unresolved consequential architecture, or conflict makes `/spark-impl` **Blocked**.
 
-Resolution order is: reviewed Spark intent, profile routing and pack configuration, profile guidance, selected packs, established native architecture, then optional target defaults. This order never silently resolves contradictions. Consequential project changes require `/spark-config` rather than a task-local override.
+Resolution order is: Spark intent, profile routing and pack configuration, profile guidance, selected packs, established native architecture, then optional target defaults. This order never silently resolves contradictions. Consequential project changes require `/spark-config` rather than a task-local override.
 
 ### 3. Use optional implementation packs
 
@@ -392,7 +332,7 @@ Invoke `/spark-test` when test authoring or broader behavioral verification is d
 /spark-test Create tests for todo-app-ui using the web-react profile.
 ```
 
-`spark-test` derives applicable scenarios from reviewed Sparks, reuses existing test conventions, updates test provenance, and classifies failures as runtime, test, intent, or environment defects.
+`spark-test` derives applicable scenarios from Sparks, reuses existing test conventions, updates test provenance, and classifies failures as runtime, test, intent, or environment defects.
 
 Adding a new test framework, dependency, project, browser harness, emulator, or other consequential infrastructure requires confirmation unless explicitly requested.
 

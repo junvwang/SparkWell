@@ -1,3 +1,9 @@
+---
+id: openapi
+description: 'Generate, implement, consume, and test OpenAPI 3.1 service contracts.'
+schema-version: 1
+---
+
 # OpenAPI Implementation Pack
 
 This optional pack generates, implements, consumes, and tests OpenAPI 3.1 service contracts. Install it with `sparkwell init --pack openapi`, then activate it per implementation profile:
@@ -13,11 +19,11 @@ implementations:
           version: '3.1'
 ```
 
-Installation makes the pack available; only a profile whose `packs` list contains `openapi` activates it. The profile, project guidance, and native project configure the pack. Conflicts remain **Blocked** rather than being resolved by list order.
+Installation makes the pack available; only a profile whose `packs` map contains an `openapi` key activates it. The profile, project guidance, and native project configure the pack. Conflicts remain **Blocked** rather than being resolved by declaration order.
 
 ## Intent Boundary
 
-Reviewed Service Sparks define public capabilities, concept-level inputs and outputs, failures, and other observable service behavior. OpenAPI documents define the realized wire interface. Domain Model Sparks may define schemas used by a Service, but this pack never publishes a Domain Model or derives CRUD operations merely because a model exists.
+Service Sparks define public capabilities, concept-level inputs and outputs, failures, and other observable service behavior. OpenAPI documents define the realized wire interface. Domain Model Sparks may define schemas used by a Service, but this pack never publishes a Domain Model or derives CRUD operations merely because a model exists.
 
 OpenAPI paths, methods, parameters, schemas, and generators are engineering decisions owned by this pack, project guidance, or established artifacts. They do not belong in SparkWell Core.
 

@@ -21,28 +21,27 @@ Profiles do not inherit and must not contain secrets.
 
 ## Implementation Packs
 
-An implementation pack is reusable, technology-specific guidance installed at `.sparkwell/packs/<pack-id>/PACK.md`. Install bundled packs explicitly with `sparkwell init --pack <pack-id>`.
+A pack provides reusable technology-specific realization and test rules. Install bundled packs with `sparkwell init --pack <pack-id>`. Installation alone does not activate a pack.
 
-A profile activates only the pack IDs used as keys in its `packs` map. Use `{}` when no packs apply or when a selected pack requires no configuration. Installation alone does not activate a pack. Before planning implementation or tests, read every selected `PACK.md` and the references it requires for the effective target and workflow. Pack references must remain inside that pack's directory. A missing pack, unreadable or escaping reference, or incompatible pack/profile combination makes the task **Blocked**.
+- A profile activates the IDs used as keys in `packs`. Use `packs: {}` for no packs and `<pack-id>: {}` when an activated pack needs no configuration.
+- `.sparkwell/packs/<pack-id>/PACK.md` defines the value's schema, target applicability, required references, generation, validation, and testing rules. Values contain only machine-required routing, references, and validation inputs; architecture belongs in project guidance.
+- Before planning, read each selected `PACK.md` and its applicable references. Pack references must remain inside that pack's directory. Missing, unreadable, escaping, incompatible, or contradictory pack input makes the task **Blocked**.
 
-Each pack defines the schema and semantics of the value under its own key. Pack configuration is limited to machine-required routing, references, and validation inputs; do not use it as a second architecture document. Packs may define target applicability, cross-profile references, artifact mapping, generation rules, validation, and test guidance. Pack requirements cannot be overridden by project guidance; contradictions are **Blocked**.
+Pack requirements cannot be overridden by project guidance. Packs own technology-specific realization and validation, not observable product behavior, Domain Model semantics, Service capabilities, or UI Component interaction boundaries. They may add compatible non-observable engineering quality and platform integration but must not change Spark intent. Multiple packs have equal authority; list order never resolves conflicts.
 
-Packs own technology-specific realization and validation, not observable product behavior, Domain Model semantics, Service capabilities, or UI Component interaction boundaries. They may add compatible non-observable engineering quality and platform integration, but must not introduce or weaken reviewed product intent. Multiple packs have equal authority; list order is for reading only and never resolves conflicts.
+## Decision Boundaries
 
-## Decision Ownership
+Keep each decision in its owning source:
 
-Keep each decision in its owning layer:
-
-| Layer | Owns |
+| Source | Owns |
 |---|---|
-| Reviewed Sparks | Product behavior, domain rules, user-visible states, failures, lifecycle, and platform intent |
-| Profile `target` and `source-root` | Deterministic target selection and artifact routing |
-| Profile `packs` | Pack activation and pack-owned machine-readable configuration |
-| Profile `guidance` | Nuanced project architecture and code-generation rules |
-| Selected implementation packs | Reusable technology-specific realization and validation rules |
+| Sparks | Product behavior, domain rules, observable states and failures, lifecycle, and observable platform requirements |
+| Profile | Target and artifact routing, Pack activation, and Pack-owned machine-readable configuration |
+| Project guidance | Architecture, mappings, data flow, artifact ownership, and implementation rules |
+| Implementation packs | Reusable technology-specific realization and validation rules |
 | Native project files and source | Actual dependencies, versions, commands, build state, and existing implementation structure |
 
-Do not move product decisions into implementation guidance. For example, whether offline work is allowed and how conflicts appear to users belong in Sparks; SQLite, repository organization, and synchronization adapters belong in the profile or guidance.
+Do not duplicate decisions across sources. Product intent belongs in Sparks. Architecture choices such as SQLite, repository boundaries, and synchronization adapters belong in project guidance; actual dependencies, versions, and build commands remain native project facts.
 
 ## Project Implementation Guidance
 
@@ -84,7 +83,7 @@ This section is the authoritative order for implementation decisions. Implementa
 
 Apply compatible decisions in this order:
 
-1. Reviewed Spark intent.
+1. Spark intent.
 2. Profile routing and pack configuration.
 3. Profile-referenced project guidance.
 4. Selected implementation packs.

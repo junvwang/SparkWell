@@ -168,6 +168,7 @@ See the **[detailed usage guide](docs/usage.md)** for installation, adapters, co
 | [`packs/`](packs/) | Optional reusable technology-specific implementation and test guidance |
 | [`adapters/`](adapters/) | Declarative mappings to coding-agent instruction and skill locations |
 | [`scripts/`](scripts/) | Dependency-free CLI and initialization engine |
+| [`docs/README.md`](docs/README.md) | Documentation map and source-of-truth guide |
 | [`docs/usage.md`](docs/usage.md) | Detailed installation and usage reference |
 | [`docs/implementation-packs.md`](docs/implementation-packs.md) | Pack boundary, activation, OpenAPI example, and migration guide |
 | [`test/`](test/) | CLI, projection, migration, safety, and methodology integrity tests |
@@ -176,7 +177,7 @@ See the **[detailed usage guide](docs/usage.md)** for installation, adapters, co
 
 SparkWell is in early development. The core Spark specification, standardized Domain Model, Service, and UI Component kinds, project implementation guidance, explicit design/configuration/implementation/testing workflows, realization provenance, multi-agent adapters, and an optional OpenAPI implementation pack are available today.
 
-The methodology and tooling will continue to evolve through practical use and feedback while keeping existing project content safe and version controlled.
+The methodology and tooling will continue to evolve through practical use and feedback while keeping existing project content safe and version controlled. See the [current status and roadmap](docs/status-and-roadmap-zh.md) for the mutable project snapshot.
 
 ## Why "Spark"?
 
