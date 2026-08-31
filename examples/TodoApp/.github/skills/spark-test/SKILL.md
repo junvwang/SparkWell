@@ -1,0 +1,134 @@
+---
+name: spark-test
+description: 'User-invoked SparkWell workflow for creating, updating, or executing tests derived from reviewed Spark Documents.'
+argument-hint: 'Specify root Spark IDs or all, plus a target or profile'
+user-invocable: true
+disable-model-invocation: true
+---
+
+# Spark Test
+
+## Purpose
+
+Create or improve focused test artifacts that verify selected Sparks for one configured implementation target.
+
+This skill owns test scenarios, test source, test-only configuration, and behavioral coverage reporting. It does not generate or modify production runtime artifacts.
+
+## Preconditions
+
+Use Sparks as the durable concept design and coverage source for this workflow.
+
+If testing exposes missing or contradictory product intent, stop and tell the user to invoke `/spark-design`. If it exposes a runtime implementation defect, report it and tell the user to invoke `/spark-impl`. Do not invoke either workflow automatically, and do not change Spark or runtime artifacts merely to make a test pass.
+
+## Inputs and Precedence
+
+Always inspect:
+
+1. The requested Sparks, composed descendants, and related contextual Sparks.
+2. `.sparkwell/config.yaml` and the selected implementation profile when one exists.
+3. Every implementation pack selected by the profile, starting with `.sparkwell/packs/<pack-id>/PACK.md`, plus the references that pack requires for testing this target.
+4. `.sparkwell/state/realizations/<implementation-id>.yaml` when it exists.
+5. Relevant runtime artifacts and interfaces that realize the selected Sparks.
+6. Native test manifests, test configuration, existing tests, CI configuration, and project test guidance.
+
+Installed packs are inactive unless the selected profile lists them. Validate every pack-defined required field, value, and cross-profile reference before resolving test artifacts. Reject absolute paths, `..` components, paths outside the project root, and pack references outside their installed pack directory. A missing or unreadable selected pack, incompatible reference or pack/profile combination, or conflict among Spark intent, profile configuration, pack guidance, and established test architecture makes the task **Blocked**.
+
+Load supporting documents only when needed:
+
+- `.sparkwell/specification.md` to resolve Spark semantics or relationships.
+- `.sparkwell/conventions.md` to resolve Spark Document storage or format.
+- `.sparkwell/implementation-profiles.md` to interpret profile configuration and apply its authoritative **Resolution and Conflicts** order.
+- `.sparkwell/realization-state.md` before creating or repairing test-artifact provenance.
+- `./references/<target>.md`, when present, for target-specific test guidance.
+
+Spark intent defines required observable coverage. Pack configuration, project guidance, and established native test conventions govern target and test implementation choices. If these sources conflict materially, stop and surface the inconsistency rather than encoding one interpretation in a test.
+
+## Resolve Target and Scope
+
+Resolve the profile, effective target, implementation ID, requested roots, candidate scope, and contextual Sparks using the same composition and target rules as `spark-impl`:
+
+- **Requested roots**: explicitly selected Spark IDs, or every project Spark for `all`.
+- **Candidate scope**: requested roots plus all transitively composed descendants.
+- **Contextual Sparks**: ancestors, used Sparks, and other concepts read only to understand interactions and risk.
+
+Selecting a child does not include its parent or siblings. A `uses` relationship adds context, not automatic test scope.
+
+## Build the Coverage Plan
+
+For each candidate Spark, derive only applicable scenarios from:
+
+- observable behavior and invariants;
+- success, failure, empty, loading, and transitional states;
+- validation and boundary rules;
+- interactions with composed and used Sparks;
+- lifecycle, persistence, concurrency, and recovery behavior;
+- applicable platform-specific intent, selected pack rules, and project guidance.
+
+Do not manufacture scenarios for topics the concept does not own.
+
+Inspect existing tests and map each scenario to one action:
+
+- **Create**: material behavior has no adequate test coverage.
+- **Update**: an existing test no longer expresses reviewed intent or uses an obsolete public interaction.
+- **Validate only**: existing coverage appears aligned and only needs execution.
+- **Blocked**: intent, runtime availability, test infrastructure, environment, or ownership prevents a defensible test action.
+
+Before editing, summarize candidate scope, scenario coverage, existing coverage, proposed actions, consequential test-infrastructure changes, and blockers.
+
+For candidate `ui-component` Sparks, derive scenarios from conceptual inputs, interactions, observable states, behavior, composition, accessibility, and boundaries. Verify child behavior through its stable user-facing surface and verify parent handling through observable coordination outcomes. Do not assert source-file layout, framework component instances, prop or event names, control classes, or one-to-one Spark-to-test structure. Use an integrated parent-child scenario only when composition behavior cannot be distinguished through narrower component scenarios.
+
+## Test Infrastructure
+
+Reuse the established test framework, helpers, fixtures, project structure, and CI conventions.
+
+If no compatible test infrastructure exists, adding a framework, dependency, project, runner, browser harness, emulator, or environment setup is a consequential engineering choice. Present the smallest compatible setup and obtain confirmation before adding it unless the user explicitly requested that infrastructure.
+
+Do not replace or migrate an established test framework without an explicit compatible request.
+
+## Create Tests and Maintain State
+
+During test work:
+
+1. Modify only test artifacts and explicitly approved test-only configuration or dependencies.
+2. Test observable behavior through stable public interfaces or native interaction surfaces. Avoid asserting incidental implementation structure.
+3. Keep coverage proportional to risk. Prefer the smallest scenario set that distinguishes required behavior and likely regressions.
+4. Avoid redundant tests, broad snapshots, timing-sensitive waits, and cross-platform matrices unless the reviewed intent or risk requires them.
+5. Do not modify production runtime artifacts. Report testability blockers for a separate `spark-impl` task.
+6. Update realization state for test artifacts created or materially maintained from Sparks. Preserve valid runtime and out-of-scope mappings.
+
+Test artifacts may derive from multiple Sparks. Realization state records provenance, not coverage status or correctness.
+
+## Execute and Classify Results
+
+Run the narrowest changed scenarios first, then the smallest relevant regression scope.
+
+Classify failures before editing:
+
+- **Runtime defect**: the implementation violates reviewed intent. Report the failing evidence and hand off to `spark-impl`; do not change production code here.
+- **Test defect**: the test incorrectly expresses reviewed intent or uses an obsolete test interface. Repair the test and rerun it.
+- **Intent defect**: requirements or Sparks are missing, ambiguous, or contradictory. Stop and hand off to an explicit `/spark-design` invocation.
+- **Environment defect**: required infrastructure or permissions are unavailable. Report the blocked validation and reproducible setup needed.
+
+Do not weaken assertions merely to make a failing implementation pass.
+
+## Report
+
+Summarize:
+
+- effective target, selected profile, and implementation ID;
+- requested roots and candidate scope;
+- scenarios created, updated, reused, blocked, or still unverified;
+- test artifacts and realization-state mappings changed;
+- commands executed and results;
+- runtime defects, intent defects, environment gaps, and remaining coverage gaps;
+- new test infrastructure or dependencies introduced with approval.
+
+Do not claim full coverage merely because all discovered tests pass.
+
+## Guardrails
+
+- Do not design or evolve Sparks in this workflow.
+- Do not implement or repair production runtime behavior in this workflow.
+- Do not couple tests mechanically one-to-one with Sparks or engineering files.
+- Do not introduce broad test infrastructure for a narrow scenario without confirmation.
+- Do not encode validation results, coverage percentages, or timestamps in realization state.
