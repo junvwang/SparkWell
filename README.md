@@ -5,7 +5,7 @@
 
 > **Build and evolve software through shared, durable intent.**
 
-SparkWell gives humans and AI a durable, reviewable representation of software intent for building and evolving software together.
+SparkWell aims to give humans and AI a durable, reviewable representation of software intent for building and evolving software together.
 
 ## Why SparkWell?
 
@@ -19,7 +19,7 @@ Coding agents make implementation dramatically faster, but speed creates a new i
 
 AI conversations are temporary. Design discussions, clarifications, and decisions can disappear when a session ends, forcing future humans and agents to reconstruct the same understanding.
 
-SparkWell captures implementation-critical intent in persistent project artifacts rather than relying on conversation history.
+SparkWell explores how to preserve durable product and software intent in persistent project artifacts rather than relying on conversation history.
 
 ### Review at AI Scale
 
@@ -31,7 +31,7 @@ SparkWell lets people review software intent and concept boundaries before imple
 
 Implementation records how software currently works, but often loses why responsibilities, constraints, interactions, and boundaries exist.
 
-Sparks preserve that design intent as the system evolves across refactors, frameworks, platforms, and rewrites.
+Sparks preserve product and design intent as the system evolves across refactors, frameworks, platforms, and rewrites.
 
 ### Beyond Black-box Development
 
@@ -50,78 +50,139 @@ This raises several fundamental questions:
 - What should AI understand before generating or changing implementation?
 - Can humans and AI collaborate through something more durable than implementation alone?
 
-SparkWell answers these questions by making software intent a first-class artifact alongside implementation.
+SparkWell explores an answer to these questions by making software intent a first-class artifact alongside implementation.
 
 ## What Is a Spark?
 
-SparkWell introduces a **Spark** as an additional software engineering artifact between **Requirements** and **Engineering Artifacts**. A Spark captures the shared software intent of one meaningful concept for humans and AI to understand, clarify, and review together.
+A **Spark** is a persistent, independently meaningful, and composable element of a software model. It gives humans and AI a stable unit through which to understand, review, evolve, and realize software intent.
+
+A Spark is not a requirement item and is not a mirror of a source file, class, control, endpoint, or database table. Requirements, ideas, feedback, and code changes are change inputs. Sparks represent the accepted current model after those inputs have been understood.
 
 ```text
-               Requirements
-                     │
-                     ▼
-            Human + AI Collaboration
-                     │
-                     ▼
-                   Spark
-          (Shared Software Intent)
-                     │
-          Human + AI Collaboration
-                     │
-                     ▼
-          Engineering Artifacts
-              ├── Source Code
-              ├── Tests
-              ├── Documentation
-              ├── Diagrams
-              └── Platform-specific Implementations
+Requirement / Idea / Feedback / Code Change
+                       │
+                       ▼
+                Normalize Change
+                       │
+                       ▼
+               Current Spark Model
 ```
 
-A Spark is neither a compressed request nor an exhaustive design dossier. It captures the minimum sufficient intent for one concept: the decisions whose absence would force a reviewer or implementer to guess material behavior, ownership, invariants, constraints, or relationships. Each decision belongs in one authoritative Spark; related Sparks reference that owner instead of repeating it.
+Spark Documents remain human-readable. They may combine prose, Markdown tables, lists, diagrams, examples, state machines, or other concise forms suited to the concept. Their structured metadata should identify the Spark and its graph topology without forcing the concept's knowledge into a rigid modeling language.
 
-Sparks can exist at different levels of abstraction. Bundled SparkWell workflows currently support three standardized kinds: Domain Models, Services, and modular UI Components. Projects may define another kind only by supplying its semantics, document rules, design rules, and target applicability.
+> **Schema the topology, not the knowledge.**
 
-Spark IDs may use `-model`, `-service`, or `-ui` as readability hints. These suffixes are optional; the `kind` field remains authoritative and workflows do not depend on suffixes. Human-readable names remain natural.
+## Product Sparks
 
-`domain-model` represents independently meaningful domain concepts with durable field semantics, invariants, lifecycle, and relationships. `service` represents independently meaningful capabilities, concept-level inputs and outputs, and failure behavior across a boundary. `ui-component` represents a modular interface boundary with user-facing behavior, state, interactions, accessibility intent, and optional child composition. A root UI Component may realize the application shell, window, page, route, or another platform entry surface.
+SparkWell's current direction begins with a **Product Spark Graph**: a durable model of what the product is now.
 
-Each Spark is stored as a **Spark Document** with two complementary parts:
+A Product Spark represents a product-level commitment that implementation cannot change unilaterally. Product Sparks describe meaningful product concepts such as user-facing spaces, core product data, observable behavior, platform-specific experiences, and product or system boundaries when those boundaries are themselves part of the product commitment.
 
-- concise frontmatter for stable identity and relationships;
-- a concise natural-language body for the concept's owned intent.
+Product Sparks should be large enough to remain independently understandable and reusable. A field, button, route, or native control normally belongs inside a larger Spark rather than becoming a Spark merely because it exists in an implementation.
 
-The Spark Document is the durable design contract for that concept. It evolves when the software intent changes, not every time code is refactored, dependencies are upgraded, or implementation structure moves.
+Product Sparks compose into larger Sparks. Starting from a product root, their composition forms an application or system:
 
-Ordinary engineering choices remain free unless they are themselves part of the software intent. A Spark does not prescribe a language, framework, class, file, or test structure by default. It may be realized by source code, tests, documentation, diagrams, and platform-specific implementations, while one artifact may realize several Sparks.
+```text
+Todo App
+├── Todo
+├── Todo List
+└── Todo Editor
+```
 
-This separation allows implementations to evolve while the concept's identity and intent remain recognizable across technologies and over time.
+Composition records what a larger concept is made of. References connect independently owned concepts that interact or depend on one another. Detailed semantics remain in the Spark bodies rather than requiring a large vocabulary of specialized graph relationships.
 
-## How SparkWell Works
+For example, one product UI can describe when it opens another, while the destination separately describes what happens after success, cancellation, or failure. Product-visible transitions belong to the relevant Product Sparks; target-specific navigation mechanisms do not.
 
-SparkWell is opt-in. Ordinary questions, coding, debugging, refactoring, and testing use the coding agent's normal workflow and do not create or update Sparks.
+## Design Sparks
 
-Invoke `/spark-design` to clarify a requested change. It first presents a concise Spark Proposal in chat, listing the Sparks to create and their summaries plus existing Sparks to evolve and why. It does not modify files before confirmation.
+Some enduring software concepts are needed to realize a product but are not themselves part of explaining what the product is. Examples may include an editing draft, response processor, synchronization coordinator, or another internal responsibility whose boundary should survive changes in language, framework, and platform.
 
-When the host provides a decision UI, choose `Revise`, `Finalize`, or `Cancel`; choosing `Revise` opens a prompt for comments. Otherwise, reply `Revise: <comments>`, `Finalize`, or `Cancel`. Finalized documents then receive a second human review before any implementation workflow begins.
+These concepts may be represented as **Design Sparks**. Design Sparks remain implementation-independent: they describe durable logical software organization, not React hooks, SwiftUI navigation APIs, classes, files, or other target mechanics.
 
-After review, invoke later workflows independently:
+The Design layer is not intended to mirror the Product Graph. It is an optional, sparse overlay:
 
-| Workflow | Responsibility | Does not own |
-|----------|----------------|--------------|
-| `/spark-impl` | Creates or updates target engineering artifacts using the selected profile and implementation packs | Spark design or test authoring |
-| `/spark-test` | Derives behavioral scenarios, creates or updates test artifacts, and reports verified and unverified intent | Spark design or production runtime changes |
+```text
+Effective Software Intent
+    =
+Product Spark Graph
+    +
+Applicable Design Sparks
+```
 
-Each slash command activates only that workflow for the current request. A decision collected by the host UI, or a direct fallback control for the latest Spark Proposal, is the only limited continuation. Workflows never activate automatically or chain into one another.
+A Product Spark does not require a corresponding Design Spark. Product Sparks can be realized directly when project guidance and established architecture already provide sufficient engineering direction. A Design Spark is justified only when it adds durable software knowledge that is absent from the Product Graph and should not be left for each implementation task to reinvent.
 
-SparkWell provides the shared realization process, not a universal project architecture or interface format. Profiles and guidance are project-owned inputs maintained manually or with ordinary coding-agent assistance. `/spark-impl` follows Sparks, profile routing and Pack configuration, project guidance, selected Packs, and native architecture; it does not choose MVC, MVVM, state management, persistence, synchronization, module structure, or a wire protocol on the project's behalf.
+## From Intent to Realization
 
-Project-wide system shape and ownership context that may affect Spark boundaries belongs in the project-owned `.sparkwell/design-context.md`. `/spark-design` reads it before proposing concepts; profile guidance remains responsible for target-specific implementation architecture.
+SparkWell does not define one universal project architecture. Concrete realization uses several sources with distinct responsibilities:
 
-Reusable technology behavior is distributed as optional implementation packs. Install a bundled pack explicitly, then activate it only in profiles that need it. For example, `sparkwell init --pack openapi` installs OpenAPI 3.1 producer, server, client, and test guidance without making OpenAPI part of SparkWell Core or enabling it for every profile.
+```text
+Product Spark Graph
+   + optional Design Sparks
+   + project design context
+   + target-specific guidance
+   + reusable Skills and Packs
+   + established native project facts
+                       │
+                       ▼
+             Engineering Artifacts
+         Code / Tests / Docs / Diagrams
+```
 
-When implementation or testing reveals missing or contradictory intent, the workflow stops and identifies `/spark-design` as the explicit next command. It does not invoke that workflow, invent product behavior in code, or weaken a test.
+Sparks preserve project-specific product and software intent. Project guidance preserves target-specific architecture and mappings. Skills and Packs provide reusable transformation and technology knowledge. Native project files remain authoritative for actual dependencies, versions, commands, artifacts, and current implementation structure.
 
-## Quick Start
+This separation allows the same Product Spark Graph to guide different platform realizations without embedding each platform's implementation mechanics into the product model.
+
+## Continuous Reconciliation
+
+SparkWell ultimately aims to maintain consistency rather than perform only one-time generation. A change may originate in a requirement, a Spark, a design decision, or implementation. The change re-enters the loop so each abstraction level can determine whether it is semantically affected.
+
+```text
+Diff
+  ↓
+Changed Spark or Artifact
+  ↓
+Traverse the Spark Graph
+  ↓
+Find Impact Candidates
+  ↓
+AI-assisted Semantic Evaluation
+  ↓
+Propose Update or Skip
+```
+
+The graph determines what should be checked. The diff determines what changed. AI and human review determine whether a candidate actually needs to change. Lower-level changes may propose higher-level changes, but they must not silently redefine product intent.
+
+This supports three different review questions:
+
+- **Product review:** Is this the product change we want?
+- **Design review:** Are these enduring software responsibilities and boundaries appropriate?
+- **Verification:** Do the engineering artifacts faithfully realize the accepted intent?
+
+## Current Exploration Focus
+
+The ideas above are hypotheses under active validation, not a finalized modeling language. The repository's existing Spark kinds and workflows represent an earlier iteration and will be updated incrementally rather than rewritten all at once.
+
+The immediate focus is the first part of the loop:
+
+```text
+Requirement
+    ↓
+Author and review Product Sparks
+```
+
+Development will proceed through a practical feedback loop:
+
+1. refine the Product Spark authoring guidance;
+2. exercise it in a deliberately small demo project;
+3. observe ambiguity, duplication, missing concepts, and unnecessary ceremony;
+4. feed those findings back into the documentation;
+5. repeat before expanding the Design and implementation workflows.
+
+The initial goal is not to finalize every Spark kind or relationship. It is to determine whether humans and AI can reliably turn a change request into a concise, composable, reviewable Product Spark Graph that is useful for later mock generation, design, implementation, testing, and reconciliation.
+
+## Existing Prototype
+
+The repository remains usable while the methodology is being revised. The commands below exercise the existing single-layer Spark prototype; they do not yet implement the Product Spark authoring direction described above.
 
 SparkWell requires Node.js 20 or later and has no runtime package dependencies.
 
@@ -150,11 +211,11 @@ Review the Spark Proposal, choose `Finalize` in the decision UI or reply `Finali
 
 Before the first new runtime realization, copy the profile placeholder from `.sparkwell/config.yaml` and maintain its referenced file under `.sparkwell/guidance/`. Complete the consequential architecture decisions there before invoking `/spark-impl`.
 
-See the [Project Setup Flow](docs/usage.md#project-setup-flow) for the complete order and ownership of these files.
+See the [Project Setup Flow](docs/usage.md#project-setup-flow) for the existing prototype's complete order and ownership of these files.
 
 GitHub Copilot is the default adapter. SparkWell also supports Claude Code, `AGENTS.md`-compatible agents, multi-agent projects, and an agent-neutral initialization mode.
 
-See the **[detailed usage guide](docs/usage.md)** for installation, adapters, configuration, workflow usage, safety behavior, and the complete CLI reference.
+See the **[detailed usage guide](docs/usage.md)** for the existing prototype's installation, adapters, configuration, workflow usage, safety behavior, and complete CLI reference.
 
 ## Project Structure
 
@@ -172,9 +233,9 @@ See the **[detailed usage guide](docs/usage.md)** for installation, adapters, co
 
 ## Current Status
 
-SparkWell is in early development. The core Spark specification, standardized Domain Model, Service, and UI Component kinds, project implementation guidance, explicit design/configuration/implementation/testing workflows, realization provenance, multi-agent adapters, and an optional OpenAPI implementation pack are available today.
+SparkWell is in early development and is undergoing a significant methodology revision. Existing tooling includes a Spark specification, design/configuration/implementation/testing workflows, realization provenance, multi-agent adapters, project guidance, and optional implementation packs. These currently reflect the previous single-layer Spark model and should not be read as the finalized form of the Product and Design model described above.
 
-The methodology and tooling will continue to evolve through practical use and feedback while keeping existing project content safe and version controlled. See the [current status and roadmap](docs/status-and-roadmap-zh.md) for the mutable project snapshot.
+The next iteration is intentionally narrower: update the requirement-to-Product-Spark authoring method, validate it repeatedly in a small demo, and revise the documentation from observed results before changing downstream workflows. Some supporting documents still describe the previous methodology and will be reconciled incrementally as each workflow is revisited.
 
 ## Why "Spark"?
 
@@ -182,7 +243,7 @@ The name is inspired by the *Spark* in the Transformers universe: the enduring i
 
 Software has a similar continuity. Implementations evolve. Languages and frameworks change. Systems may be rewritten. Yet the intent of a software concept - why it exists, what it owns, how it behaves, and how it relates to other concepts - should remain recognizable.
 
-A Spark is not another implementation. It is the design identity that should survive every implementation.
+A Spark is not another implementation. It is an intent identity that should survive every implementation.
 
 ## Contributing
 
